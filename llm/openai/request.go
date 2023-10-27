@@ -1,13 +1,13 @@
-package vllm
+package openai
 
 import (
 	"encoding/json"
 	"fmt"
 )
 
-// VLLMRequest is the data holding the information to make a
+// request is the data holding the information to make a
 // request to VLLM
-type VLLMRequest struct {
+type request struct {
 	LogitBias        map[string]int `json:"logit_bias,omitempty"`
 	Model            string         `json:"model,omitempty"`
 	Prompt           string         `json:"prompt,omitempty"`
@@ -20,7 +20,7 @@ type VLLMRequest struct {
 	LogProbs         int            `json:"logprobs,omitempty"`
 }
 
-func (r VLLMRequest) String() string {
+func (r request) String() string {
 
 	var header = `model: %s
 stop: %v

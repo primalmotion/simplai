@@ -7,21 +7,21 @@ import (
 	prompt "git.sr.ht/~primalmotion/simplai/prompt"
 )
 
-type LLMNode struct {
+type LLM struct {
 	llm llm.LLM
 	*BaseNode
 	options []llm.InferenceOption
 }
 
-func NewLLM(llm llm.LLM, options ...llm.InferenceOption) *LLMNode {
-	return &LLMNode{
+func NewLLM(llm llm.LLM, options ...llm.InferenceOption) *LLM {
+	return &LLM{
 		BaseNode: New(),
 		llm:      llm,
 		options:  options,
 	}
 }
 
-func (n *LLMNode) Execute(input prompt.Input) (string, error) {
+func (n *LLM) Execute(input prompt.Input) (string, error) {
 
 	opts := n.options
 	if stop := input.StopWords(); len(stop) > 0 {

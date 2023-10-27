@@ -5,17 +5,17 @@ import (
 	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
-type PrintNode struct {
+type DebugNode struct {
 	*BaseNode
 }
 
-func NewPrintNode() *PrintNode {
-	return &PrintNode{
+func NewDebug() *DebugNode {
+	return &DebugNode{
 		BaseNode: New(),
 	}
 }
 
-func (n *PrintNode) Execute(input prompt.Input) (string, error) {
+func (n *DebugNode) Execute(input prompt.Input) (string, error) {
 
 	render.Box(input.Input(), "3")
 	return n.BaseNode.Execute(input)

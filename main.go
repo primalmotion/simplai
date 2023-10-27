@@ -7,18 +7,18 @@ import (
 	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/chain"
+	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 	"git.sr.ht/~primalmotion/simplai/prompt/classifier"
 	"git.sr.ht/~primalmotion/simplai/prompt/storyteller"
 	"git.sr.ht/~primalmotion/simplai/prompt/summarizer"
 	"git.sr.ht/~primalmotion/simplai/utils/render"
-	"git.sr.ht/~primalmotion/simplai/vllm"
 )
 
 func main() {
 
-	llmmodel := vllm.NewVLLM(
+	llmmodel := openai.NewOpenAIAPI(
 		"http://cruncher.lan:8000/v1",
 		"HuggingFaceH4/zephyr-7b-alpha",
 		0.0,
@@ -44,7 +44,7 @@ func main() {
 			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/s "))
 			ch = chain.New(
 				summarizer.NewSummarizer(),
-				node.NewPrintNode(),
+				node.NewDebug(),
 				node.NewLLM(llmmodel),
 			)
 
@@ -52,7 +52,7 @@ func main() {
 			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/t "))
 			ch = chain.New(
 				storyteller.NewStoryTeller(),
-				node.NewPrintNode(),
+				node.NewDebug(),
 				node.NewLLM(llmmodel),
 			)
 
@@ -67,7 +67,7 @@ func main() {
 			)
 			ch = chain.New(
 				classifier.NewClassifier(),
-				node.NewPrintNode(),
+				node.NewDebug(),
 				node.NewLLM(llmmodel),
 			)
 

@@ -1,4 +1,4 @@
-package vllm
+package openai
 
 import (
 	"bytes"
@@ -11,16 +11,16 @@ import (
 	"git.sr.ht/~primalmotion/simplai/llm"
 )
 
-type VLLM struct {
+type OpenAIAPI struct {
 	client      *http.Client
 	url         string
 	model       string
 	temperature float64
 }
 
-func NewVLLM(url string, model string, temperature float64) *VLLM {
+func NewOpenAIAPI(url string, model string, temperature float64) *OpenAIAPI {
 	client := &http.Client{}
-	return &VLLM{
+	return &OpenAIAPI{
 		url:         url,
 		model:       model,
 		temperature: temperature,
@@ -28,7 +28,7 @@ func NewVLLM(url string, model string, temperature float64) *VLLM {
 	}
 }
 
-func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, error) {
+func (v *OpenAIAPI) Infer(prompt string, options ...llm.InferenceOption) (string, error) {
 
 	config := llm.NewInferenceConfig()
 	config.Model = v.model
@@ -41,7 +41,7 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 	buffer := bytes.NewBuffer(nil)
 	encoder := json.NewEncoder(buffer)
 
-	vllmreq := VLLMRequest{
+	vllmreq := request{
 		LogitBias:        config.LogitBias,
 		Model:            config.Model,
 		Prompt:           prompt,
@@ -79,7 +79,7 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 		return "", fmt.Errorf("server was unable to process the request: %s\n\n%s", resp.Status, content)
 	}
 
-	vllmresp := &VLLMResponse{}
+	vllmresp := &response{}
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(vllmresp); err != nil {
 		return "", fmt.Errorf("Unable to decode the response: %w", err)
