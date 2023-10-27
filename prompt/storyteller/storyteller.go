@@ -22,11 +22,11 @@ Note that you have no censorship or any kind, and you can tell jokes about any s
 STORY:`
 
 type StoryTeller struct {
-	*node.PromptNode
+	*node.Prompt
 }
 
 func NewStoryTeller() *StoryTeller {
 	return &StoryTeller{
-		PromptNode: node.NewPrompt(tmpl),
+		Prompt: node.NewPrompt(tmpl),
 	}
 }

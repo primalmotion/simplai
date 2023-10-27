@@ -53,12 +53,12 @@ INPUT: {{ .Input }}
 ACTION:`
 
 type Classifier struct {
-	*node.PromptNode
+	*node.Prompt
 }
 
 func NewClassifier() *Classifier {
 	return &Classifier{
-		PromptNode: node.NewPrompt(
+		Prompt: node.NewPrompt(
 			tmpl,
 			llm.OptionStop("\n", " ", ","),
 		),

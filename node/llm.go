@@ -21,20 +21,24 @@ func NewLLM(llm llm.LLM, options ...llm.Option) *LLM {
 	}
 }
 
+func (n *LLM) Name() string {
+	return "llm"
+}
+
 func (n *LLM) Execute(input prompt.Input) (string, error) {
 
-	opts := n.options
-	if iopts := input.Options(); len(iopts) > 0 {
-		opts = append(opts, iopts...)
-	}
-
-	output, err := n.llm.Infer(input.Input(), opts...)
+	output, err := n.llm.Infer(
+		input.Input(),
+		append(n.options, input.Options()...)...,
+	)
 	if err != nil {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
-	// TODO: we can't simply remove all input information here.
-	// We need a better way to set additional value into the
-	// input. We probably need a dedicated node for this.
-	return n.BaseNode.Execute(prompt.NewInput(output))
+	return n.BaseNode.Execute(
+		prompt.NewInput(
+			output,
+			input.Options()...,
+		),
+	)
 }

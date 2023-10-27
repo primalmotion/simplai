@@ -35,7 +35,6 @@ func (i input) Get(key string) any {
 	if i.keys == nil {
 		return nil
 	}
-
 	return i.keys[key]
 }
 

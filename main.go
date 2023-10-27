@@ -71,6 +71,18 @@ func main() {
 				node.NewLLM(llmmodel),
 			)
 
+		case strings.HasPrefix(input, "/C "):
+			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/C "))
+			ch = chain.New(
+				storyteller.NewStoryTeller(),
+				node.NewDebug(),
+				node.NewLLM(llmmodel),
+				node.NewDebug(),
+				summarizer.NewSummarizer(),
+				node.NewDebug(),
+				node.NewLLM(llmmodel),
+			)
+
 		default:
 			render.Box("Unknown action.", "1")
 			fmt.Print("> ")

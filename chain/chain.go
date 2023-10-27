@@ -11,17 +11,27 @@ type Chain struct {
 
 func New(nodes ...node.Node) *Chain {
 
-	chain := &Chain{
-		nodes: nodes,
+	if len(nodes) == 0 {
+		return &Chain{}
 	}
 
+	internalNodes := []node.Node{}
+
 	for i, n := range nodes {
+		if n == nil {
+			continue
+		}
+		internalNodes = append(internalNodes, n)
 		if len(nodes) > i+1 {
-			n.Chain(nodes[i+1])
+			if nodes[i+1] != nil {
+				n.Chain(nodes[i+1])
+			}
 		}
 	}
 
-	return chain
+	return &Chain{
+		nodes: internalNodes,
+	}
 }
 
 func (c *Chain) Execute(input prompt.Input) (string, error) {

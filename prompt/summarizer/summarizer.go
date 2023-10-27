@@ -23,12 +23,12 @@ func standardizeSpaces(s string) string {
 }
 
 type Summarizer struct {
-	*node.PromptNode
+	*node.Prompt
 }
 
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
-		PromptNode: node.NewPrompt(tmpl),
+		Prompt: node.NewPrompt(tmpl),
 	}
 }
 
@@ -49,5 +49,5 @@ func (s *Summarizer) Execute(in prompt.Input) (string, error) {
 		text = text[:2048]
 	}
 
-	return s.PromptNode.Execute(prompt.NewInput(text))
+	return s.Prompt.Execute(prompt.NewInput(text))
 }

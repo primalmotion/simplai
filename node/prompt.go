@@ -9,21 +9,25 @@ import (
 	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
-type PromptNode struct {
+type Prompt struct {
 	*BaseNode
 	template string
 	options  []llm.Option
 }
 
-func NewPrompt(template string, options ...llm.Option) *PromptNode {
-	return &PromptNode{
+func NewPrompt(template string, options ...llm.Option) *Prompt {
+	return &Prompt{
 		template: template,
 		options:  options,
 		BaseNode: New(),
 	}
 }
 
-func (n *PromptNode) Execute(input prompt.Input) (string, error) {
+func (n *Prompt) Name() string {
+	return "prompt"
+}
+
+func (n *Prompt) Execute(input prompt.Input) (string, error) {
 
 	tmpl, err := template.New("").Parse(n.template)
 	if err != nil {
@@ -35,15 +39,10 @@ func (n *PromptNode) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	opts := n.options
-	if iopts := input.Options(); len(iopts) > 0 {
-		opts = append(opts, iopts...)
-	}
-
 	return n.BaseNode.Execute(
 		prompt.NewInput(
 			buf.String(),
-			opts...,
+			append(n.options, input.Options()...)...,
 		),
 	)
 }

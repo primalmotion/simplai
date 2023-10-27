@@ -8,14 +8,20 @@ type Node interface {
 	Chain(next Node) Node
 	Next() Node
 	Execute(input prompt.Input) (string, error)
+	Name() string
 }
 
 type BaseNode struct {
 	next Node
+	prev Node
 }
 
 func New() *BaseNode {
 	return &BaseNode{}
+}
+
+func (n *BaseNode) Name() string {
+	return "base"
 }
 
 func (n *BaseNode) Chain(next Node) Node {
