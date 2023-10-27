@@ -1,4 +1,4 @@
-package chain
+package node
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type Node struct {
 	options []llm.InferenceOption
 }
 
-func NewNode(llm llm.LLM, prmp prompt.Formatter, options ...llm.InferenceOption) *Node {
+func New(llm llm.LLM, prmp prompt.Formatter, options ...llm.InferenceOption) *Node {
 	return &Node{
 		prompt:  prmp,
 		llm:     llm,
@@ -22,8 +22,9 @@ func NewNode(llm llm.LLM, prmp prompt.Formatter, options ...llm.InferenceOption)
 	}
 }
 
-func (n *Node) Add(next *Node) {
+func (n *Node) AddNode(next *Node) *Node {
 	n.next = next
+	return next
 }
 
 func (n *Node) Execute(input prompt.Input) (string, error) {
@@ -47,5 +48,5 @@ func (n *Node) Execute(input prompt.Input) (string, error) {
 	}
 
 	fmt.Println("OUTPUT:", output)
-	return n.next.Execute(prompt.NewInput(output, nil))
+	return n.next.Execute(prompt.NewInput(output))
 }

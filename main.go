@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/chain"
+	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 	"git.sr.ht/~primalmotion/simplai/prompt/storyteller"
 	"git.sr.ht/~primalmotion/simplai/prompt/summarizer"
@@ -36,7 +37,7 @@ func main() {
 
 		case strings.HasPrefix(input, "/summarize "):
 
-			in := prompt.NewInput(strings.TrimPrefix(input, "/summarize "), nil)
+			in := prompt.NewInput(strings.TrimPrefix(input, "/summarize "))
 			prmpt, err = summarizer.Format(in)
 			if err != nil {
 				fmt.Println(err)
@@ -45,7 +46,7 @@ func main() {
 
 		case strings.HasPrefix(input, "/story "):
 
-			in := prompt.NewInput(strings.TrimPrefix(input, "/story "), nil)
+			in := prompt.NewInput(strings.TrimPrefix(input, "/story "))
 			prmpt, err = storyTeller.Format(in)
 			if err != nil {
 				fmt.Println(err)
@@ -53,10 +54,11 @@ func main() {
 			}
 
 		default:
-			node1 := chain.NewNode(llm, storyTeller)
-			node2 := chain.NewNode(llm, summarizer)
-			node1.Add(node2)
-			fmt.Println(node1.Execute(prompt.NewInput(input, nil)))
+			c := chain.New(
+				node.New(llm, storyTeller),
+				node.New(llm, summarizer),
+			)
+			fmt.Println(c.Execute(prompt.NewInput(input)))
 			continue
 		}
 

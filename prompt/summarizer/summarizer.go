@@ -36,25 +36,20 @@ func NewSummarizer() prompt.Formatter {
 
 func (s *summarizer) Format(in prompt.Input) (string, error) {
 
-	input := in.Input()
+	text := in.Input()
 
-	if _, err := url.Parse(input); err != nil {
-		text := standardizeSpaces(input)
-		if len(text) > 2048 {
-			text = text[:2048]
+	if _, err := url.ParseRequestURI(text); err == nil {
+		article, err := readability.FromURL(text, 30*time.Second)
+		if err != nil {
+			return "", fmt.Errorf("unable to load article: %w", err)
 		}
-		return s.Formatter.Format(prompt.NewInput(text, nil))
+		text = article.TextContent
 	}
 
-	article, err := readability.FromURL(input, 30*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("unable to load article: %w", err)
-	}
-
-	text := standardizeSpaces(article.TextContent)
+	text = standardizeSpaces(text)
 	if len(text) > 2048 {
 		text = text[:2048]
 	}
 
-	return s.Formatter.Format(prompt.NewInput(text, nil))
+	return s.Formatter.Format(prompt.NewInput(text))
 }
