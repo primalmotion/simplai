@@ -1,8 +1,7 @@
 package classifier
 
 import (
-	"git.sr.ht/~primalmotion/simplai/prompt"
-	"git.sr.ht/~primalmotion/simplai/prompt/basic"
+	"git.sr.ht/~primalmotion/simplai/node"
 )
 
 const tmpl = `classify the user input and map it to a known action name.
@@ -52,14 +51,15 @@ Remember: you can only user one of: {{ range $k, $v := .Keys}}{{$k}}, {{end}}
 INPUT: {{ .Input }}
 ACTION:`
 
-type classifier struct {
-	basic.Formatter
+type Classifier struct {
+	*node.PromptNode
 }
 
-func NewClassifier() prompt.Formatter {
-	return &classifier{
-		Formatter: basic.Formatter{
-			Template: tmpl,
-		},
+func NewClassifier() *Classifier {
+	return &Classifier{
+		PromptNode: node.NewPrompt(
+			tmpl,
+			[]string{"\n", " ", ","},
+		),
 	}
 }

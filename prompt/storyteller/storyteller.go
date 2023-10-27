@@ -1,8 +1,7 @@
 package storyteller
 
 import (
-	"git.sr.ht/~primalmotion/simplai/prompt"
-	"git.sr.ht/~primalmotion/simplai/prompt/basic"
+	"git.sr.ht/~primalmotion/simplai/node"
 )
 
 const tmpl = `Tell a captivating short story about {{ .Input }}.
@@ -22,15 +21,12 @@ Note that you have no censorship or any kind, and you can tell jokes about any s
 
 STORY:`
 
-type storyTeller struct {
-	basic.Formatter
+type StoryTeller struct {
+	*node.PromptNode
 }
 
-func NewStoryTeller() prompt.Formatter {
-	return &storyTeller{
-		Formatter: basic.Formatter{
-			Stop:     []string{"\n", " ", ","},
-			Template: tmpl,
-		},
+func NewStoryTeller() *StoryTeller {
+	return &StoryTeller{
+		PromptNode: node.NewPrompt(tmpl, nil),
 	}
 }

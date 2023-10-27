@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
-	"git.sr.ht/~primalmotion/simplai/prompt/basic"
 	readability "github.com/go-shiori/go-readability"
 )
 
@@ -22,19 +22,17 @@ func standardizeSpaces(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
 
-type summarizer struct {
-	basic.Formatter
+type Summarizer struct {
+	*node.PromptNode
 }
 
-func NewSummarizer() prompt.Formatter {
-	return &summarizer{
-		Formatter: basic.Formatter{
-			Template: tmpl,
-		},
+func NewSummarizer() *Summarizer {
+	return &Summarizer{
+		PromptNode: node.NewPrompt(tmpl, nil),
 	}
 }
 
-func (s *summarizer) Format(in prompt.Input) (string, error) {
+func (s *Summarizer) Execute(in prompt.Input) (string, error) {
 
 	text := in.Input()
 
@@ -51,5 +49,5 @@ func (s *summarizer) Format(in prompt.Input) (string, error) {
 		text = text[:2048]
 	}
 
-	return s.Formatter.Format(prompt.NewInput(text))
+	return s.PromptNode.Execute(prompt.NewInput(text))
 }

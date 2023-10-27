@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/chain"
-	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 	"git.sr.ht/~primalmotion/simplai/prompt/classifier"
@@ -25,10 +24,6 @@ func main() {
 		0.0,
 	)
 
-	summarizer := summarizer.NewSummarizer()
-	storyTeller := storyteller.NewStoryTeller()
-	classifier := classifier.NewClassifier()
-
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
 	for scanner.Scan() {
@@ -40,32 +35,29 @@ func main() {
 			continue
 		}
 
-		var prmpt string
-		var err error
+		var ch node.Node
+		var llmInput prompt.Input
 
 		switch {
 
 		case strings.HasPrefix(input, "/s "):
-
-			in := prompt.NewInput(strings.TrimPrefix(input, "/s "))
-			prmpt, err = summarizer.Format(in)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
+			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/s "))
+			ch = chain.New(
+				summarizer.NewSummarizer(),
+				node.NewPrintNode(),
+				node.NewLLM(llmmodel),
+			)
 
 		case strings.HasPrefix(input, "/t "):
-
-			in := prompt.NewInput(strings.TrimPrefix(input, "/t "))
-			prmpt, err = storyTeller.Format(in)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
+			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/t "))
+			ch = chain.New(
+				storyteller.NewStoryTeller(),
+				node.NewPrintNode(),
+				node.NewLLM(llmmodel),
+			)
 
 		case strings.HasPrefix(input, "/c "):
-
-			in := prompt.NewInputWithKeys(
+			llmInput = prompt.NewInputWithKeys(
 				strings.TrimPrefix(input, "/c "),
 				map[string]any{
 					"story-teller": "write something, invent a story, tell a tale or a lie.",
@@ -73,32 +65,19 @@ func main() {
 					"search":       "fetch information from the internet about people, facts or news.",
 				},
 			)
-			prmpt, err = classifier.Format(in)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-
-		case strings.HasPrefix(input, "/chain "):
-			c := chain.New(
-				node.New(llmmodel, storyTeller),
-				node.New(llmmodel, summarizer),
+			ch = chain.New(
+				classifier.NewClassifier(),
+				node.NewPrintNode(),
+				node.NewLLM(llmmodel),
 			)
-			fmt.Println(c.Execute(prompt.NewInput(input)))
 
 		default:
-			render.Box("unknown action.", "1")
+			render.Box("Unknown action.", "1")
 			fmt.Print("> ")
 			continue
 		}
 
-		// TODO: these options should be part of the prompt or of the node.
-		opts := []llm.InferenceOption{
-			// llm.OptionInferStop("\n", ".", " "),
-		}
-
-		render.Box(prmpt, "3")
-		output, err := llmmodel.Infer(prmpt, opts...)
+		output, err := ch.Execute(llmInput)
 		if err != nil {
 			fmt.Println(err)
 			continue

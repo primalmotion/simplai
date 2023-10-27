@@ -1,4 +1,4 @@
-package basic
+package node
 
 import (
 	"bytes"
@@ -8,12 +8,21 @@ import (
 	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
-type Formatter struct {
+type PromptNode struct {
+	*BaseNode
 	Template string
 	Stop     []string
 }
 
-func (s *Formatter) Format(input prompt.Input) (string, error) {
+func NewPrompt(template string, stopWords []string) *PromptNode {
+	return &PromptNode{
+		Template: template,
+		Stop:     stopWords,
+		BaseNode: New(),
+	}
+}
+
+func (s *PromptNode) Execute(input prompt.Input) (string, error) {
 
 	tmpl, err := template.New("").Parse(s.Template)
 	if err != nil {
@@ -25,9 +34,5 @@ func (s *Formatter) Format(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	return buf.String(), nil
-}
-
-func (s *Formatter) StopWords() []string {
-	return s.Stop
+	return s.BaseNode.Execute(prompt.NewInput(buf.String(), s.Stop...))
 }
