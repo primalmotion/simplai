@@ -28,7 +28,7 @@ func NewOpenAIAPI(url string, model string, temperature float64) *OpenAIAPI {
 	}
 }
 
-func (v *OpenAIAPI) Infer(prompt string, options ...llm.InferenceOption) (string, error) {
+func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) {
 
 	config := llm.NewInferenceConfig()
 	config.Model = v.model

@@ -20,57 +20,57 @@ func NewInferenceConfig() InferenceConfig {
 	}
 }
 
-type InferenceOption func(*InferenceConfig)
+type Option func(*InferenceConfig)
 
-func OptionInferTemperature(temp float64) InferenceOption {
+func OptionTemperature(temp float64) Option {
 	return func(c *InferenceConfig) {
 		c.Temperature = temp
 	}
 }
 
-func OptionInferModel(model string) InferenceOption {
+func OptionModel(model string) Option {
 	return func(c *InferenceConfig) {
 		c.Model = model
 	}
 }
 
-func OptionInferMaxTokens(maxTokens int) InferenceOption {
+func OptionMaxTokens(maxTokens int) Option {
 	return func(c *InferenceConfig) {
 		c.MaxTokens = maxTokens
 	}
 }
 
-func OptionInferFrequencePenalty(penalty float64) InferenceOption {
+func OptionFrequencePenalty(penalty float64) Option {
 	return func(c *InferenceConfig) {
 		c.FrequencyPenalty = penalty
 	}
 }
 
-func OptionInferLogitBias(bias map[string]int) InferenceOption {
+func OptionLogitBias(bias map[string]int) Option {
 	return func(c *InferenceConfig) {
 		c.LogitBias = bias
 	}
 }
 
-func OptionInferPresencePenalty(penalty float64) InferenceOption {
+func OptionPresencePenalty(penalty float64) Option {
 	return func(c *InferenceConfig) {
 		c.PresencePenalty = penalty
 	}
 }
 
-func OptionInferLogProbs(prob int) InferenceOption {
+func OptionLogProbs(prob int) Option {
 	return func(c *InferenceConfig) {
 		c.LogProbs = prob
 	}
 }
 
-func OptionInferStop(stop ...string) InferenceOption {
+func OptionStop(words ...string) Option {
 	return func(c *InferenceConfig) {
-		c.Stop = stop
+		c.Stop = words
 	}
 }
 
-func OptionInferTopP(topP float64) InferenceOption {
+func OptionTopP(topP float64) Option {
 	return func(c *InferenceConfig) {
 		c.TopP = topP
 	}

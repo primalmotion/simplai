@@ -2,9 +2,18 @@ package chain
 
 import (
 	"git.sr.ht/~primalmotion/simplai/node"
+	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
-func New(nodes ...node.Node) node.Node {
+type Chain struct {
+	nodes []node.Node
+}
+
+func New(nodes ...node.Node) *Chain {
+
+	chain := &Chain{
+		nodes: nodes,
+	}
 
 	for i, n := range nodes {
 
@@ -13,5 +22,11 @@ func New(nodes ...node.Node) node.Node {
 		}
 	}
 
-	return nodes[0]
+	return chain
+}
+
+func (c *Chain) Execute(input prompt.Input) (string, error) {
+
+	return c.nodes[0].Execute(input)
+
 }

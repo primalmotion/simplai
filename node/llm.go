@@ -10,10 +10,10 @@ import (
 type LLM struct {
 	llm llm.LLM
 	*BaseNode
-	options []llm.InferenceOption
+	options []llm.Option
 }
 
-func NewLLM(llm llm.LLM, options ...llm.InferenceOption) *LLM {
+func NewLLM(llm llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
 		BaseNode: New(),
 		llm:      llm,
@@ -24,8 +24,8 @@ func NewLLM(llm llm.LLM, options ...llm.InferenceOption) *LLM {
 func (n *LLM) Execute(input prompt.Input) (string, error) {
 
 	opts := n.options
-	if stop := input.StopWords(); len(stop) > 0 {
-		opts = append(opts, llm.OptionInferStop(stop...))
+	if iopts := input.Options(); len(iopts) > 0 {
+		opts = append(opts, iopts...)
 	}
 
 	output, err := n.llm.Infer(input.Input(), opts...)

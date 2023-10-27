@@ -1,27 +1,29 @@
 package prompt
 
+import "git.sr.ht/~primalmotion/simplai/llm"
+
 type Input interface {
 	Input() string
 	Get(key string) any
 	Keys() map[string]any
-	StopWords() []string
+	Options() []llm.Option
 }
 
 type input struct {
-	keys  map[string]any
-	input string
-	stop  []string
+	keys    map[string]any
+	input   string
+	options []llm.Option
 }
 
-func NewInput(in string, stop ...string) Input {
-	return NewInputWithKeys(in, nil, stop...)
+func NewInput(in string, options ...llm.Option) Input {
+	return NewInputWithKeys(in, nil, options...)
 }
 
-func NewInputWithKeys(in string, keys map[string]any, stop ...string) Input {
+func NewInputWithKeys(in string, keys map[string]any, options ...llm.Option) Input {
 	return input{
-		input: in,
-		keys:  keys,
-		stop:  stop,
+		input:   in,
+		keys:    keys,
+		options: options,
 	}
 }
 
@@ -41,6 +43,6 @@ func (i input) Keys() map[string]any {
 	return i.keys
 }
 
-func (i input) StopWords() []string {
-	return i.stop
+func (i input) Options() []llm.Option {
+	return i.options
 }

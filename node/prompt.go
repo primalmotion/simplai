@@ -5,26 +5,27 @@ import (
 	"fmt"
 	"text/template"
 
+	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
 type PromptNode struct {
 	*BaseNode
-	Template string
-	Stop     []string
+	template string
+	stop     []string
 }
 
 func NewPrompt(template string, stopWords []string) *PromptNode {
 	return &PromptNode{
-		Template: template,
-		Stop:     stopWords,
+		template: template,
+		stop:     stopWords,
 		BaseNode: New(),
 	}
 }
 
 func (s *PromptNode) Execute(input prompt.Input) (string, error) {
 
-	tmpl, err := template.New("").Parse(s.Template)
+	tmpl, err := template.New("").Parse(s.template)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse template: %w", err)
 	}
@@ -34,5 +35,10 @@ func (s *PromptNode) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	return s.BaseNode.Execute(prompt.NewInput(buf.String(), s.Stop...))
+	return s.BaseNode.Execute(
+		prompt.NewInput(
+			buf.String(),
+			llm.OptionStop(s.stop...),
+		),
+	)
 }

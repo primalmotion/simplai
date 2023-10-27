@@ -35,7 +35,7 @@ func main() {
 			continue
 		}
 
-		var ch node.Node
+		var ch *chain.Chain
 		var llmInput prompt.Input
 
 		switch {
