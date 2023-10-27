@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"git.sr.ht/~primalmotion/simplai/prompts/storyteller"
 	"git.sr.ht/~primalmotion/simplai/prompts/websummarizer"
 	"git.sr.ht/~primalmotion/simplai/vllm"
 )
@@ -19,12 +20,13 @@ func main() {
 	)
 
 	summarizer := websummarizer.WebSummarizer{}
+	storyTeller := storyteller.StoryTeller{}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
 	for scanner.Scan() {
 
-		input := scanner.Text()
+		input := strings.TrimSpace(scanner.Text())
 		var prompt string
 		var err error
 
@@ -33,6 +35,14 @@ func main() {
 		case strings.HasPrefix(input, "/summarize "):
 
 			prompt, err = summarizer.Format(strings.TrimPrefix(input, "/summarize "))
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+		case strings.HasPrefix(input, "/story "):
+
+			prompt, err = storyTeller.Format(strings.TrimPrefix(input, "/story "))
 			if err != nil {
 				fmt.Println(err)
 				continue

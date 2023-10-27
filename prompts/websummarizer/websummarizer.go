@@ -23,13 +23,13 @@ func standardizeSpaces(s string) string {
 type WebSummarizer struct {
 }
 
-func (s *WebSummarizer) Format(address string) (string, error) {
+func (s *WebSummarizer) Format(input string) (string, error) {
 
-	if _, err := url.Parse(address); err != nil {
+	if _, err := url.Parse(input); err != nil {
 		return "", fmt.Errorf("The given url is not valid: %w", err)
 	}
 
-	article, err := readability.FromURL(address, 30*time.Second)
+	article, err := readability.FromURL(input, 30*time.Second)
 	if err != nil {
 		return "", fmt.Errorf("unable to load article: %w", err)
 	}

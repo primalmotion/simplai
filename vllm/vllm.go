@@ -47,7 +47,7 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 		Temperature: config.Temperature,
 	}
 
-	fmt.Println(vllmreq)
+	// fmt.Println(vllmreq)
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
