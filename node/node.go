@@ -14,7 +14,11 @@ type Node struct {
 	options []llm.InferenceOption
 }
 
-func New(llm llm.LLM, prmp prompt.Formatter, options ...llm.InferenceOption) *Node {
+func New(
+	llm llm.LLM,
+	prmp prompt.Formatter,
+	options ...llm.InferenceOption,
+) *Node {
 	return &Node{
 		prompt:  prmp,
 		llm:     llm,
@@ -22,9 +26,13 @@ func New(llm llm.LLM, prmp prompt.Formatter, options ...llm.InferenceOption) *No
 	}
 }
 
-func (n *Node) AddNode(next *Node) *Node {
+func (n *Node) Chain(next *Node) *Node {
 	n.next = next
 	return next
+}
+
+func (n *Node) Next() *Node {
+	return n.next
 }
 
 func (n *Node) Execute(input prompt.Input) (string, error) {
@@ -34,19 +42,15 @@ func (n *Node) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to format prompt: %w", err)
 	}
 
-	fmt.Println("------------")
-	fmt.Println("NODE PROMPT:")
-	fmt.Println(fprompt)
-
 	output, err := n.llm.Infer(fprompt, n.options...)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
-	if n.next == nil {
+	next := n.Next()
+	if next == nil {
 		return output, nil
 	}
 
-	fmt.Println("OUTPUT:", output)
-	return n.next.Execute(prompt.NewInput(output))
+	return next.Execute(prompt.NewInput(output))
 }

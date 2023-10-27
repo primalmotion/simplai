@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
+	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 )
@@ -41,13 +43,19 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 	encoder := json.NewEncoder(buffer)
 
 	vllmreq := VLLMRequest{
-		Prompt:      prompt,
-		Model:       config.Model,
-		MaxTokens:   int(math.Max(float64(llm.CountTokens(v.model, prompt)), 2048.0)),
-		Temperature: config.Temperature,
+		LogitBias:        config.LogitBias,
+		Model:            config.Model,
+		Prompt:           prompt,
+		Stop:             config.Stop,
+		MaxTokens:        int(math.Max(float64(llm.CountTokens(v.model, prompt)), 2048.0)),
+		Temperature:      config.Temperature,
+		TopP:             config.TopP,
+		FrequencyPenalty: config.FrequencyPenalty,
+		PresencePenalty:  config.PresencePenalty,
+		LogProbs:         config.LogProbs,
 	}
 
-	// fmt.Println(vllmreq)
+	fmt.Println(vllmreq)
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
@@ -62,15 +70,26 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 	if err != nil {
 		return "", fmt.Errorf("unable to send request: %w", err)
 	}
+
+	defer func() {
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
+
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("server was unable to process the request: %s", resp.Status)
+		content, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("server was unable to process the request: %s\n\n%s", resp.Status, content)
 	}
 
-	dec := json.NewDecoder(resp.Body)
 	vllmresp := &VLLMResponse{}
+	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(vllmresp); err != nil {
 		return "", fmt.Errorf("Unable to decode the response: %w", err)
 	}
 
-	return vllmresp.Choices[0].Text, nil
+	output := vllmresp.Choices[0].Text
+	output = strings.TrimSpace(output)
+
+	return output, nil
 }

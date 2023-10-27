@@ -7,7 +7,7 @@ func New(nodes ...*node.Node) *node.Node {
 	for i, n := range nodes {
 
 		if len(nodes) < i+1 {
-			n.AddNode(nodes[i+1])
+			n.Chain(nodes[i+1])
 		}
 	}
 

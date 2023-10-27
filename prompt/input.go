@@ -3,6 +3,7 @@ package prompt
 type Input interface {
 	Input() string
 	Get(key string) any
+	Keys() map[string]any
 }
 
 type input struct {
@@ -31,4 +32,8 @@ func (i input) Get(key string) any {
 	}
 
 	return i.keys[key]
+}
+
+func (i input) Keys() map[string]any {
+	return i.keys
 }
