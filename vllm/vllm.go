@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 
-	"git.sr.ht/~primalmotion/fllm/llm"
+	"git.sr.ht/~primalmotion/simplai/llm"
 )
 
 type VLLM struct {
 	client      *http.Client
 	url         string
 	model       string
-	temperature float32
+	temperature float64
 }
 
-func NewVLLM(url string, model string, temperature float32) *VLLM {
+func NewVLLM(url string, model string, temperature float64) *VLLM {
 	client := &http.Client{}
 	return &VLLM{
 		url:         url,
@@ -39,12 +40,16 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 	buffer := bytes.NewBuffer(nil)
 	encoder := json.NewEncoder(buffer)
 
-	if err := encoder.Encode(VLLMRequest{
+	vllmreq := VLLMRequest{
 		Prompt:      prompt,
 		Model:       config.Model,
-		MaxTokens:   config.MaxTokens,
+		MaxTokens:   int(math.Max(float64(llm.CountTokens(v.model, prompt)), 2048.0)),
 		Temperature: config.Temperature,
-	}); err != nil {
+	}
+
+	fmt.Println(vllmreq)
+
+	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
 	}
 
