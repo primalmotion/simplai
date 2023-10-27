@@ -29,6 +29,7 @@ type storyTeller struct {
 func NewStoryTeller() prompt.Formatter {
 	return &storyTeller{
 		Formatter: basic.Formatter{
+			Stop:     []string{"\n", " ", ","},
 			Template: tmpl,
 		},
 	}

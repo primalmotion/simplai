@@ -42,7 +42,9 @@ func (n *Node) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to format prompt: %w", err)
 	}
 
-	output, err := n.llm.Infer(fprompt, n.options...)
+	opts := append(n.options, llm.OptionInferStop(n.prompt.StopWords()...))
+
+	output, err := n.llm.Infer(fprompt, opts...)
 	if err != nil {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}

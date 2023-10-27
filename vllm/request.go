@@ -1,6 +1,9 @@
 package vllm
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // VLLMRequest is the data holding the information to make a
 // request to VLLM
@@ -18,9 +21,9 @@ type VLLMRequest struct {
 }
 
 func (r VLLMRequest) String() string {
-	return fmt.Sprintf(`---
-model: %s
-stop: %s
+
+	var header = `model: %s
+stop: %v
 max_tokens: %d
 temp: %f
 top_p: %f
@@ -29,18 +32,22 @@ presence_penalty: %f
 logprobs: %d
 logit_bias: %v
 
-%s
----
-`,
+%s`
+
+	stopsBytes, _ := json.Marshal(r.Stop)
+	logitBiasBytes, _ := json.Marshal(r.LogitBias)
+
+	return fmt.Sprintf(
+		header,
 		r.Model,
-		r.Stop,
+		string(stopsBytes),
 		r.MaxTokens,
 		r.Temperature,
 		r.TopP,
 		r.FrequencyPenalty,
 		r.PresencePenalty,
 		r.LogProbs,
-		r.LogitBias,
+		string(logitBiasBytes),
 		r.Prompt,
 	)
 }

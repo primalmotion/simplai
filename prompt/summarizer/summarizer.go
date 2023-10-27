@@ -11,8 +11,8 @@ import (
 	readability "github.com/go-shiori/go-readability"
 )
 
-const tmpl = `You are extremely good at providing precise summary of any text.
-You will now summarize the following input:
+const tmpl = `You are extremely good at providing precise 3-4 sentence summary
+of any text. You will now summarize the following input:
 
 {{ .Input }}
 

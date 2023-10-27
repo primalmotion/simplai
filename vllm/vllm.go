@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"strings"
 
@@ -47,15 +46,13 @@ func (v *VLLM) Infer(prompt string, options ...llm.InferenceOption) (string, err
 		Model:            config.Model,
 		Prompt:           prompt,
 		Stop:             config.Stop,
-		MaxTokens:        int(math.Max(float64(llm.CountTokens(v.model, prompt)), 2048.0)),
+		MaxTokens:        llm.CountTokens(v.model, prompt),
 		Temperature:      config.Temperature,
 		TopP:             config.TopP,
 		FrequencyPenalty: config.FrequencyPenalty,
 		PresencePenalty:  config.PresencePenalty,
 		LogProbs:         config.LogProbs,
 	}
-
-	fmt.Println(vllmreq)
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)

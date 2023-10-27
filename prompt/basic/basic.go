@@ -10,6 +10,7 @@ import (
 
 type Formatter struct {
 	Template string
+	Stop     []string
 }
 
 func (s *Formatter) Format(input prompt.Input) (string, error) {
@@ -25,4 +26,8 @@ func (s *Formatter) Format(input prompt.Input) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func (s *Formatter) StopWords() []string {
+	return s.Stop
 }
