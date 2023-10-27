@@ -1,6 +1,7 @@
 package classifier
 
 import (
+	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
@@ -59,7 +60,7 @@ func NewClassifier() *Classifier {
 	return &Classifier{
 		PromptNode: node.NewPrompt(
 			tmpl,
-			[]string{"\n", " ", ","},
+			llm.OptionStop("\n", " ", ","),
 		),
 	}
 }

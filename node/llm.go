@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
-	prompt "git.sr.ht/~primalmotion/simplai/prompt"
+	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
 type LLM struct {
@@ -33,5 +33,8 @@ func (n *LLM) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
+	// TODO: we can't simply remove all input information here.
+	// We need a better way to set additional value into the
+	// input. We probably need a dedicated node for this.
 	return n.BaseNode.Execute(prompt.NewInput(output))
 }

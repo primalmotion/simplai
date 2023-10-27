@@ -27,6 +27,6 @@ type StoryTeller struct {
 
 func NewStoryTeller() *StoryTeller {
 	return &StoryTeller{
-		PromptNode: node.NewPrompt(tmpl, nil),
+		PromptNode: node.NewPrompt(tmpl),
 	}
 }

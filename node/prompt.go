@@ -12,20 +12,20 @@ import (
 type PromptNode struct {
 	*BaseNode
 	template string
-	stop     []string
+	options  []llm.Option
 }
 
-func NewPrompt(template string, stopWords []string) *PromptNode {
+func NewPrompt(template string, options ...llm.Option) *PromptNode {
 	return &PromptNode{
 		template: template,
-		stop:     stopWords,
+		options:  options,
 		BaseNode: New(),
 	}
 }
 
-func (s *PromptNode) Execute(input prompt.Input) (string, error) {
+func (n *PromptNode) Execute(input prompt.Input) (string, error) {
 
-	tmpl, err := template.New("").Parse(s.template)
+	tmpl, err := template.New("").Parse(n.template)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse template: %w", err)
 	}
@@ -35,10 +35,15 @@ func (s *PromptNode) Execute(input prompt.Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	return s.BaseNode.Execute(
+	opts := n.options
+	if iopts := input.Options(); len(iopts) > 0 {
+		opts = append(opts, iopts...)
+	}
+
+	return n.BaseNode.Execute(
 		prompt.NewInput(
 			buf.String(),
-			llm.OptionStop(s.stop...),
+			opts...,
 		),
 	)
 }

@@ -28,7 +28,7 @@ type Summarizer struct {
 
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
-		PromptNode: node.NewPrompt(tmpl, nil),
+		PromptNode: node.NewPrompt(tmpl),
 	}
 }
 

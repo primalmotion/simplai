@@ -16,7 +16,6 @@ func New(nodes ...node.Node) *Chain {
 	}
 
 	for i, n := range nodes {
-
 		if len(nodes) > i+1 {
 			n.Chain(nodes[i+1])
 		}
