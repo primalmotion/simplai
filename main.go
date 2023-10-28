@@ -21,10 +21,19 @@ func main() {
 		0.0,
 	)
 
+	debugMode := true
 	printPreHook := func(n node.Node, in node.Input) (node.Input, error) {
-		render.Box(fmt.Sprintf("[%s]\n%s", n.Name(), in.Input()), "4")
+		if debugMode {
+			render.Box(fmt.Sprintf("[%s]\n%s", n.Name(), in.Input()), "4")
+		}
 		return in, nil
 	}
+
+	// this one needs state
+	conversationChain := chain.New(
+		prompt.NewConversation("ai", "human").WithPreHook(printPreHook),
+		node.NewLLM(llmmodel),
+	)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
@@ -42,6 +51,12 @@ func main() {
 		var llmInput node.Input
 
 		switch {
+
+		case strings.HasPrefix(input, ":debug"):
+			debugMode = !debugMode
+			render.Box(fmt.Sprintf("debug mode: %t", debugMode), "2")
+			fmt.Print("> ")
+			continue
 
 		case strings.HasPrefix(input, "/s "):
 			llmInput = node.NewInput(strings.TrimPrefix(input, "/s "))
@@ -81,9 +96,8 @@ func main() {
 			)
 
 		default:
-			render.Box("Unknown action.", "1")
-			fmt.Print("> ")
-			continue
+			llmInput = node.NewInput(input)
+			ch = conversationChain
 		}
 
 		output, err := ch.Execute(llmInput)
