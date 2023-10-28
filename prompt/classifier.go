@@ -68,15 +68,15 @@ func NewClassifier() *Classifier {
 }
 
 func (n *Classifier) Name() string {
-	return fmt.Sprintf("%s:classifier", n.BaseNode.Name())
+	return fmt.Sprintf("%s:classifier", n.Prompt.Name())
 }
 
 func (n *Classifier) WithPreHook(h node.PreHook) node.Node {
-	n.BaseNode.WithPreHook(h)
+	n.Prompt.WithPreHook(h)
 	return n
 }
 
 func (n *Classifier) WithPostHook(h node.PostHook) node.Node {
-	n.BaseNode.WithPostHook(h)
+	n.Prompt.WithPostHook(h)
 	return n
 }

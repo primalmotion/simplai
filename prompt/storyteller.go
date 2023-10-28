@@ -34,15 +34,15 @@ func NewStoryTeller() *StoryTeller {
 }
 
 func (n *StoryTeller) Name() string {
-	return fmt.Sprintf("%s:storyteller", n.BaseNode.Name())
+	return fmt.Sprintf("%s:storyteller", n.Prompt.Name())
 }
 
 func (n *StoryTeller) WithPreHook(h node.PreHook) node.Node {
-	n.BaseNode.WithPreHook(h)
+	n.Prompt.WithPreHook(h)
 	return n
 }
 
 func (n *StoryTeller) WithPostHook(h node.PostHook) node.Node {
-	n.BaseNode.WithPostHook(h)
+	n.Prompt.WithPostHook(h)
 	return n
 }
