@@ -7,6 +7,8 @@ type Input interface {
 	Get(key string) any
 	Keys() map[string]any
 	Options() []llm.Option
+
+	WithKeyValue(k string, v any) Input
 }
 
 type input struct {
@@ -25,6 +27,17 @@ func NewInputWithKeys(in string, keys map[string]any, options ...llm.Option) Inp
 		keys:    keys,
 		options: options,
 	}
+}
+
+func (i *input) WithKeyValue(k string, v any) Input {
+
+	if i.keys == nil {
+		i.keys = map[string]any{}
+	}
+
+	i.keys[k] = v
+
+	return i
 }
 
 func (i *input) Input() string {
