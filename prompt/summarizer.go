@@ -1,4 +1,4 @@
-package summarizer
+package prompt
 
 import (
 	"fmt"
@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"git.sr.ht/~primalmotion/simplai/node"
-	"git.sr.ht/~primalmotion/simplai/prompt"
 	readability "github.com/go-shiori/go-readability"
 )
 
-const tmpl = `You are extremely good at providing precise 3-4 sentence summary
+const summarizerTemplate = `You are extremely good at providing precise 3-4 sentence summary
 of any text. You will now summarize the following input:
 
 {{ .Input }}
@@ -28,7 +27,7 @@ type Summarizer struct {
 
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
-		Prompt: node.NewPrompt(tmpl),
+		Prompt: node.NewPrompt(summarizerTemplate),
 	}
 }
 
@@ -46,7 +45,7 @@ func (n *Summarizer) WithPostHook(h node.PostHook) node.Node {
 	return n
 }
 
-func (s *Summarizer) Execute(in prompt.Input) (string, error) {
+func (s *Summarizer) Execute(in node.Input) (string, error) {
 
 	text := in.Input()
 
@@ -63,5 +62,5 @@ func (s *Summarizer) Execute(in prompt.Input) (string, error) {
 		text = text[:2048]
 	}
 
-	return s.Prompt.Execute(prompt.NewInput(text))
+	return s.Prompt.Execute(node.NewInput(text))
 }

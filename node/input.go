@@ -1,4 +1,4 @@
-package prompt
+package node
 
 import "git.sr.ht/~primalmotion/simplai/llm"
 

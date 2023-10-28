@@ -10,9 +10,6 @@ import (
 	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
-	"git.sr.ht/~primalmotion/simplai/prompt/classifier"
-	"git.sr.ht/~primalmotion/simplai/prompt/storyteller"
-	"git.sr.ht/~primalmotion/simplai/prompt/summarizer"
 	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
@@ -24,13 +21,14 @@ func main() {
 		0.0,
 	)
 
-	printPreHook := func(n node.Node, in prompt.Input) (prompt.Input, error) {
-		render.Box(in.Input(), "4")
+	printPreHook := func(n node.Node, in node.Input) (node.Input, error) {
+		render.Box(fmt.Sprintf("[%s]\n%s", n.Name(), in.Input()), "4")
 		return in, nil
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
+
 	for scanner.Scan() {
 
 		input := strings.TrimSpace(scanner.Text())
@@ -41,26 +39,26 @@ func main() {
 		}
 
 		var ch *chain.Chain
-		var llmInput prompt.Input
+		var llmInput node.Input
 
 		switch {
 
 		case strings.HasPrefix(input, "/s "):
-			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/s "))
+			llmInput = node.NewInput(strings.TrimPrefix(input, "/s "))
 			ch = chain.New(
-				summarizer.NewSummarizer().WithPreHook(printPreHook),
+				prompt.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
 		case strings.HasPrefix(input, "/t "):
-			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/t "))
+			llmInput = node.NewInput(strings.TrimPrefix(input, "/t "))
 			ch = chain.New(
-				storyteller.NewStoryTeller().WithPreHook(printPreHook),
+				prompt.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
 		case strings.HasPrefix(input, "/c "):
-			llmInput = prompt.NewInputWithKeys(
+			llmInput = node.NewInputWithKeys(
 				strings.TrimPrefix(input, "/c "),
 				map[string]any{
 					"story-teller": "write something, invent a story, tell a tale or a lie.",
@@ -69,16 +67,16 @@ func main() {
 				},
 			)
 			ch = chain.New(
-				classifier.NewClassifier().WithPreHook(printPreHook),
+				prompt.NewClassifier().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
 		case strings.HasPrefix(input, "/C "):
-			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/C "))
+			llmInput = node.NewInput(strings.TrimPrefix(input, "/C "))
 			ch = chain.New(
-				storyteller.NewStoryTeller().WithPreHook(printPreHook),
+				prompt.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
-					summarizer.NewSummarizer().WithPreHook(printPreHook),
+				prompt.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
@@ -90,7 +88,7 @@ func main() {
 
 		output, err := ch.Execute(llmInput)
 		if err != nil {
-			fmt.Println(err)
+			render.Box(err.Error(), "1")
 			continue
 		}
 

@@ -2,20 +2,20 @@ package node
 
 import (
 	"fmt"
-
-	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
-type PreHook func(Node, prompt.Input) (prompt.Input, error)
+type PreHook func(Node, Input) (Input, error)
 type PostHook func(Node, string) (string, error)
 
 type Node interface {
 	Chain(next Node) Node
 	Next() Node
-	Execute(input prompt.Input) (string, error)
+
 	Name() string
 	WithPreHook(PreHook) Node
 	WithPostHook(PostHook) Node
+
+	Execute(input Input) (string, error)
 }
 
 type BaseNode struct {
@@ -41,7 +41,7 @@ func (n *BaseNode) Next() Node {
 	return n.next
 }
 
-func (n *BaseNode) Execute(input prompt.Input) (string, error) {
+func (n *BaseNode) Execute(input Input) (string, error) {
 
 	var err error
 	var output string

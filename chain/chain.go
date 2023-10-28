@@ -2,7 +2,6 @@ package chain
 
 import (
 	"git.sr.ht/~primalmotion/simplai/node"
-	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
 type Chain struct {
@@ -32,7 +31,7 @@ func New(nodes ...node.Node) *Chain {
 	}
 }
 
-func (c *Chain) Execute(input prompt.Input) (string, error) {
+func (c *Chain) Execute(input node.Input) (string, error) {
 
 	return c.nodes[0].Execute(input)
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
 type LLM struct {
@@ -35,7 +34,7 @@ func (n *LLM) WithPostHook(h PostHook) Node {
 	return n
 }
 
-func (n *LLM) Execute(input prompt.Input) (string, error) {
+func (n *LLM) Execute(input Input) (string, error) {
 
 	output, err := n.llm.Infer(
 		input.Input(),
@@ -46,7 +45,7 @@ func (n *LLM) Execute(input prompt.Input) (string, error) {
 	}
 
 	return n.BaseNode.Execute(
-		prompt.NewInput(
+		NewInput(
 			output,
 			input.Options()...,
 		),

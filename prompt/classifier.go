@@ -1,4 +1,4 @@
-package classifier
+package prompt
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-const tmpl = `classify the user input and map it to a known action name.
+const classifierTemplate = `classify the user input and map it to a known action name.
 your output will be used by a machine and it needs to be perfect.
 You must conform to the protocol described below at all times.
 
@@ -61,7 +61,7 @@ type Classifier struct {
 func NewClassifier() *Classifier {
 	return &Classifier{
 		Prompt: node.NewPrompt(
-			tmpl,
+			classifierTemplate,
 			llm.OptionStop("\n", " ", ","),
 		),
 	}

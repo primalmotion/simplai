@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/prompt"
 )
 
 type Prompt struct {
@@ -37,7 +36,7 @@ func (n *Prompt) WithPostHook(h PostHook) Node {
 	return n
 }
 
-func (n *Prompt) Execute(input prompt.Input) (string, error) {
+func (n *Prompt) Execute(input Input) (string, error) {
 
 	tmpl, err := template.New("").Parse(n.template)
 	if err != nil {
@@ -50,7 +49,7 @@ func (n *Prompt) Execute(input prompt.Input) (string, error) {
 	}
 
 	return n.BaseNode.Execute(
-		prompt.NewInput(
+		NewInput(
 			buf.String(),
 			append(n.options, input.Options()...)...,
 		),

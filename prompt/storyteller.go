@@ -1,4 +1,4 @@
-package storyteller
+package prompt
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-const tmpl = `Tell a captivating short story about {{ .Input }}.
+const storyTellerTemplate = `Tell a captivating short story about {{ .Input }}.
 
 Make the story vivid and imaginative using compelling
 characters, dramatic plot twists, and immersive sensory details.
@@ -29,7 +29,7 @@ type StoryTeller struct {
 
 func NewStoryTeller() *StoryTeller {
 	return &StoryTeller{
-		Prompt: node.NewPrompt(tmpl),
+		Prompt: node.NewPrompt(storyTellerTemplate),
 	}
 }
 
