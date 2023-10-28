@@ -27,6 +27,16 @@ func (n *Prompt) Name() string {
 	return "prompt"
 }
 
+func (n *Prompt) WithPreHook(h PreHook) Node {
+	n.BaseNode.WithPreHook(h)
+	return n
+}
+
+func (n *Prompt) WithPostHook(h PostHook) Node {
+	n.BaseNode.WithPostHook(h)
+	return n
+}
+
 func (n *Prompt) Execute(input prompt.Input) (string, error) {
 
 	tmpl, err := template.New("").Parse(n.template)

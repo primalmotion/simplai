@@ -32,6 +32,20 @@ func NewSummarizer() *Summarizer {
 	}
 }
 
+func (n *Summarizer) Name() string {
+	return fmt.Sprintf("%s:summarizer", n.BaseNode.Name())
+}
+
+func (n *Summarizer) WithPreHook(h node.PreHook) node.Node {
+	n.BaseNode.WithPreHook(h)
+	return n
+}
+
+func (n *Summarizer) WithPostHook(h node.PostHook) node.Node {
+	n.BaseNode.WithPostHook(h)
+	return n
+}
+
 func (s *Summarizer) Execute(in prompt.Input) (string, error) {
 
 	text := in.Input()

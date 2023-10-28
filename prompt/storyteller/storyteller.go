@@ -1,6 +1,8 @@
 package storyteller
 
 import (
+	"fmt"
+
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
@@ -29,4 +31,18 @@ func NewStoryTeller() *StoryTeller {
 	return &StoryTeller{
 		Prompt: node.NewPrompt(tmpl),
 	}
+}
+
+func (n *StoryTeller) Name() string {
+	return fmt.Sprintf("%s:storyteller", n.BaseNode.Name())
+}
+
+func (n *StoryTeller) WithPreHook(h node.PreHook) node.Node {
+	n.BaseNode.WithPreHook(h)
+	return n
+}
+
+func (n *StoryTeller) WithPostHook(h node.PostHook) node.Node {
+	n.BaseNode.WithPostHook(h)
+	return n
 }

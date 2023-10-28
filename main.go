@@ -24,6 +24,11 @@ func main() {
 		0.0,
 	)
 
+	printPreHook := func(n node.Node, in prompt.Input) (prompt.Input, error) {
+		render.Box(in.Input(), "4")
+		return in, nil
+	}
+
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
 	for scanner.Scan() {
@@ -43,16 +48,14 @@ func main() {
 		case strings.HasPrefix(input, "/s "):
 			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/s "))
 			ch = chain.New(
-				summarizer.NewSummarizer(),
-				node.NewDebug(),
+				summarizer.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
 		case strings.HasPrefix(input, "/t "):
 			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/t "))
 			ch = chain.New(
-				storyteller.NewStoryTeller(),
-				node.NewDebug(),
+				storyteller.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
@@ -66,20 +69,16 @@ func main() {
 				},
 			)
 			ch = chain.New(
-				classifier.NewClassifier(),
-				node.NewDebug(),
+				classifier.NewClassifier().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 
 		case strings.HasPrefix(input, "/C "):
 			llmInput = prompt.NewInput(strings.TrimPrefix(input, "/C "))
 			ch = chain.New(
-				storyteller.NewStoryTeller(),
-				node.NewDebug(),
+				storyteller.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
-				node.NewDebug(),
-				summarizer.NewSummarizer(),
-				node.NewDebug(),
+					summarizer.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 

@@ -20,28 +20,28 @@ func NewInput(in string, options ...llm.Option) Input {
 }
 
 func NewInputWithKeys(in string, keys map[string]any, options ...llm.Option) Input {
-	return input{
+	return &input{
 		input:   in,
 		keys:    keys,
 		options: options,
 	}
 }
 
-func (i input) Input() string {
+func (i *input) Input() string {
 	return i.input
 }
 
-func (i input) Get(key string) any {
+func (i *input) Get(key string) any {
 	if i.keys == nil {
 		return nil
 	}
 	return i.keys[key]
 }
 
-func (i input) Keys() map[string]any {
+func (i *input) Keys() map[string]any {
 	return i.keys
 }
 
-func (i input) Options() []llm.Option {
+func (i *input) Options() []llm.Option {
 	return i.options
 }

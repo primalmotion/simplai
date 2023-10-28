@@ -1,6 +1,8 @@
 package classifier
 
 import (
+	"fmt"
+
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 )
@@ -63,4 +65,18 @@ func NewClassifier() *Classifier {
 			llm.OptionStop("\n", " ", ","),
 		),
 	}
+}
+
+func (n *Classifier) Name() string {
+	return fmt.Sprintf("%s:classifier", n.BaseNode.Name())
+}
+
+func (n *Classifier) WithPreHook(h node.PreHook) node.Node {
+	n.BaseNode.WithPreHook(h)
+	return n
+}
+
+func (n *Classifier) WithPostHook(h node.PostHook) node.Node {
+	n.BaseNode.WithPostHook(h)
+	return n
 }

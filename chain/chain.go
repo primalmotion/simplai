@@ -22,10 +22,8 @@ func New(nodes ...node.Node) *Chain {
 			continue
 		}
 		internalNodes = append(internalNodes, n)
-		if len(nodes) > i+1 {
-			if nodes[i+1] != nil {
-				n.Chain(nodes[i+1])
-			}
+		if len(nodes) > i+1 && nodes[i+1] != nil {
+			n.Chain(nodes[i+1])
 		}
 	}
 

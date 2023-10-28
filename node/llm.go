@@ -25,6 +25,16 @@ func (n *LLM) Name() string {
 	return "llm"
 }
 
+func (n *LLM) WithPreHook(h PreHook) Node {
+	n.BaseNode.WithPreHook(h)
+	return n
+}
+
+func (n *LLM) WithPostHook(h PostHook) Node {
+	n.BaseNode.WithPostHook(h)
+	return n
+}
+
 func (n *LLM) Execute(input prompt.Input) (string, error) {
 
 	output, err := n.llm.Infer(
