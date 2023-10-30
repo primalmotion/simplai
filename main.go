@@ -30,10 +30,7 @@ func main() {
 	}
 
 	// this one needs state
-	conversationChain := chain.New(
-		prompt.NewConversation("ai", "human").WithPreHook(printPreHook),
-		node.NewLLM(llmmodel),
-	)
+	conversation := node.NewConversation("ai", "human")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
@@ -72,6 +69,14 @@ func main() {
 				node.NewLLM(llmmodel),
 			)
 
+		case strings.HasPrefix(input, "/S "):
+			llmInput = node.NewInput(strings.TrimPrefix(input, "/S "))
+			ch = chain.New(
+				conversation,
+				prompt.NewSearxSearch(conversation, "https://search.inframonde.me").WithPreHook(printPreHook),
+				node.NewLLM(llmmodel),
+			)
+
 		case strings.HasPrefix(input, "/c "):
 			llmInput = node.NewInputWithKeys(
 				strings.TrimPrefix(input, "/c "),
@@ -97,7 +102,11 @@ func main() {
 
 		default:
 			llmInput = node.NewInput(input)
-			ch = conversationChain
+			ch = chain.New(
+				conversation,
+				prompt.NewConversation(conversation).WithPreHook(printPreHook),
+				node.NewLLM(llmmodel),
+			)
 		}
 
 		output, err := ch.Execute(llmInput)

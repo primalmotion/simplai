@@ -3,10 +3,10 @@ package prompt
 import (
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 
 	"git.sr.ht/~primalmotion/simplai/node"
+	"git.sr.ht/~primalmotion/simplai/utils/trim"
 	readability "github.com/go-shiori/go-readability"
 )
 
@@ -16,10 +16,6 @@ of any text. You will now summarize the following input:
 {{ .Input }}
 
 SUMMARY:`
-
-func standardizeSpaces(s string) string {
-	return strings.Join(strings.Fields(s), " ")
-}
 
 type Summarizer struct {
 	*node.Prompt
@@ -57,7 +53,7 @@ func (s *Summarizer) Execute(in node.Input) (string, error) {
 		text = article.TextContent
 	}
 
-	text = standardizeSpaces(text)
+	text = trim.Output(text)
 	if len(text) > 2048 {
 		text = text[:2048]
 	}

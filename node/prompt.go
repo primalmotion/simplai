@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
+	"github.com/Masterminds/sprig"
 )
 
 type Prompt struct {
@@ -38,7 +39,9 @@ func (n *Prompt) WithPostHook(h PostHook) Node {
 
 func (n *Prompt) Execute(input Input) (string, error) {
 
-	tmpl, err := template.New("").Parse(n.template)
+	tmpl, err := template.New("").
+		Funcs(sprig.FuncMap()).
+		Parse(n.template)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse template: %w", err)
 	}
