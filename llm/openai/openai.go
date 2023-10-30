@@ -33,6 +33,7 @@ func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) 
 	config := llm.NewInferenceConfig()
 	config.Model = v.model
 	config.Temperature = v.temperature
+	config.MaxTokens = llm.CountTokens(v.model, prompt)
 
 	for _, opt := range options {
 		opt(&config)
@@ -46,13 +47,15 @@ func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) 
 		Model:            config.Model,
 		Prompt:           prompt,
 		Stop:             config.Stop,
-		MaxTokens:        llm.CountTokens(v.model, prompt),
+		MaxTokens:        config.MaxTokens,
 		Temperature:      config.Temperature,
 		TopP:             config.TopP,
 		FrequencyPenalty: config.FrequencyPenalty,
 		PresencePenalty:  config.PresencePenalty,
 		LogProbs:         config.LogProbs,
 	}
+
+	fmt.Println(vllmreq)
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
