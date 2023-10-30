@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"context"
 	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
@@ -56,9 +57,10 @@ func (n *Conversation) WithPostHook(h node.PostHook) node.Node {
 	return n
 }
 
-func (n *Conversation) Execute(in node.Input) (string, error) {
+func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	output, err := n.Prompt.Execute(in)
+	output, err := n.Prompt.Execute(ctx, in)
 	if err != nil {
 		return "", err
 	}

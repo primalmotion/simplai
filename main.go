@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -127,7 +128,8 @@ func main() {
 			)
 		}
 
-		output, err := ch.Execute(llmInput)
+		ctx := context.Background()
+		output, err := ch.Execute(ctx, llmInput)
 		if err != nil {
 			render.Box(err.Error(), "1")
 			continue

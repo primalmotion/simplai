@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"time"
@@ -41,7 +42,7 @@ func (n *Summarizer) WithPostHook(h node.PostHook) node.Node {
 	return n
 }
 
-func (s *Summarizer) Execute(in node.Input) (string, error) {
+func (s *Summarizer) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	text := in.Input()
 
@@ -58,5 +59,5 @@ func (s *Summarizer) Execute(in node.Input) (string, error) {
 		text = text[:2048]
 	}
 
-	return s.Prompt.Execute(node.NewInput(text))
+	return s.Prompt.Execute(ctx, node.NewInput(text))
 }

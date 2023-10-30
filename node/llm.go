@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
@@ -34,9 +35,9 @@ func (n *LLM) WithPostHook(h PostHook) Node {
 	return n
 }
 
-func (n *LLM) Execute(input Input) (string, error) {
+func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
-	output, err := n.llm.Infer(
+	output, err := n.llm.Infer(ctx,
 		input.Input(),
 		append(n.options, input.Options()...)...,
 	)
@@ -44,7 +45,7 @@ func (n *LLM) Execute(input Input) (string, error) {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
-	return n.BaseNode.Execute(
+	return n.BaseNode.Execute(ctx,
 		NewInput(
 			output,
 			input.Options()...,

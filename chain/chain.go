@@ -1,6 +1,8 @@
 package chain
 
 import (
+	"context"
+
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
@@ -31,8 +33,8 @@ func New(nodes ...node.Node) *Chain {
 	}
 }
 
-func (c *Chain) Execute(input node.Input) (string, error) {
+func (c *Chain) Execute(ctx context.Context, input node.Input) (string, error) {
 
-	return c.nodes[0].Execute(input)
+	return c.nodes[0].Execute(ctx, input)
 
 }

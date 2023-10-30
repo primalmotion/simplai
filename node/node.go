@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -15,7 +16,7 @@ type Node interface {
 	WithPreHook(PreHook) Node
 	WithPostHook(PostHook) Node
 
-	Execute(input Input) (string, error)
+	Execute(ctx context.Context, input Input) (string, error)
 }
 
 type BaseNode struct {
@@ -41,7 +42,7 @@ func (n *BaseNode) Next() Node {
 	return n.next
 }
 
-func (n *BaseNode) Execute(input Input) (string, error) {
+func (n *BaseNode) Execute(ctx context.Context, input Input) (string, error) {
 
 	var err error
 	var output string
@@ -56,7 +57,7 @@ func (n *BaseNode) Execute(input Input) (string, error) {
 	next := n.Next()
 
 	if next != nil {
-		output, err = next.Execute(input)
+		output, err = next.Execute(ctx, input)
 	} else {
 		output = input.Input()
 	}

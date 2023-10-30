@@ -2,6 +2,7 @@ package node
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"text/template"
 
@@ -37,7 +38,7 @@ func (n *Prompt) WithPostHook(h PostHook) Node {
 	return n
 }
 
-func (n *Prompt) Execute(input Input) (string, error) {
+func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 
 	tmpl, err := template.New("").
 		Funcs(sprig.FuncMap()).
@@ -52,6 +53,7 @@ func (n *Prompt) Execute(input Input) (string, error) {
 	}
 
 	return n.BaseNode.Execute(
+		ctx,
 		NewInput(
 			buf.String(),
 			append(n.options, input.Options()...)...,

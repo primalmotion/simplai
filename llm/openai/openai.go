@@ -2,6 +2,7 @@ package openai
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -28,7 +29,7 @@ func NewOpenAIAPI(url string, model string, temperature float64) *OpenAIAPI {
 	}
 }
 
-func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) {
+func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
 	config := llm.NewInferenceConfig()
 	config.Model = v.model
@@ -61,7 +62,7 @@ func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) 
 		return "", fmt.Errorf("unable to encode request: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/completions", v.url), buffer)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/completions", v.url), buffer)
 	if err != nil {
 		return "", fmt.Errorf("unable to prepare request: %w", err)
 	}
@@ -85,7 +86,7 @@ func (v *OpenAIAPI) Infer(prompt string, options ...llm.Option) (string, error) 
 	vllmresp := &response{}
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(vllmresp); err != nil {
-		return "", fmt.Errorf("Unable to decode the response: %w", err)
+		return "", fmt.Errorf("unable to decode the response: %w", err)
 	}
 
 	output := vllmresp.Choices[0].Text
