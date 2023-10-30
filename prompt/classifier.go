@@ -22,21 +22,21 @@ Example:
 	compose: write or compose a song.
 
 Given a user input, you must find which action is describing the best the
-user's intent. For example, if the user input is:
+user's intent then what are the parameters for this action.
+
+For example:
 
 	INPUT: write a hello world program in python
-	ACTION: code
+	ACTION: {"action": "code", "params": "hello world in python"}
+
 	INPUT: compose a song about bananas
-	ACTION: compose
+	ACTION: {"action": "compose", "params": "bananas"}
 
-If a sequence of multiple actions is needed, you must write them in order:
+If the input not explicitely map to any known actions, you must exactly write:
 
-	INPUT: summarize the latest news and post them on the my blog
-	ACTION: search, summarize, post
+	ACTION: {"action": ""}
 
-If the input not explicitely map to any known actions, you must write:
-
-	ACTION: none
+Your answer MUST be a valid JSON.
 
 It is VERY IMPORTANT you understand that you MUST follow this protocol at all
 costs, no matter what, and at all circumstances.
@@ -46,7 +46,7 @@ costs, no matter what, and at all circumstances.
 	{{ $k }}: {{ $v -}}
 {{ end }}
 
-Remember: you can write one of: {{ range $k, $v := .Keys}}{{$k}}, {{end}}
+Remember: ACTION must only be one of: {{ range $k, $v := .Keys}}{{$k}}, {{end}}
 
 ## PROCEED
 
@@ -61,8 +61,8 @@ func NewClassifier() *Classifier {
 	return &Classifier{
 		Prompt: node.NewPrompt(
 			classifierTemplate,
-			llm.OptionStop("\n", " ", ","),
-			llm.OptionMaxTokens(10),
+			llm.OptionStop("\n"),
+			llm.OptionMaxTokens(100),
 		),
 	}
 }
