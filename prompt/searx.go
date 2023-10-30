@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -62,7 +63,7 @@ func (n *SearxSearch) WithPostHook(h node.PostHook) node.Node {
 	return n
 }
 
-func (n *SearxSearch) Execute(in node.Input) (string, error) {
+func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	query := in.Input()
 
@@ -101,6 +102,7 @@ func (n *SearxSearch) Execute(in node.Input) (string, error) {
 	}
 
 	output, err := n.Prompt.Execute(
+		ctx,
 		node.NewInput(string(data)).
 			WithKeyValue("userquery", query),
 	)

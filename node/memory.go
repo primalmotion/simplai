@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -56,7 +57,7 @@ func (c *ChatMemory) WithPostHook(h PostHook) Node {
 	return c
 }
 
-func (c *ChatMemory) Execute(input Input) (string, error) {
+func (c *ChatMemory) Execute(ctx context.Context, input Input) (string, error) {
 
 	if input.Input() == "flush" {
 		c.history = []string{}
@@ -71,7 +72,7 @@ func (c *ChatMemory) Execute(input Input) (string, error) {
 
 	c.AddUserMessage(input.Input())
 
-	output, err := c.BaseNode.Execute(input)
+	output, err := c.BaseNode.Execute(ctx, input)
 	if err != nil {
 		return "", err
 	}

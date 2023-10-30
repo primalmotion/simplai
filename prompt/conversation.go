@@ -59,7 +59,6 @@ func (n *Conversation) WithPostHook(h node.PostHook) node.Node {
 
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
 
-	output, err := n.Prompt.Execute(in)
 	output, err := n.Prompt.Execute(ctx, in)
 	if err != nil {
 		return "", err

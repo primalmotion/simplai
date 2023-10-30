@@ -56,7 +56,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 		LogProbs:         config.LogProbs,
 	}
 
-	fmt.Println(vllmreq)
+	// fmt.Println(vllmreq)
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
