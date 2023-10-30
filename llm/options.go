@@ -1,15 +1,18 @@
 package llm
 
 type InferenceConfig struct {
-	LogitBias        map[string]int
-	Model            string
-	Stop             []string
-	MaxTokens        int
-	Temperature      float64
-	FrequencyPenalty float64
-	PresencePenalty  float64
-	LogProbs         int
-	TopP             float64
+	LogitBias         map[string]int
+	Model             string
+	Stop              []string
+	MaxTokens         int
+	Temperature       float64
+	FrequencyPenalty  float64
+	RepetitionPenalty float64
+	PresencePenalty   float64
+	LogProbs          int
+	TopP              float64
+	TopK              int
+	Seed              int
 }
 
 func NewInferenceConfig() InferenceConfig {
@@ -52,6 +55,12 @@ func OptionLogitBias(bias map[string]int) Option {
 	}
 }
 
+func OptionRepetitionPenalty(penalty float64) Option {
+	return func(c *InferenceConfig) {
+		c.RepetitionPenalty = penalty
+	}
+}
+
 func OptionPresencePenalty(penalty float64) Option {
 	return func(c *InferenceConfig) {
 		c.PresencePenalty = penalty
@@ -73,5 +82,17 @@ func OptionStop(words ...string) Option {
 func OptionTopP(topP float64) Option {
 	return func(c *InferenceConfig) {
 		c.TopP = topP
+	}
+}
+
+func OptionTopK(topK int) Option {
+	return func(c *InferenceConfig) {
+		c.TopK = topK
+	}
+}
+
+func OptionSeed(seed int) Option {
+	return func(c *InferenceConfig) {
+		c.Seed = seed
 	}
 }
