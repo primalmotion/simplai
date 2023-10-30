@@ -46,10 +46,9 @@ costs, no matter what, and at all circumstances.
 	{{ $k }}: {{ $v -}}
 {{ end }}
 
-Remember: you can only user one of: {{ range $k, $v := .Keys}}{{$k}}, {{end}}
+Remember: you can write one of: {{ range $k, $v := .Keys}}{{$k}}, {{end}}
 
 ## PROCEED
-
 
 INPUT: {{ .Input }}
 ACTION:`
@@ -63,6 +62,7 @@ func NewClassifier() *Classifier {
 		Prompt: node.NewPrompt(
 			classifierTemplate,
 			llm.OptionStop("\n", " ", ","),
+			llm.OptionMaxTokens(10),
 		),
 	}
 }
