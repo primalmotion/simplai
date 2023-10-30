@@ -13,6 +13,20 @@ import (
 	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
+func matchPrefix(input string, prefix string) (bool, string) {
+
+	if strings.HasPrefix(input, fmt.Sprintf("%s ", prefix)) {
+		return true, strings.TrimSpace(
+			strings.TrimPrefix(
+				input,
+				fmt.Sprintf("%s ", prefix),
+			),
+		)
+	}
+
+	return false, ""
+}
+
 func main() {
 
 	llmmodel := openai.NewOpenAIAPI(
@@ -30,7 +44,11 @@ func main() {
 	}
 
 	// this one needs state
-	conversation := node.NewConversation("ai", "human")
+	memory := node.NewChatMemory(
+		"<|system|>",
+		"<|assistant|>",
+		"<|user|>",
+	)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
@@ -47,64 +65,64 @@ func main() {
 		var ch *chain.Chain
 		var llmInput node.Input
 
-		switch {
-
-		case strings.HasPrefix(input, ":debug"):
+		if ok, _ := matchPrefix(input, ":debug"); ok {
 			debugMode = !debugMode
 			render.Box(fmt.Sprintf("debug mode: %t", debugMode), "2")
 			fmt.Print("> ")
 			continue
+		}
 
-		case strings.HasPrefix(input, "/s "):
-			llmInput = node.NewInput(strings.TrimPrefix(input, "/s "))
+		if ok, in := matchPrefix(input, "/s"); ok {
+			llmInput = node.NewInput(in)
 			ch = chain.New(
 				prompt.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
+		}
 
-		case strings.HasPrefix(input, "/t "):
-			llmInput = node.NewInput(strings.TrimPrefix(input, "/t "))
+		if ok, in := matchPrefix(input, "/t"); ok {
+			llmInput = node.NewInput(in)
 			ch = chain.New(
 				prompt.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
+		}
 
-		case strings.HasPrefix(input, "/S "):
-			llmInput = node.NewInput(strings.TrimPrefix(input, "/S "))
+		if ok, in := matchPrefix(input, "/S"); ok {
+			llmInput = node.NewInput(in)
 			ch = chain.New(
-				conversation,
-				prompt.NewSearxSearch(conversation, "https://search.inframonde.me").WithPreHook(printPreHook),
+				memory,
+				prompt.NewSearxSearch(memory, "https://search.inframonde.me").WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
+		}
 
-		case strings.HasPrefix(input, "/c "):
-			llmInput = node.NewInputWithKeys(
-				strings.TrimPrefix(input, "/c "),
-				map[string]any{
-					"story-teller": "write something, invent a story, tell a tale or a lie.",
-					"summarize":    "summarize some text, URL or document.",
-					"search":       "fetch information from the internet about people, facts or news.",
-				},
-			)
+		if ok, in := matchPrefix(input, "/c"); ok {
+			llmInput = node.NewInput(in).
+				WithKeyValue("story-teller", "write something, invent a story, tell a tale or a lie.").
+				WithKeyValue("summarize", "summarize some text, URL or document.").
+				WithKeyValue("search", "fetch information from the internet about people, facts or news.")
 			ch = chain.New(
 				prompt.NewClassifier().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
+		}
 
-		case strings.HasPrefix(input, "/C "):
-			llmInput = node.NewInput(strings.TrimPrefix(input, "/C "))
+		if ok, in := matchPrefix(input, "/C"); ok {
+			llmInput = node.NewInput(in)
 			ch = chain.New(
 				prompt.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 				prompt.NewSummarizer().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
+		}
 
-		default:
+		if llmInput == nil || ch == nil {
 			llmInput = node.NewInput(input)
 			ch = chain.New(
-				conversation,
-				prompt.NewConversation(conversation).WithPreHook(printPreHook),
+				memory,
+				prompt.NewConversation(memory).WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 		}

@@ -7,33 +7,36 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-const conversationTemplate = `You name is {{ .Get "botname" }}. You are an AI
-with high conversational skills. You are entairtaining and curious.
-You are knowledgeable in programming, physics, artificial intelligence, biology
-and philosophy.
+const conversationTemplate = `{{ .Get "system" }}
 
-You have a conversation with {{ .Get "username" }}. You will do your best to
-continue the conversation. You will make use of the context provided below in
-order to stay extremely coherent.
+You are an AI with high conversational skills. You are entertaining and
+curious. You are knowledgeable in programming, physics, artificial
+intelligence, biology and philosophy. You will do your best to continue the
+conversation. You will make use of the context provided below in order to stay
+extremely coherent. If you are not sure, just tell that you don't know.
 
-AI: Hello how may I help you?
+{{ .Get "botname" }}
+Hello how may I help you?
 {{ .Get "history" | join "\n" }}
-{{ .Get "username" }}: {{ .Input }}
-{{ .Get "botname" }}: `
+{{ .Get "username" }}
+{{ .Input }}
+{{ .Get "botname" }}
+`
 
 type Conversation struct {
 	*node.Prompt
-	conversation *node.Conversation
+	conversation *node.ChatMemory
 }
 
-func NewConversation(c *node.Conversation) *Conversation {
+func NewConversation(c *node.ChatMemory) *Conversation {
 	return &Conversation{
 		conversation: c,
 		Prompt: node.NewPrompt(
 			conversationTemplate,
 			llm.OptionStop(
-				fmt.Sprintf("\n%s", c.BotName()),
-				fmt.Sprintf("\n%s", c.UserName()),
+				fmt.Sprintf("%s", c.System()),
+				fmt.Sprintf("%s", c.BotName()),
+				fmt.Sprintf("%s", c.UserName()),
 			),
 		),
 	}

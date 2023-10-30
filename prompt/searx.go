@@ -33,12 +33,12 @@ type searxTrimmedResponse struct {
 
 type SearxSearch struct {
 	*node.Prompt
-	conversation *node.Conversation
+	conversation *node.ChatMemory
 	client       http.Client
 	api          string
 }
 
-func NewSearxSearch(conversation *node.Conversation, api string) *SearxSearch {
+func NewSearxSearch(conversation *node.ChatMemory, api string) *SearxSearch {
 	client := http.Client{}
 	return &SearxSearch{
 		api:          api,

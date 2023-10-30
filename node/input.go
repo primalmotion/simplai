@@ -18,22 +18,14 @@ type input struct {
 }
 
 func NewInput(in string, options ...llm.Option) Input {
-	return NewInputWithKeys(in, nil, options...)
-}
-
-func NewInputWithKeys(in string, keys map[string]any, options ...llm.Option) Input {
 	return &input{
 		input:   in,
-		keys:    keys,
+		keys:    map[string]any{},
 		options: options,
 	}
 }
 
 func (i *input) WithKeyValue(k string, v any) Input {
-
-	if i.keys == nil {
-		i.keys = map[string]any{}
-	}
 
 	i.keys[k] = v
 
@@ -45,9 +37,6 @@ func (i *input) Input() string {
 }
 
 func (i *input) Get(key string) any {
-	if i.keys == nil {
-		return nil
-	}
 	return i.keys[key]
 }
 

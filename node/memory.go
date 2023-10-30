@@ -7,70 +7,76 @@ import (
 	"git.sr.ht/~primalmotion/simplai/utils/trim"
 )
 
-type Conversation struct {
+type ChatMemory struct {
 	*BaseNode
-	botname  string
-	username string
-	history  []string
+	system    string
+	botname   string
+	username  string
+	separator string
+	history   []string
 }
 
-func NewConversation(botname string, username string) *Conversation {
-	return &Conversation{
-		BaseNode: New(),
-		botname:  strings.ToUpper(botname),
-		username: strings.ToUpper(username),
+func NewChatMemory(system string, botname string, username string) *ChatMemory {
+	return &ChatMemory{
+		BaseNode:  New(),
+		system:    strings.ToLower(system),
+		botname:   strings.ToLower(botname),
+		username:  strings.ToLower(username),
+		separator: "\n",
 	}
 }
 
-func (c *Conversation) BotName() string {
-	return c.botname
+func (c *ChatMemory) BotName() string { return c.botname }
+
+func (c *ChatMemory) UserName() string { return c.username }
+
+func (c *ChatMemory) System() string { return c.system }
+
+func (c *ChatMemory) History() []string { return append([]string{}, c.history...) }
+
+func (c *ChatMemory) AddUserMessage(content string) {
+	c.history = append(c.history, fmt.Sprintf("%s%s%s", c.username, c.separator, content))
 }
 
-func (c *Conversation) UserName() string {
-	return c.username
+func (c *ChatMemory) AddBotMessage(content string) {
+	c.history = append(c.history, fmt.Sprintf("%s%s%s", c.botname, c.separator, content))
 }
 
-func (c *Conversation) History() []string {
-	return append([]string{}, c.history...)
+func (n *ChatMemory) Name() string {
+	return "memory"
 }
 
-func (c *Conversation) AddUserMessage(content string) {
-	c.history = append(c.history, fmt.Sprintf("%s: %s", c.username, content))
+func (c *ChatMemory) WithPreHook(h PreHook) Node {
+	c.BaseNode.WithPreHook(h)
+	return c
 }
 
-func (c *Conversation) AddBotMessage(content string) {
-	c.history = append(c.history, fmt.Sprintf("%s: %s", c.botname, content))
+func (c *ChatMemory) WithPostHook(h PostHook) Node {
+	c.BaseNode.WithPostHook(h)
+	return c
 }
 
-func (n *Conversation) Name() string {
-	return "prompt"
-}
+func (c *ChatMemory) Execute(input Input) (string, error) {
 
-func (n *Conversation) WithPreHook(h PreHook) Node {
-	n.BaseNode.WithPreHook(h)
-	return n
-}
-
-func (n *Conversation) WithPostHook(h PostHook) Node {
-	n.BaseNode.WithPostHook(h)
-	return n
-}
-
-func (n *Conversation) Execute(input Input) (string, error) {
+	if input.Input() == "flush" {
+		c.history = []string{}
+		return "memory flushed", nil
+	}
 
 	input = input.
-		WithKeyValue("botname", n.botname).
-		WithKeyValue("username", n.username).
-		WithKeyValue("history", n.History())
+		WithKeyValue("system", c.system).
+		WithKeyValue("botname", c.botname).
+		WithKeyValue("username", c.username).
+		WithKeyValue("history", c.History())
 
-	n.AddUserMessage(input.Input())
+	c.AddUserMessage(input.Input())
 
-	output, err := n.BaseNode.Execute(input)
+	output, err := c.BaseNode.Execute(input)
 	if err != nil {
 		return "", err
 	}
 
-	n.AddBotMessage(trim.Output(output))
+	c.AddBotMessage(trim.Output(output))
 
 	return output, nil
 }
