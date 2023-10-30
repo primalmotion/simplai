@@ -68,7 +68,7 @@ func (o *LLM) Infer(ctx context.Context, prompt string, options ...llm.Option) (
 		Options:  ollamaOptions,
 	}
 
-	resp, err := o.client.Generate(ctx, req)
+	resp, err := o.client.Infer(ctx, req)
 	if err != nil {
 		return "", err
 	}

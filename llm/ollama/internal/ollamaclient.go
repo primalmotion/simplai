@@ -6,11 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
-	"os"
-	"strings"
 )
 
 type Client struct {
@@ -35,25 +32,6 @@ func checkError(resp *http.Response, body []byte) error {
 }
 
 func NewClient(ourl *url.URL) (*Client, error) {
-	if ourl == nil {
-		scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
-		if !ok {
-			scheme, hostport = "http", os.Getenv("OLLAMA_HOST")
-		}
-
-		host, port, err := net.SplitHostPort(hostport)
-		if err != nil {
-			host, port = "127.0.0.1", "11434"
-			if ip := net.ParseIP(strings.Trim(os.Getenv("OLLAMA_HOST"), "[]")); ip != nil {
-				host = ip.String()
-			}
-		}
-
-		ourl = &url.URL{
-			Scheme: scheme,
-			Host:   net.JoinHostPort(host, port),
-		}
-	}
 
 	client := Client{
 		base: ourl,
@@ -112,9 +90,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	return nil
 }
 
-type GenerateResponseFunc func(GenerateResponse) error
-
-func (c *Client) Generate(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
+func (c *Client) Infer(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
 	resp := &GenerateResponse{}
 	if err := c.do(ctx, http.MethodPost, "/api/generate", req, &resp); err != nil {
 		fmt.Println(resp)
