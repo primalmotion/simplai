@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/chain"
 	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
@@ -51,9 +50,45 @@ func main() {
 		"<|user|>",
 	)
 
+	summarizerChain := node.NewChain(
+		prompt.NewSummarizer().WithPreHook(printPreHook),
+		node.NewLLM(llmmodel),
+	)
+
+	storytellerChain := node.NewChain(
+		prompt.NewStoryTeller().WithPreHook(printPreHook),
+		node.NewLLM(llmmodel),
+	)
+
+	searxChain := node.NewChain(
+		memory,
+		prompt.NewSearxSearch("https://search.inframonde.me").WithPreHook(printPreHook),
+		node.NewLLM(llmmodel),
+	)
+
+	routerChain := node.NewChain(
+		memory,
+		node.NewChain(
+			prompt.NewClassifier(
+				prompt.NewStoryTeller(),
+				prompt.NewSummarizer(),
+				prompt.NewSearxSearch("https://search.inframonde.me"),
+			).WithPreHook(printPreHook),
+			node.NewLLM(llmmodel),
+		),
+
+		node.NewChain(
+			prompt.NewRouter(
+				prompt.NewStoryTeller(),
+				prompt.NewSummarizer(),
+				prompt.NewSearxSearch("https://search.inframonde.me"),
+			).WithPreHook(printPreHook),
+			node.NewLLM(llmmodel),
+		),
+	)
+
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
-
 	for scanner.Scan() {
 
 		input := strings.TrimSpace(scanner.Text())
@@ -63,7 +98,7 @@ func main() {
 			continue
 		}
 
-		var ch *chain.Chain
+		var ch node.Node
 		var llmInput node.Input
 
 		if ok, _ := matchPrefix(input, ":debug"); ok {
@@ -75,43 +110,27 @@ func main() {
 
 		if ok, in := matchPrefix(input, "/s"); ok {
 			llmInput = node.NewInput(in)
-			ch = chain.New(
-				prompt.NewSummarizer().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
+			ch = summarizerChain
 		}
 
 		if ok, in := matchPrefix(input, "/t"); ok {
 			llmInput = node.NewInput(in)
-			ch = chain.New(
-				prompt.NewStoryTeller().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
+			ch = storytellerChain
 		}
 
 		if ok, in := matchPrefix(input, "/S"); ok {
 			llmInput = node.NewInput(in)
-			ch = chain.New(
-				memory,
-				prompt.NewSearxSearch(memory, "https://search.inframonde.me").WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
+			ch = searxChain
 		}
 
 		if ok, in := matchPrefix(input, "/c"); ok {
-			llmInput = node.NewInput(in).
-				WithKeyValue("story-teller", "write something, invent a story, tell a tale or a lie.").
-				WithKeyValue("summarize", "summarize some text, URL or document.").
-				WithKeyValue("search", "fetch information from the internet about people, facts or news.")
-			ch = chain.New(
-				prompt.NewClassifier().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
+			llmInput = node.NewInput(in)
+			ch = routerChain
 		}
 
 		if ok, in := matchPrefix(input, "/C"); ok {
 			llmInput = node.NewInput(in)
-			ch = chain.New(
+			ch = node.NewChain(
 				prompt.NewStoryTeller().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 				prompt.NewSummarizer().WithPreHook(printPreHook),
@@ -121,7 +140,7 @@ func main() {
 
 		if llmInput == nil || ch == nil {
 			llmInput = node.NewInput(input)
-			ch = chain.New(
+			ch = node.NewChain(
 				memory,
 				prompt.NewConversation(memory).WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),

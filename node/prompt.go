@@ -13,19 +13,25 @@ import (
 type Prompt struct {
 	*BaseNode
 	template string
-	options  []llm.Option
+	Options  []llm.Option
 }
 
 func NewPrompt(template string, options ...llm.Option) *Prompt {
 	return &Prompt{
 		template: template,
-		options:  options,
+		Options:  options,
 		BaseNode: New(),
 	}
 }
 
-func (n *Prompt) Name() string {
-	return "prompt"
+func (n *Prompt) WithName(name string) Node {
+	n.BaseNode.WithName(name)
+	return n
+}
+
+func (n *Prompt) WithDescription(desc string) Node {
+	n.BaseNode.WithDescription(desc)
+	return n
 }
 
 func (n *Prompt) WithPreHook(h PreHook) Node {
@@ -52,11 +58,7 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	return n.BaseNode.Execute(
-		ctx,
-		NewInput(
-			buf.String(),
-			append(n.options, input.Options()...)...,
-		),
+	return n.BaseNode.Execute(ctx,
+		NewInput(buf.String(), append(n.Options, input.Options()...)...),
 	)
 }

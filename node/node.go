@@ -12,7 +12,10 @@ type Node interface {
 	Chain(next Node) Node
 	Next() Node
 
+	WithName(string) Node
 	Name() string
+	WithDescription(string) Node
+	Description() string
 	WithPreHook(PreHook) Node
 	WithPostHook(PostHook) Node
 
@@ -20,17 +23,33 @@ type Node interface {
 }
 
 type BaseNode struct {
-	next     Node
-	preHook  PreHook
-	postHook PostHook
+	next        Node
+	preHook     PreHook
+	postHook    PostHook
+	name        string
+	description string
 }
 
 func New() *BaseNode {
 	return &BaseNode{}
 }
 
+func (n *BaseNode) WithName(name string) Node {
+	n.name = name
+	return n
+}
+
+func (n *BaseNode) WithDescription(desc string) Node {
+	n.description = desc
+	return n
+}
+
 func (n *BaseNode) Name() string {
-	return "base"
+	return n.name
+}
+
+func (n *BaseNode) Description() string {
+	return n.description
 }
 
 func (n *BaseNode) Chain(next Node) Node {

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
+	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
 type OpenAIAPI struct {
@@ -56,7 +57,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 		LogProbs:         config.LogProbs,
 	}
 
-	// fmt.Println(vllmreq)
+	render.Box(vllmreq.String(), "3")
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
@@ -91,6 +92,8 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 
 	output := vllmresp.Choices[0].Text
 	output = strings.TrimSpace(output)
+
+	// fmt.Println(output)
 
 	return output, nil
 }

@@ -30,9 +30,7 @@ top_p: %f
 frequency_penalty: %f
 presence_penalty: %f
 logprobs: %d
-logit_bias: %v
-
-%s`
+logit_bias: %v`
 
 	stopsBytes, _ := json.Marshal(r.Stop)
 	logitBiasBytes, _ := json.Marshal(r.LogitBias)
@@ -48,6 +46,5 @@ logit_bias: %v
 		r.PresencePenalty,
 		r.LogProbs,
 		string(logitBiasBytes),
-		r.Prompt,
 	)
 }

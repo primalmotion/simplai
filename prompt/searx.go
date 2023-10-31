@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
+	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-const searxTemplate = `You must read, understand and summarize
-The following JSON data coming from the API of a search engine
-called searx. You must extract the data and summarize the results.
+const searxTemplate = `You must extract the information from the following
+data. Write a short summary of about 2-3 sentences.
 
-The search the made was: {{ .Get "userquery" }}
+QUERY: {{ .Get "userquery" }}
 
-API DATA:
+RESULTS:
 
 {{ .Input }}
 
@@ -34,23 +35,32 @@ type searxTrimmedResponse struct {
 
 type SearxSearch struct {
 	*node.Prompt
-	conversation *node.ChatMemory
-	client       http.Client
-	api          string
+	client http.Client
+	api    string
 }
 
-func NewSearxSearch(conversation *node.ChatMemory, api string) *SearxSearch {
+func NewSearxSearch(api string) *SearxSearch {
 	client := http.Client{}
 	return &SearxSearch{
-		api:          api,
-		client:       client,
-		conversation: conversation,
-		Prompt:       node.NewPrompt(searxTemplate),
+		api:    api,
+		client: client,
+		Prompt: node.NewPrompt(
+			searxTemplate,
+			llm.OptionMaxTokens(2048),
+		).
+			WithName("search").
+			WithDescription("used to summarize some text, URL or document.").(*node.Prompt),
 	}
 }
 
-func (n *SearxSearch) Name() string {
-	return fmt.Sprintf("%s:searxsearch", n.Prompt.Name())
+func (n *SearxSearch) WithName(name string) node.Node {
+	n.Prompt.WithName(name)
+	return n
+}
+
+func (n *SearxSearch) WithDescription(desc string) node.Node {
+	n.Prompt.WithDescription(desc)
+	return n
 }
 
 func (n *SearxSearch) WithPreHook(h node.PreHook) node.Node {
@@ -96,19 +106,18 @@ func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error
 		return "", fmt.Errorf("unable to decode response: %w", err)
 	}
 
-	data, err := json.MarshalIndent(out, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("unable to reencode json data: %w", err)
+	output := []string{}
+	for _, entry := range out.Results {
+		output = append(output, fmt.Sprintf("- %s\n%s", entry.Title, entry.Content))
 	}
+	// data, err := json.MarshalIndent(out, "", " ")
+	// if err != nil {
+	// 	return "", fmt.Errorf("unable to reencode json data: %w", err)
+	// }
 
-	output, err := n.Prompt.Execute(
+	return n.Prompt.Execute(
 		ctx,
-		node.NewInput(string(data)).
+		node.NewInput(strings.Join(output, "\n\n")).
 			WithKeyValue("userquery", query),
 	)
-	if err != nil {
-		return "", fmt.Errorf("unable to execute query: %w", err)
-	}
-
-	return output, nil
 }

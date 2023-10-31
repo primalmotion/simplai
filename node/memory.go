@@ -19,7 +19,7 @@ type ChatMemory struct {
 
 func NewChatMemory(system string, botname string, username string) *ChatMemory {
 	return &ChatMemory{
-		BaseNode:  New(),
+		BaseNode:  New().WithName("memory").(*BaseNode),
 		system:    strings.ToLower(system),
 		botname:   strings.ToLower(botname),
 		username:  strings.ToLower(username),
@@ -43,8 +43,14 @@ func (c *ChatMemory) AddBotMessage(content string) {
 	c.history = append(c.history, fmt.Sprintf("%s%s%s", c.botname, c.separator, content))
 }
 
-func (n *ChatMemory) Name() string {
-	return "memory"
+func (n *ChatMemory) WithName(name string) Node {
+	n.BaseNode.WithName(name)
+	return n
+}
+
+func (n *ChatMemory) WithDescription(desc string) Node {
+	n.BaseNode.WithDescription(desc)
+	return n
 }
 
 func (c *ChatMemory) WithPreHook(h PreHook) Node {

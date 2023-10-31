@@ -39,12 +39,20 @@ func NewConversation(c *node.ChatMemory) *Conversation {
 				fmt.Sprintf("%s", c.BotName()),
 				fmt.Sprintf("%s", c.UserName()),
 			),
-		),
+		).
+			WithName("conversation").
+			WithDescription("Used to have a general conversation with the user.").(*node.Prompt),
 	}
 }
 
-func (n *Conversation) Name() string {
-	return fmt.Sprintf("%s:conversation", n.Prompt.Name())
+func (n *Conversation) WithName(name string) node.Node {
+	n.Prompt.WithName(name)
+	return n
+}
+
+func (n *Conversation) WithDescription(desc string) node.Node {
+	n.Prompt.WithDescription(desc)
+	return n
 }
 
 func (n *Conversation) WithPreHook(h node.PreHook) node.Node {
@@ -58,11 +66,5 @@ func (n *Conversation) WithPostHook(h node.PostHook) node.Node {
 }
 
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
-
-	output, err := n.Prompt.Execute(ctx, in)
-	if err != nil {
-		return "", err
-	}
-
-	return output, nil
+	return n.Prompt.Execute(ctx, in)
 }

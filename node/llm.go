@@ -15,14 +15,20 @@ type LLM struct {
 
 func NewLLM(llm llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
-		BaseNode: New(),
+		BaseNode: New().WithName("llm").(*BaseNode),
 		llm:      llm,
 		options:  options,
 	}
 }
 
-func (n *LLM) Name() string {
-	return "llm"
+func (n *LLM) WithName(name string) Node {
+	n.BaseNode.WithName(name)
+	return n
+}
+
+func (n *LLM) WithDescription(desc string) Node {
+	n.BaseNode.WithDescription(desc)
+	return n
 }
 
 func (n *LLM) WithPreHook(h PreHook) Node {
@@ -45,10 +51,5 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
-	return n.BaseNode.Execute(ctx,
-		NewInput(
-			output,
-			input.Options()...,
-		),
-	)
+	return n.BaseNode.Execute(ctx, NewInput(output))
 }

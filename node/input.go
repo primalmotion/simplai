@@ -26,9 +26,7 @@ func NewInput(in string, options ...llm.Option) Input {
 }
 
 func (i *input) WithKeyValue(k string, v any) Input {
-
 	i.keys[k] = v
-
 	return i
 }
 

@@ -24,12 +24,20 @@ type Summarizer struct {
 
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
-		Prompt: node.NewPrompt(summarizerTemplate),
+		Prompt: node.NewPrompt(summarizerTemplate).
+			WithName("summarizer").
+			WithDescription("summarize some text, URL or document.").(*node.Prompt),
 	}
 }
 
-func (n *Summarizer) Name() string {
-	return fmt.Sprintf("%s:summarizer", n.Prompt.Name())
+func (n *Summarizer) WithName(name string) node.Node {
+	n.Prompt.WithName(name)
+	return n
+}
+
+func (n *Summarizer) WithDescription(desc string) node.Node {
+	n.Prompt.WithDescription(desc)
+	return n
 }
 
 func (n *Summarizer) WithPreHook(h node.PreHook) node.Node {
