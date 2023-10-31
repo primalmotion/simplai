@@ -24,7 +24,7 @@ Hello how may I help you?
 
 var ConversationInfo = node.Info{
 	Name:        "conversation",
-	Description: "Used to have a general conversation with the user",
+	Description: "used to have a general conversation with the user",
 	Parameters:  "the user INPUT, as is. You must not modify or summarize it",
 }
 

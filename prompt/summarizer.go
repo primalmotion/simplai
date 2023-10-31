@@ -13,7 +13,7 @@ import (
 
 var SummarizerInfo = node.Info{
 	Name:        "summarizer",
-	Description: "summarize some text, URL or document.",
+	Description: "use to summarize some text, URL or document.",
 	Parameters:  "either the full text to summarize or a valid URL",
 }
 

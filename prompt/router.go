@@ -12,7 +12,7 @@ const routerTemplate = `{{.Input}}`
 
 var RouterInfo = node.Info{
 	Name:        "router",
-	Description: "route the input to a particular chain.",
+	Description: "use to route the input to a particular chain.",
 }
 
 type routerInstruction struct {

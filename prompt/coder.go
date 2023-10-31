@@ -7,7 +7,7 @@ import (
 
 var CoderInfo = node.Info{
 	Name:        "coder",
-	Description: "write some code, in various programming language",
+	Description: "use to write some code, in various programming language",
 	Parameters:  "The detailed summary of the code to write",
 }
 

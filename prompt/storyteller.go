@@ -6,7 +6,7 @@ import (
 
 var StoryTellerInfo = node.Info{
 	Name:        "storyteller",
-	Description: "write something, invent a story, tell a tale or a lie.",
+	Description: "use to write something, invent a story, tell a tale or a lie.",
 	Parameters:  "The subject of the story to write",
 }
 
