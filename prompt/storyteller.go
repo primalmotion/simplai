@@ -39,13 +39,3 @@ func NewStoryTeller() *StoryTeller {
 		),
 	}
 }
-
-func (n *StoryTeller) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *StoryTeller) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}

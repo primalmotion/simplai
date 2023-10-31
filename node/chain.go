@@ -30,16 +30,6 @@ func NewChain(desc Info, nodes ...Node) *Chain {
 	}
 }
 
-func (n *Chain) WithPreHook(h PreHook) Node {
-	n.BaseNode.WithPreHook(h)
-	return n
-}
-
-func (n *Chain) WithPostHook(h PostHook) Node {
-	n.BaseNode.WithPostHook(h)
-	return n
-}
-
 func (c *Chain) Execute(ctx context.Context, input Input) (string, error) {
 
 	if input.Debug() {

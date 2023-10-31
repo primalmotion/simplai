@@ -50,16 +50,6 @@ func (n *Router) Chain(next node.Node) {
 	n.defaultNode.Chain(next)
 }
 
-func (n *Router) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *Router) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
-
 func (n *Router) isValidAction(action string) bool {
 
 	if action == "" {

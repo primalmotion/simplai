@@ -42,16 +42,6 @@ func NewConversation() *Conversation {
 	}
 }
 
-func (n *Conversation) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *Conversation) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
-
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
 	return n.Prompt.Execute(ctx, in.WithOptions(
 		llm.OptionStop(

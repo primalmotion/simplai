@@ -21,16 +21,6 @@ func NewLLM(desc Info, llm llm.LLM, options ...llm.Option) *LLM {
 	}
 }
 
-func (n *LLM) WithPreHook(h PreHook) Node {
-	n.BaseNode.WithPreHook(h)
-	return n
-}
-
-func (n *LLM) WithPostHook(h PostHook) Node {
-	n.BaseNode.WithPostHook(h)
-	return n
-}
-
 func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
 	opts := append(n.options, input.Options()...)

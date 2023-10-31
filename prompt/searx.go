@@ -56,16 +56,6 @@ func NewSearxSearch(api string) *SearxSearch {
 	}
 }
 
-func (n *SearxSearch) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *SearxSearch) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
-
 func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	query := in.Input()

@@ -104,16 +104,6 @@ func NewClassifier(subchains ...node.Info) *Classifier {
 	}
 }
 
-func (n *Classifier) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *Classifier) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
-
 func (n *Classifier) subchainNames() []string {
 	out := make([]string, len(n.subchainMap))
 	i := 0

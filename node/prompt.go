@@ -24,16 +24,6 @@ func NewPrompt(desc Info, template string, options ...llm.Option) *Prompt {
 	}
 }
 
-func (n *Prompt) WithPreHook(h PreHook) Node {
-	n.BaseNode.WithPreHook(h)
-	return n
-}
-
-func (n *Prompt) WithPostHook(h PostHook) Node {
-	n.BaseNode.WithPostHook(h)
-	return n
-}
-
 func (n *Prompt) Options() []llm.Option {
 	return append([]llm.Option{}, n.options...)
 }

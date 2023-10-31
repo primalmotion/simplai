@@ -27,16 +27,12 @@ type Node interface {
 	Info() Info
 	Chain(Node)
 	Next() Node
-	WithPreHook(PreHook) Node
-	WithPostHook(PostHook) Node
 	Execute(context.Context, Input) (string, error)
 }
 
 type BaseNode struct {
-	next     Node
-	preHook  PreHook
-	postHook PostHook
-	desc     Info
+	next Node
+	desc Info
 }
 
 func New(desc Info) *BaseNode {
@@ -65,13 +61,6 @@ func (n *BaseNode) Execute(ctx context.Context, input Input) (string, error) {
 	var err error
 	var output string
 
-	if n.preHook != nil {
-		input, err = n.preHook(n, input)
-		if err != nil {
-			return "", fmt.Errorf("error during pre hook: %w", err)
-		}
-	}
-
 	next := n.Next()
 	if next != nil {
 		output, err = next.Execute(ctx, input)
@@ -79,22 +68,5 @@ func (n *BaseNode) Execute(ctx context.Context, input Input) (string, error) {
 		output = input.Input()
 	}
 
-	if n.postHook != nil {
-		output, err = n.postHook(n, output)
-		if err != nil {
-			return "", fmt.Errorf("error during post hook: %w", err)
-		}
-	}
-
 	return output, err
-}
-
-func (n *BaseNode) WithPreHook(hook PreHook) Node {
-	n.preHook = hook
-	return n
-}
-
-func (n *BaseNode) WithPostHook(hook PostHook) Node {
-	n.postHook = hook
-	return n
 }

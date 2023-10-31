@@ -37,16 +37,6 @@ func NewSummarizer() *Summarizer {
 	}
 }
 
-func (n *Summarizer) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *Summarizer) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
-
 func (s *Summarizer) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	text := in.Input()

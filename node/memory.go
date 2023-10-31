@@ -32,16 +32,6 @@ func (c *ChatMemory) WithStorage(storage *[]string) *ChatMemory {
 	return c
 }
 
-func (c *ChatMemory) WithPreHook(h PreHook) Node {
-	c.BaseNode.WithPreHook(h)
-	return c
-}
-
-func (c *ChatMemory) WithPostHook(h PostHook) Node {
-	c.BaseNode.WithPostHook(h)
-	return c
-}
-
 func (c *ChatMemory) BotName() string {
 	return c.botname
 }

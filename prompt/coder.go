@@ -45,13 +45,3 @@ func NewCoder() *Coder {
 		),
 	}
 }
-
-func (n *Coder) WithPreHook(h node.PreHook) node.Node {
-	n.Prompt.WithPreHook(h)
-	return n
-}
-
-func (n *Coder) WithPostHook(h node.PostHook) node.Node {
-	n.Prompt.WithPostHook(h)
-	return n
-}
