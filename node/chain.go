@@ -12,6 +12,10 @@ type Chain struct {
 	nodes []Node
 }
 
+func NewChainWithName(name string, nodes ...Node) *Chain {
+	return NewChain(Desc{Name: name}, nodes...)
+}
+
 func NewChain(desc Desc, nodes ...Node) *Chain {
 
 	for i, n := range nodes {
