@@ -32,17 +32,11 @@ func main() {
 
 	llmmodel := openai.NewOpenAIAPI(
 		"http://cruncher.lan:8000/v1",
-		"HuggingFaceH4/zephyr-7b-alpha",
+		"HuggingFaceH4/zephyr-7b-beta",
 		0.0,
 	)
 
 	debugMode := true
-	// printPreHook := func(n node.Node, in node.Input) (node.Input, error) {
-	// 	if debugMode {
-	// 		render.Box(fmt.Sprintf("[%s]\n%s", n.Desc().Name, in.Input()), "4")
-	// 	}
-	// 	return in, nil
-	// }
 
 	// this one needs state
 	// it's an ugly array for now.
@@ -77,37 +71,20 @@ func main() {
 
 	routerChain := node.NewChain(
 		node.Desc{Name: "chain:root"},
-
 		mistral.NewChatMemory().WithStorage(&memstorage),
-
-		// node.NewChain(
-		// node.Desc{Name: "chain:root:classifier"},
 		prompt.NewClassifier(
 			prompt.StoryTellerDesc,
 			prompt.SummarizerDesc,
 			prompt.SearxSearchDesc,
 		),
 		mistral.NewLLM(llmmodel),
-		// ),
-
-		// node.NewChain(
-		// 	node.Desc{Name: "chain:root:executor"},
 		prompt.NewRouter(
 			prompt.NewConversation(),
 			prompt.NewStoryTeller(),
 			prompt.NewSummarizer(),
 			prompt.NewSearxSearch("https://search.inframonde.me"),
 		),
-		// node.NewFunc(
-		// 	node.Desc{Name: "debug"},
-		// 	func(ctx context.Context, in node.Input, n node.Node) (string, error) {
-		//
-		// 		// fmt.Println("in.INput", in.Input())
-		// 		fmt.Println("in.Options", n.Desc().Name, "-->", in.Options())
-		// 		return in.Input(), nil
-		// 	}),
 		mistral.NewLLM(llmmodel),
-		// ),
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)

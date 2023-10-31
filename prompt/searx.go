@@ -103,12 +103,13 @@ func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error
 
 	output := []string{}
 	for _, entry := range out.Results {
-		output = append(output, fmt.Sprintf("- %s\n%s", entry.Title, entry.Content))
+		output = append(output, fmt.Sprintf(
+			"- %s (score: %2f)\n%s",
+			entry.Title,
+			entry.Score,
+			entry.Content,
+		))
 	}
-	// data, err := json.MarshalIndent(out, "", " ")
-	// if err != nil {
-	// 	return "", fmt.Errorf("unable to reencode json data: %w", err)
-	// }
 
 	return n.Prompt.Execute(
 		ctx,

@@ -116,6 +116,5 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 		)
 	}
 
-	// return output, nil
 	return n.Prompt.Execute(ctx, in.Derive(output))
 }
