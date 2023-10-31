@@ -128,16 +128,6 @@ func main() {
 			ch = routerChain
 		}
 
-		if ok, in := matchPrefix(input, "/C"); ok {
-			llmInput = node.NewInput(in)
-			ch = node.NewChain(
-				prompt.NewStoryTeller().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-				prompt.NewSummarizer().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
-		}
-
 		if llmInput == nil || ch == nil {
 			llmInput = node.NewInput(input)
 			ch = node.NewChain(
