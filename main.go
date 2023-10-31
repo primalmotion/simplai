@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"git.sr.ht/~primalmotion/simplai/llm/models/mistral"
 	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/theckman/yacspin"
 )
 
 func matchPrefix(input string, prefix string) (bool, string) {
-
 	if strings.HasPrefix(input, fmt.Sprintf("%s", prefix)) {
 		return true, strings.TrimSpace(
 			strings.TrimPrefix(
@@ -24,8 +25,16 @@ func matchPrefix(input string, prefix string) (bool, string) {
 			),
 		)
 	}
-
 	return false, ""
+}
+
+func updateSpinner(spinner *yacspin.Spinner, message string) node.Node {
+	return node.NewFunc(
+		node.Desc{Name: "debug"},
+		func(ctx context.Context, in node.Input, err node.Node) (string, error) {
+			spinner.Message(message + "...")
+			return in.Input(), nil
+		})
 }
 
 func main() {
@@ -36,53 +45,78 @@ func main() {
 		0.0,
 	)
 
-	debugMode := true
+	debugMode := false
+	cfg := yacspin.Config{
+		Frequency:       100 * time.Millisecond,
+		Suffix:          " ",
+		CharSet:         yacspin.CharSets[11],
+		SuffixAutoColon: true,
+		ColorAll:        true,
+		Colors:          []string{"fgYellow"},
+		StopColors:      []string{"fgGreen"},
+	}
+
+	spinner, _ := yacspin.New(cfg)
 
 	// this one needs state
 	// it's an ugly array for now.
 	memstorage := []string{}
 
-	summarizerChain := node.NewChain(
-		node.Desc{Name: "chain:summarizer"},
+	summarizerChain := node.NewChainWithName(
+		"chain:summarizer",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSummarizer(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	storytellerChain := node.NewChain(
-		node.Desc{Name: "chain:storytelling"},
+	storytellerChain := node.NewChainWithName(
+		"chain:storytelling",
 		prompt.NewStoryTeller(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	searxChain := node.NewChain(
-		node.Desc{Name: "chain:search"},
+	searxChain := node.NewChainWithName("chain:search",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSearxSearch("https://search.inframonde.me"),
 		mistral.NewLLM(llmmodel),
 	)
 
-	conversationChain := node.NewChain(
-		node.Desc{Name: "chain:conversation"},
+	conversationChain := node.NewChainWithName(
+		"chain:conversation",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewConversation(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	routerChain := node.NewChain(
-		node.Desc{Name: "chain:root"},
+	routerChain := node.NewChainWithName(
+		"chain:root",
 		mistral.NewChatMemory().WithStorage(&memstorage),
+		updateSpinner(spinner, "classifying"),
 		prompt.NewClassifier(
 			prompt.StoryTellerDesc,
 			prompt.SummarizerDesc,
 			prompt.SearxSearchDesc,
 		),
+		updateSpinner(spinner, "understanding"),
 		mistral.NewLLM(llmmodel),
+		updateSpinner(spinner, "routing"),
 		prompt.NewRouter(
 			prompt.NewConversation(),
-			prompt.NewStoryTeller(),
-			prompt.NewSummarizer(),
-			prompt.NewSearxSearch("https://search.inframonde.me"),
+			node.NewChainWithName(
+				"storyteller",
+				updateSpinner(spinner, "writing story"),
+				prompt.NewStoryTeller(),
+			),
+			node.NewChainWithName(
+				"summarizer",
+				updateSpinner(spinner, "summarizing"),
+				prompt.NewSummarizer(),
+			),
+			node.NewChainWithName(
+				"search",
+				updateSpinner(spinner, "searching the web"),
+				prompt.NewSearxSearch("https://search.inframonde.me"),
+			),
 		),
 		mistral.NewLLM(llmmodel),
 	)
@@ -125,18 +159,23 @@ func main() {
 
 		if ok, in := matchPrefix(input, "/c"); ok {
 			llmInput = node.NewInput(in)
-			ch = routerChain
+			ch = conversationChain
 		}
 
 		if ch == nil {
 			llmInput = node.NewInput(input)
-			ch = conversationChain
-			// llmInput = node.NewInput(input)
-			// ch = routerChain
+			ch = routerChain
+		}
+
+		if !debugMode {
+			spinner.Start()
 		}
 
 		ctx := context.Background()
 		output, err := ch.Execute(ctx, llmInput.WithDebug(debugMode))
+		if !debugMode {
+			spinner.Stop()
+		}
 		if err != nil {
 			render.Box(err.Error(), "1")
 			continue
