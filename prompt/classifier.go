@@ -51,7 +51,7 @@ Here is some output example:
 
 If the input not explicitely map to any known actions, you MUST exactly write:
 
-ACTION: {"action":"","params":"{{.Input}}"}
+	ACTION: {"action":"","params":"{{.Input}}"}
 
 It is VERY IMPORTANT you remember that you MUST follow this protocol no matter
 what, in all circumstances.
