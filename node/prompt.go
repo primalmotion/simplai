@@ -16,22 +16,12 @@ type Prompt struct {
 	options  []llm.Option
 }
 
-func NewPrompt(template string, options ...llm.Option) *Prompt {
+func NewPrompt(desc Desc, template string, options ...llm.Option) *Prompt {
 	return &Prompt{
 		template: template,
 		options:  options,
-		BaseNode: New(),
+		BaseNode: New(desc),
 	}
-}
-
-func (n *Prompt) WithName(name string) Node {
-	n.BaseNode.WithName(name)
-	return n
-}
-
-func (n *Prompt) WithDescription(desc string) Node {
-	n.BaseNode.WithDescription(desc)
-	return n
 }
 
 func (n *Prompt) WithPreHook(h PreHook) Node {
@@ -44,9 +34,13 @@ func (n *Prompt) WithPostHook(h PostHook) Node {
 	return n
 }
 
+func (n *Prompt) Options() []llm.Option {
+	return append([]llm.Option{}, n.options...)
+}
+
 func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 
-	tmpl, err := template.New("").
+	tmpl, err := template.New("base").
 		Funcs(sprig.FuncMap()).
 		Parse(n.template)
 	if err != nil {
@@ -58,8 +52,14 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
+	if input.Debug() {
+		LogNode(n, "2", buf.String())
+	}
+
 	return n.BaseNode.Execute(
 		ctx,
-		input.Derive(buf.String()).WithOptions(n.options...),
+		input.
+			Derive(buf.String()).
+			WithOptions(append(n.options, input.Options()...)...),
 	)
 }

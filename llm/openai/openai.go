@@ -57,7 +57,9 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 		LogProbs:         config.LogProbs,
 	}
 
-	render.Box(vllmreq.String(), "3")
+	if config.Debug {
+		render.Box(vllmreq.String(), "8")
+	}
 
 	if err := encoder.Encode(vllmreq); err != nil {
 		return "", fmt.Errorf("unable to encode request: %w", err)
@@ -90,10 +92,12 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 		return "", fmt.Errorf("unable to decode the response: %w", err)
 	}
 
+	if config.Debug {
+		render.Box(vllmresp.String(), "8")
+	}
+
 	output := vllmresp.Choices[0].Text
 	output = strings.TrimSpace(output)
-
-	// fmt.Println(output)
 
 	return output, nil
 }

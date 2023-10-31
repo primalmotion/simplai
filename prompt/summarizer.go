@@ -11,6 +11,11 @@ import (
 	readability "github.com/go-shiori/go-readability"
 )
 
+var SummarizerDesc = node.Desc{
+	Name:        "summarizer",
+	Description: "summarize some text, URL or document.",
+}
+
 const summarizerTemplate = `You are extremely good at providing precise 3-4 sentence summary
 of any text. You will now summarize the following input:
 
@@ -24,20 +29,11 @@ type Summarizer struct {
 
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
-		Prompt: node.NewPrompt(summarizerTemplate).
-			WithName("summarizer").
-			WithDescription("summarize some text, URL or document.").(*node.Prompt),
+		Prompt: node.NewPrompt(
+			SummarizerDesc,
+			summarizerTemplate,
+		),
 	}
-}
-
-func (n *Summarizer) WithName(name string) node.Node {
-	n.Prompt.WithName(name)
-	return n
-}
-
-func (n *Summarizer) WithDescription(desc string) node.Node {
-	n.Prompt.WithDescription(desc)
-	return n
 }
 
 func (n *Summarizer) WithPreHook(h node.PreHook) node.Node {

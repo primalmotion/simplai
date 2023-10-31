@@ -2,9 +2,7 @@ package prompt
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -55,37 +53,32 @@ Remember: ACTION must only be one of: {{ range $k, $v := .Get "subchains" }}{{$k
 INPUT: {{ .Input }}
 ACTION:`
 
-type Classifier struct {
-	*node.Prompt
-	subchainMap map[string]node.Node
+var ClassifierDesc = node.Desc{
+	Name:        "classifier",
+	Description: "used to classify the intent of the user.",
 }
 
-func NewClassifier(subchains ...node.Node) *Classifier {
+type Classifier struct {
+	*node.Prompt
+	subchainMap map[string]node.Desc
+}
 
-	subchainMap := map[string]node.Node{}
+func NewClassifier(subchains ...node.Desc) *Classifier {
+
+	subchainMap := map[string]node.Desc{}
 	for _, s := range subchains {
-		subchainMap[s.Name()] = s
+		subchainMap[s.Name] = s
 	}
+
 	return &Classifier{
 		subchainMap: subchainMap,
 		Prompt: node.NewPrompt(
+			ClassifierDesc,
 			classifierTemplate,
 			llm.OptionStop("\n"),
 			llm.OptionMaxTokens(100),
-		).
-			WithName("classifier").
-			WithDescription("used to classify the intent of the user.").(*node.Prompt),
+		),
 	}
-}
-
-func (n *Classifier) WithName(name string) node.Node {
-	n.Prompt.WithName(name)
-	return n
-}
-
-func (n *Classifier) WithDescription(desc string) node.Node {
-	n.Prompt.WithDescription(desc)
-	return n
 }
 
 func (n *Classifier) WithPreHook(h node.PreHook) node.Node {
@@ -98,66 +91,19 @@ func (n *Classifier) WithPostHook(h node.PostHook) node.Node {
 	return n
 }
 
-func (n *Classifier) isValidAction(action string) bool {
-
-	if action == "" {
-		return true
-	}
-
-	for k := range n.subchainMap {
-		if action == k {
-			return true
-		}
-	}
-	return false
-}
-
 func (n *Classifier) subchainNames() []string {
 	out := make([]string, len(n.subchainMap))
 	i := 0
 	for _, v := range n.subchainMap {
-		out[i] = fmt.Sprintf(`{"action": "%s"}`, v.Name())
+		out[i] = fmt.Sprintf(`{"action": "%s"}`, v.Name)
 		i++
 	}
 	return out
 }
 
 func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string, err error) {
-
-	var i int
-	for i = 0; i <= 3; i++ {
-
-		in := in.WithKeyValue("subchains", n.subchainMap)
-
-		output, err = n.Prompt.Execute(ctx, in)
-		if err != nil {
-			return "", err
-		}
-
-		out := map[string]any{}
-		if err := json.Unmarshal([]byte(output), &out); err != nil {
-			in = in.WithKeyValue("scratchpad", "I failed to generate a valid json. I must generate a valid json.")
-			continue
-		}
-
-		if !n.isValidAction(out["action"].(string)) {
-			in = in.WithKeyValue(
-				"scratchpad",
-				fmt.Sprintf(
-					`{"action": "%s"} is invalid. Only use one of: %s. If nothing matches, then write {"action": ""}`,
-					out["action"],
-					strings.Join(n.subchainNames(), ", "),
-				),
-			)
-			continue
-		}
-
-		break
-	}
-
-	if i >= 3 {
-		return `{"action": ""}`, nil
-	}
-
-	return output, nil
+	return n.Prompt.Execute(
+		ctx,
+		in.WithKeyValue("subchains", n.subchainMap),
+	)
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -93,7 +92,6 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 func (c *Client) Infer(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
 	resp := &GenerateResponse{}
 	if err := c.do(ctx, http.MethodPost, "/api/generate", req, &resp); err != nil {
-		fmt.Println(resp)
 		return resp, err
 	}
 	return resp, nil

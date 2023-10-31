@@ -6,6 +6,7 @@ type Input struct {
 	keys    map[string]any
 	input   string
 	options []llm.Option
+	debug   bool
 }
 
 func NewInput(in string, options ...llm.Option) Input {
@@ -22,7 +23,7 @@ func (i Input) WithKeyValue(k string, v any) Input {
 }
 
 func (i Input) WithOptions(options ...llm.Option) Input {
-	i.options = append(i.options, options...)
+	i.options = append([]llm.Option{}, options...)
 	return i
 }
 
@@ -34,12 +35,17 @@ func (i Input) Get(key string) any {
 	return i.keys[key]
 }
 
-func (i Input) Keys() map[string]any {
-	return i.keys
-}
-
 func (i Input) Options() []llm.Option {
 	return i.options
+}
+
+func (i Input) WithDebug(debug bool) Input {
+	i.debug = debug
+	return i
+}
+
+func (i Input) Debug() bool {
+	return i.debug
 }
 
 func (i *Input) Derive(in string) Input {
@@ -52,6 +58,7 @@ func (i *Input) Derive(in string) Input {
 	return Input{
 		input:   in,
 		keys:    nkeys,
+		debug:   i.debug,
 		options: append([]llm.Option{}, i.options...),
 	}
 }

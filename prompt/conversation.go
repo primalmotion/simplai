@@ -8,7 +8,6 @@ import (
 )
 
 const conversationTemplate = `{{ .Get "system" }}
-
 You are an AI with high conversational skills. You are entertaining and
 curious. You are knowledgeable in programming, physics, artificial
 intelligence, biology and philosophy. You will do your best to continue the
@@ -23,6 +22,11 @@ Hello how may I help you?
 {{ .Get "botname" }}
 `
 
+var ConversationDesc = node.Desc{
+	Name:        "conversation",
+	Description: "Used to have a general conversation with the user.",
+}
+
 type Conversation struct {
 	*node.Prompt
 	conversation *node.ChatMemory
@@ -30,20 +34,11 @@ type Conversation struct {
 
 func NewConversation() *Conversation {
 	return &Conversation{
-		Prompt: node.NewPrompt(conversationTemplate).
-			WithName("conversation").
-			WithDescription("Used to have a general conversation with the user.").(*node.Prompt),
+		Prompt: node.NewPrompt(
+			ConversationDesc,
+			conversationTemplate,
+		),
 	}
-}
-
-func (n *Conversation) WithName(name string) node.Node {
-	n.Prompt.WithName(name)
-	return n
-}
-
-func (n *Conversation) WithDescription(desc string) node.Node {
-	n.Prompt.WithDescription(desc)
-	return n
 }
 
 func (n *Conversation) WithPreHook(h node.PreHook) node.Node {

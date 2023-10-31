@@ -3,56 +3,55 @@ package node
 import (
 	"context"
 	"fmt"
+
+	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
+
+type Desc struct {
+	Name        string
+	Description string
+}
+
+func LogNode(n Node, color string, format string, kwargs ...any) { // lulz
+	render.Box(
+		fmt.Sprintf("[%s]\n\n", n.Desc().Name)+fmt.Sprintf(format, kwargs...),
+		color,
+	)
+}
 
 type PreHook func(Node, Input) (Input, error)
 type PostHook func(Node, string) (string, error)
 
 type Node interface {
-	Chain(next Node) Node
+	Desc() Desc
+	Chain(Node) Node
 	Next() Node
-
-	WithName(string) Node
-	Name() string
-	WithDescription(string) Node
-	Description() string
 	WithPreHook(PreHook) Node
 	WithPostHook(PostHook) Node
-
-	Execute(ctx context.Context, input Input) (string, error)
+	Execute(context.Context, Input) (string, error)
 }
 
 type BaseNode struct {
-	next        Node
-	preHook     PreHook
-	postHook    PostHook
-	name        string
-	description string
+	next     Node
+	preHook  PreHook
+	postHook PostHook
+	desc     Desc
 }
 
-func New() *BaseNode {
-	return &BaseNode{}
+func New(desc Desc) *BaseNode {
+	return &BaseNode{
+		desc: desc,
+	}
 }
 
-func (n *BaseNode) WithName(name string) Node {
-	n.name = name
-	return n
-}
-
-func (n *BaseNode) WithDescription(desc string) Node {
-	n.description = desc
-	return n
-}
-
-func (n *BaseNode) Name() string {
-	return n.name
-}
-
-func (n *BaseNode) Description() string {
-	return n.description
+func (n *BaseNode) Desc() Desc {
+	return n.desc
 }
 
 func (n *BaseNode) Chain(next Node) Node {
+	if n.next != nil {
+		panic(fmt.Sprintf("node %s is already chained to %s", n.Desc().Name, n.next.Desc().Name))
+	}
 	n.next = next
 	return next
 }
@@ -74,7 +73,6 @@ func (n *BaseNode) Execute(ctx context.Context, input Input) (string, error) {
 	}
 
 	next := n.Next()
-
 	if next != nil {
 		output, err = next.Execute(ctx, input)
 	} else {

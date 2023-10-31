@@ -13,6 +13,7 @@ type InferenceConfig struct {
 	TopP              float64
 	TopK              int
 	Seed              int
+	Debug             bool
 }
 
 func NewInferenceConfig() InferenceConfig {
@@ -25,6 +26,11 @@ func NewInferenceConfig() InferenceConfig {
 
 type Option func(*InferenceConfig)
 
+func OptionDebug(debug bool) Option {
+	return func(c *InferenceConfig) {
+		c.Debug = debug
+	}
+}
 func OptionTemperature(temp float64) Option {
 	return func(c *InferenceConfig) {
 		c.Temperature = temp

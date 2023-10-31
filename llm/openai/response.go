@@ -1,5 +1,10 @@
 package openai
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 // VLLMResponse is the structure describing a VLLM response.
 
 type response struct {
@@ -16,4 +21,22 @@ type response struct {
 		TotalTokens      int `json:"total_tokens,omitempty"`
 		CompletionTokens int `json:"completion_tokens,omitempty"`
 	} `json:"usage,omitempty"`
+}
+
+func (r response) String() string {
+
+	var header = `id: %s
+model: %s
+object: %s
+usage: %s`
+
+	usageBytes, _ := json.Marshal(r.Usage)
+
+	return fmt.Sprintf(
+		header,
+		r.ID,
+		r.Model,
+		r.Object,
+		string(usageBytes),
+	)
 }

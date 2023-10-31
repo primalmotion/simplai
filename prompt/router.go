@@ -8,7 +8,12 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-const routerTemplate = `{{ .Input }}`
+const routerTemplate = `{{.Input}}`
+
+var RouterDesc = node.Desc{
+	Name:        "router",
+	Description: "route the input to a particular chain.",
+}
 
 type routerInstruction struct {
 	Action string `json:"action"`
@@ -24,24 +29,23 @@ func NewRouter(subchains ...node.Node) *Router {
 
 	subchainMap := map[string]node.Node{}
 	for _, s := range subchains {
-		subchainMap[s.Name()] = s
+		subchainMap[s.Desc().Name] = s
 	}
+
 	return &Router{
 		subchainMap: subchainMap,
-		Prompt: node.NewPrompt(routerTemplate).
-			WithName("router").
-			WithDescription("route the input to a particular chain.").(*node.Prompt),
+		Prompt: node.NewPrompt(
+			RouterDesc,
+			routerTemplate,
+		),
 	}
 }
 
-func (n *Router) WithName(name string) node.Node {
-	n.Prompt.WithName(name)
-	return n
-}
-
-func (n *Router) WithDescription(desc string) node.Node {
-	n.Prompt.WithDescription(desc)
-	return n
+func (n *Router) Chain(next node.Node) node.Node {
+	for _, s := range n.subchainMap {
+		s.Chain(next)
+	}
+	return next
 }
 
 func (n *Router) WithPreHook(h node.PreHook) node.Node {
@@ -76,14 +80,40 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 	}
 
 	if !n.isValidAction(inst.Action) {
-		return "", fmt.Errorf("invalid action name %s", inst.Action)
+		return "", fmt.Errorf(
+			"[%s] invalid action name '%s'",
+			n.Desc().Name,
+			inst.Action,
+		)
 	}
 
 	subchain := n.subchainMap[inst.Action]
-	output, err := subchain.Execute(ctx, in.Derive(inst.Params))
-	if err != nil {
-		return "", fmt.Errorf("unable to run subchain: %w", err)
+
+	if in.Debug() {
+		node.LogNode(
+			n,
+			"13",
+			"received: %s\nexecuting subchain: %s",
+			in.Input(),
+			subchain.Desc().Name,
+		)
 	}
 
+	output, err := subchain.Execute(
+		ctx,
+		in.
+			Derive(inst.Params).
+			WithOptions(n.Options()...),
+	)
+	if err != nil {
+		return "", fmt.Errorf(
+			"[%s] unable to run subchain '%s': %w",
+			n.Desc().Name,
+			subchain.Desc().Name,
+			err,
+		)
+	}
+
+	// return output, nil
 	return n.Prompt.Execute(ctx, in.Derive(output))
 }

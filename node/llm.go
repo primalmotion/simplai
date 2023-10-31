@@ -13,22 +13,12 @@ type LLM struct {
 	options []llm.Option
 }
 
-func NewLLM(llm llm.LLM, options ...llm.Option) *LLM {
+func NewLLM(desc Desc, llm llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
-		BaseNode: New().WithName("llm").(*BaseNode),
+		BaseNode: New(desc),
 		llm:      llm,
 		options:  options,
 	}
-}
-
-func (n *LLM) WithName(name string) Node {
-	n.BaseNode.WithName(name)
-	return n
-}
-
-func (n *LLM) WithDescription(desc string) Node {
-	n.BaseNode.WithDescription(desc)
-	return n
 }
 
 func (n *LLM) WithPreHook(h PreHook) Node {
@@ -43,10 +33,11 @@ func (n *LLM) WithPostHook(h PostHook) Node {
 
 func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
-	output, err := n.llm.Infer(ctx,
-		input.Input(),
-		append(n.options, input.Options()...)...,
-	)
+	opts := append(n.options, input.Options()...)
+	if input.Debug() {
+		opts = append(opts, llm.OptionDebug(true))
+	}
+	output, err := n.llm.Infer(ctx, input.Input(), opts...)
 	if err != nil {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}

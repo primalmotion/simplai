@@ -3,6 +3,8 @@ package node
 import (
 	"context"
 	"fmt"
+
+	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
 type Chain struct {
@@ -10,7 +12,7 @@ type Chain struct {
 	nodes []Node
 }
 
-func NewChain(nodes ...Node) *Chain {
+func NewChain(desc Desc, nodes ...Node) *Chain {
 
 	for i, n := range nodes {
 		if len(nodes) > i+1 && nodes[i+1] != nil {
@@ -19,19 +21,9 @@ func NewChain(nodes ...Node) *Chain {
 	}
 
 	return &Chain{
-		BaseNode: New().WithName("chain").(*BaseNode),
+		BaseNode: New(desc),
 		nodes:    nodes,
 	}
-}
-
-func (n *Chain) WithName(name string) Node {
-	n.BaseNode.WithName(name)
-	return n
-}
-
-func (n *Chain) WithDescription(desc string) Node {
-	n.BaseNode.WithDescription(desc)
-	return n
 }
 
 func (n *Chain) WithPreHook(h PreHook) Node {
@@ -46,9 +38,18 @@ func (n *Chain) WithPostHook(h PostHook) Node {
 
 func (c *Chain) Execute(ctx context.Context, input Input) (string, error) {
 
+	if input.Debug() {
+		render.Box(fmt.Sprintf("[%s]", c.desc.Name), "3")
+	}
+
 	output, err := c.nodes[0].Execute(ctx, input)
 	if err != nil {
-		return "", fmt.Errorf("unable to execute chained node: %w", err)
+		return "", fmt.Errorf(
+			"[%s] unable to execute node '%s': %w",
+			c.desc.Name,
+			c.nodes[0].Desc().Name,
+			err,
+		)
 	}
 
 	return c.BaseNode.Execute(ctx, input.Derive(output))

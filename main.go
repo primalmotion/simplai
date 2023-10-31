@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"git.sr.ht/~primalmotion/simplai/llm/models/mistral"
 	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
@@ -36,53 +37,78 @@ func main() {
 	)
 
 	debugMode := true
-	printPreHook := func(n node.Node, in node.Input) (node.Input, error) {
-		if debugMode {
-			render.Box(fmt.Sprintf("[%s]\n%s", n.Name(), in.Input()), "4")
-		}
-		return in, nil
-	}
+	// printPreHook := func(n node.Node, in node.Input) (node.Input, error) {
+	// 	if debugMode {
+	// 		render.Box(fmt.Sprintf("[%s]\n%s", n.Desc().Name, in.Input()), "4")
+	// 	}
+	// 	return in, nil
+	// }
 
 	// this one needs state
 	// it's an ugly array for now.
 	memstorage := []string{}
 
 	summarizerChain := node.NewChain(
-		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
-		prompt.NewSummarizer().WithPreHook(printPreHook),
-		node.NewLLM(llmmodel),
+		node.Desc{Name: "chain:summarizer"},
+		mistral.NewChatMemory().WithStorage(&memstorage),
+		prompt.NewSummarizer(),
+		mistral.NewLLM(llmmodel),
 	)
 
 	storytellerChain := node.NewChain(
-		prompt.NewStoryTeller().WithPreHook(printPreHook),
-		node.NewLLM(llmmodel),
+		node.Desc{Name: "chain:storytelling"},
+		prompt.NewStoryTeller(),
+		mistral.NewLLM(llmmodel),
 	)
 
 	searxChain := node.NewChain(
-		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
-		prompt.NewSearxSearch("https://search.inframonde.me").WithPreHook(printPreHook),
-		node.NewLLM(llmmodel),
+		node.Desc{Name: "chain:search"},
+		mistral.NewChatMemory().WithStorage(&memstorage),
+		prompt.NewSearxSearch("https://search.inframonde.me"),
+		mistral.NewLLM(llmmodel),
+	)
+
+	conversationChain := node.NewChain(
+		node.Desc{Name: "chain:conversation"},
+		mistral.NewChatMemory().WithStorage(&memstorage),
+		prompt.NewConversation(),
+		mistral.NewLLM(llmmodel),
 	)
 
 	routerChain := node.NewChain(
-		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
-		node.NewChain(
-			prompt.NewClassifier(
-				prompt.NewStoryTeller(),
-				prompt.NewSummarizer(),
-				prompt.NewSearxSearch("https://search.inframonde.me"),
-			).WithPreHook(printPreHook),
-			node.NewLLM(llmmodel),
-		),
+		node.Desc{Name: "chain:root"},
 
-		node.NewChain(
-			prompt.NewRouter(
-				prompt.NewStoryTeller(),
-				prompt.NewSummarizer(),
-				prompt.NewSearxSearch("https://search.inframonde.me"),
-			).WithPreHook(printPreHook),
-			node.NewLLM(llmmodel),
+		mistral.NewChatMemory().WithStorage(&memstorage),
+
+		// node.NewChain(
+		// node.Desc{Name: "chain:root:classifier"},
+		prompt.NewClassifier(
+			prompt.ConversationDesc,
+			prompt.StoryTellerDesc,
+			prompt.SummarizerDesc,
+			prompt.SearxSearchDesc,
 		),
+		mistral.NewLLM(llmmodel),
+		// ),
+
+		// node.NewChain(
+		// 	node.Desc{Name: "chain:root:executor"},
+		prompt.NewRouter(
+			prompt.NewConversation(),
+			prompt.NewStoryTeller(),
+			prompt.NewSummarizer(),
+			prompt.NewSearxSearch("https://search.inframonde.me"),
+		),
+		// node.NewFunc(
+		// 	node.Desc{Name: "debug"},
+		// 	func(ctx context.Context, in node.Input, n node.Node) (string, error) {
+		//
+		// 		// fmt.Println("in.INput", in.Input())
+		// 		fmt.Println("in.Options", n.Desc().Name, "-->", in.Options())
+		// 		return in.Input(), nil
+		// 	}),
+		mistral.NewLLM(llmmodel),
+		// ),
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -128,15 +154,13 @@ func main() {
 
 		if ch == nil {
 			llmInput = node.NewInput(input)
-			ch = node.NewChain(
-				node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
-				prompt.NewConversation().WithPreHook(printPreHook),
-				node.NewLLM(llmmodel),
-			)
+			ch = conversationChain
+			// llmInput = node.NewInput(input)
+			// ch = routerChain
 		}
 
 		ctx := context.Background()
-		output, err := ch.Execute(ctx, llmInput)
+		output, err := ch.Execute(ctx, llmInput.WithDebug(debugMode))
 		if err != nil {
 			render.Box(err.Error(), "1")
 			continue

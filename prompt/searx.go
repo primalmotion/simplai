@@ -23,6 +23,11 @@ RESULTS:
 
 SUMMARY:`
 
+var SearxSearchDesc = node.Desc{
+	Name:        "search",
+	Description: "used to summarize some text, URL or document.",
+}
+
 type searxTrimmedResponse struct {
 	Results []struct {
 		Content  string  `json:"content"`
@@ -45,22 +50,11 @@ func NewSearxSearch(api string) *SearxSearch {
 		api:    api,
 		client: client,
 		Prompt: node.NewPrompt(
+			SearxSearchDesc,
 			searxTemplate,
 			llm.OptionMaxTokens(2048),
-		).
-			WithName("search").
-			WithDescription("used to summarize some text, URL or document.").(*node.Prompt),
+		),
 	}
-}
-
-func (n *SearxSearch) WithName(name string) node.Node {
-	n.Prompt.WithName(name)
-	return n
-}
-
-func (n *SearxSearch) WithDescription(desc string) node.Node {
-	n.Prompt.WithDescription(desc)
-	return n
 }
 
 func (n *SearxSearch) WithPreHook(h node.PreHook) node.Node {
