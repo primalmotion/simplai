@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -13,6 +14,8 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
 	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/quick"
 	"github.com/theckman/yacspin"
 )
 
@@ -102,7 +105,11 @@ func main() {
 		mistral.NewLLM(llmmodel),
 		updateSpinner(spinner, "routing"),
 		prompt.NewRouter(
-			prompt.NewConversation(),
+			node.NewChainWithName(
+				"conversation",
+				prompt.NewConversation(),
+				mistral.NewLLM(llmmodel),
+			),
 			node.NewChainWithName(
 				"storyteller",
 				updateSpinner(spinner, "writing story"),
@@ -190,7 +197,15 @@ func main() {
 			continue
 		}
 
-		render.Box(output, "12")
+		buf := &bytes.Buffer{}
+
+		if lex := lexers.Analyse(output); lex == nil {
+			buf.WriteString(output)
+		} else {
+			quick.Highlight(buf, output, lex.Config().Name, "terminal", "")
+		}
+
+		render.Box(buf.String(), "12")
 		fmt.Print("> ")
 	}
 }

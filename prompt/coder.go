@@ -18,14 +18,14 @@ particularly proficient in Go, Python, Bash and Javascript.
 If you are are to code in Java, just respond "I don't code in that language and
 you shouldn't too".
 
-When you are finished, you MUST write a new single line containing only "EOF".
+When you are finished, you MUST write a new single line containing only "<|EOF|>".
 
 # EXAMPLE
 
 INPUT: write a hello world in bash
 CODE: #!/bin/bash
 echo "hello world"
-EOF
+<|EOF|>
 
 # PROCEED
 
@@ -41,7 +41,7 @@ func NewCoder() *Coder {
 		Prompt: node.NewPrompt(
 			CoderDesc,
 			coderTemplate,
-			llm.OptionStop("EOF"),
+			llm.OptionStop("<|EOF|>"),
 		),
 	}
 }
