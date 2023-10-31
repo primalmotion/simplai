@@ -26,6 +26,7 @@ SUMMARY:`
 var SearxSearchDesc = node.Desc{
 	Name:        "search",
 	Description: "used to summarize some text, URL or document.",
+	Parameters:  "the subject to search for",
 }
 
 type searxTrimmedResponse struct {

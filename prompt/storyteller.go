@@ -7,6 +7,7 @@ import (
 var StoryTellerDesc = node.Desc{
 	Name:        "storyteller",
 	Description: "write something, invent a story, tell a tale or a lie.",
+	Parameters:  "The subject of the story to write",
 }
 
 const storyTellerTemplate = `Tell a captivating short story about {{ .Input }}.

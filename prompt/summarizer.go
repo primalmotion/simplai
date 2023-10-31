@@ -14,6 +14,7 @@ import (
 var SummarizerDesc = node.Desc{
 	Name:        "summarizer",
 	Description: "summarize some text, URL or document.",
+	Parameters:  "either the full text to summarize or a valid URL",
 }
 
 const summarizerTemplate = `You are extremely good at providing precise 3-4 sentence summary

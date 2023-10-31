@@ -85,14 +85,12 @@ func (c *ChatMemory) Execute(ctx context.Context, input Input) (string, error) {
 		WithKeyValue("username", c.username).
 		WithKeyValue("history", c.History())
 
-	c.AddUserMessage(input.Input())
-
 	output, err := c.BaseNode.Execute(ctx, input)
 	if err != nil {
-		// *c.history = (*c.history)[:len(*c.history)-1]
 		return "", err
 	}
 
+	c.AddUserMessage(input.Input())
 	c.AddBotMessage(trim.Output(output))
 
 	return output, nil

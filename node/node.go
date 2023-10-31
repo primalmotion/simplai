@@ -10,6 +10,7 @@ import (
 type Desc struct {
 	Name        string
 	Description string
+	Parameters  string
 }
 
 func LogNode(n Node, color string, format string, kwargs ...any) { // lulz
