@@ -46,9 +46,12 @@ Here is some output example:
 	INPUT: compose a song about bananas
 	ACTION: {"action":"compose","params":"bananas"}
 
+	INPUT: jump over the bridge
+	ACTION: {"action":"","params":"jump over the bridge"}
+
 If the input not explicitely map to any known actions, you MUST exactly write:
 
-	ACTION: {"action":""}
+ACTION: {"action":"","params":"{{.Input}}"}
 
 It is VERY IMPORTANT you remember that you MUST follow this protocol no matter
 what, in all circumstances.

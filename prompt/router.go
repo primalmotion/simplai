@@ -23,9 +23,10 @@ type routerInstruction struct {
 type Router struct {
 	*node.Prompt
 	subchainMap map[string]node.Node
+	defaultNode node.Node
 }
 
-func NewRouter(subchains ...node.Node) *Router {
+func NewRouter(defaultNode node.Node, subchains ...node.Node) *Router {
 
 	subchainMap := map[string]node.Node{}
 	for _, s := range subchains {
@@ -34,6 +35,7 @@ func NewRouter(subchains ...node.Node) *Router {
 
 	return &Router{
 		subchainMap: subchainMap,
+		defaultNode: defaultNode,
 		Prompt: node.NewPrompt(
 			RouterDesc,
 			routerTemplate,
@@ -41,11 +43,11 @@ func NewRouter(subchains ...node.Node) *Router {
 	}
 }
 
-func (n *Router) Chain(next node.Node) node.Node {
+func (n *Router) Chain(next node.Node) {
 	for _, s := range n.subchainMap {
 		s.Chain(next)
 	}
-	return next
+	n.defaultNode.Chain(next)
 }
 
 func (n *Router) WithPreHook(h node.PreHook) node.Node {
@@ -87,7 +89,12 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 		)
 	}
 
-	subchain := n.subchainMap[inst.Action]
+	var subchain node.Node
+	if inst.Action != "" {
+		subchain = n.subchainMap[inst.Action]
+	} else {
+		subchain = n.defaultNode
+	}
 
 	if in.Debug() {
 		node.LogNode(
@@ -99,12 +106,7 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 		)
 	}
 
-	output, err := subchain.Execute(
-		ctx,
-		in.
-			Derive(inst.Params).
-			WithOptions(n.Options()...),
-	)
+	output, err := subchain.Execute(ctx, in.Derive(inst.Params).WithOptions(n.Options()...))
 	if err != nil {
 		return "", fmt.Errorf(
 			"[%s] unable to run subchain '%s': %w",

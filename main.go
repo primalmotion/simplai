@@ -83,7 +83,6 @@ func main() {
 		// node.NewChain(
 		// node.Desc{Name: "chain:root:classifier"},
 		prompt.NewClassifier(
-			prompt.ConversationDesc,
 			prompt.StoryTellerDesc,
 			prompt.SummarizerDesc,
 			prompt.SearxSearchDesc,

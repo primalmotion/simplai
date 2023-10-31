@@ -25,7 +25,7 @@ Hello how may I help you?
 var ConversationDesc = node.Desc{
 	Name:        "conversation",
 	Description: "Used to have a general conversation with the user",
-	Parameters:  "Full, unmodified, unsummarized user input",
+	Parameters:  "the user INPUT, as is. You must not modify or summarize it",
 }
 
 type Conversation struct {

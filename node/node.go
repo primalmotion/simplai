@@ -25,7 +25,7 @@ type PostHook func(Node, string) (string, error)
 
 type Node interface {
 	Desc() Desc
-	Chain(Node) Node
+	Chain(Node)
 	Next() Node
 	WithPreHook(PreHook) Node
 	WithPostHook(PostHook) Node
@@ -49,12 +49,11 @@ func (n *BaseNode) Desc() Desc {
 	return n.desc
 }
 
-func (n *BaseNode) Chain(next Node) Node {
+func (n *BaseNode) Chain(next Node) {
 	if n.next != nil {
 		panic(fmt.Sprintf("node %s is already chained to %s", n.Desc().Name, n.next.Desc().Name))
 	}
 	n.next = next
-	return next
 }
 
 func (n *BaseNode) Next() Node {
