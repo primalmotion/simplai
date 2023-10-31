@@ -196,6 +196,7 @@ func main() {
 		}
 		if err != nil {
 			render.Box(err.Error(), "1")
+			fmt.Print("> ")
 			continue
 		}
 
