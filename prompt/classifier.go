@@ -76,7 +76,7 @@ Pay attention to the action description if it details what the params should be.
 INPUT: {{ .Input }}
 ACTION:`
 
-var ClassifierDesc = node.Info{
+var ClassifierInfo = node.Info{
 	Name:        "classifier",
 	Description: "used to classify the intent of the user.",
 }
@@ -96,7 +96,7 @@ func NewClassifier(subchains ...node.Info) *Classifier {
 	return &Classifier{
 		subchainMap: subchainMap,
 		Prompt: node.NewPrompt(
-			ClassifierDesc,
+			ClassifierInfo,
 			classifierTemplate,
 			llm.OptionStop("\n"),
 			// llm.OptionMaxTokens(100),

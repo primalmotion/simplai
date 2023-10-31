@@ -22,7 +22,7 @@ RESULTS:
 
 SUMMARY:`
 
-var SearxSearchDesc = node.Info{
+var SearxSearchInfo = node.Info{
 	Name:        "search",
 	Description: "used to summarize some text, URL or document.",
 	Parameters:  "the subject to search for",
@@ -50,7 +50,7 @@ func NewSearxSearch(api string) *SearxSearch {
 		api:    api,
 		client: client,
 		Prompt: node.NewPrompt(
-			SearxSearchDesc,
+			SearxSearchInfo,
 			searxTemplate,
 		),
 	}

@@ -10,7 +10,7 @@ import (
 
 const routerTemplate = `{{.Input}}`
 
-var RouterDesc = node.Info{
+var RouterInfo = node.Info{
 	Name:        "router",
 	Description: "route the input to a particular chain.",
 }
@@ -37,7 +37,7 @@ func NewRouter(defaultNode node.Node, subchains ...node.Node) *Router {
 		subchainMap: subchainMap,
 		defaultNode: defaultNode,
 		Prompt: node.NewPrompt(
-			RouterDesc,
+			RouterInfo,
 			routerTemplate,
 		),
 	}

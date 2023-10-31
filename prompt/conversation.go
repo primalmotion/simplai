@@ -22,7 +22,7 @@ Hello how may I help you?
 {{ .Get "botname" }}
 `
 
-var ConversationDesc = node.Info{
+var ConversationInfo = node.Info{
 	Name:        "conversation",
 	Description: "Used to have a general conversation with the user",
 	Parameters:  "the user INPUT, as is. You must not modify or summarize it",
@@ -36,7 +36,7 @@ type Conversation struct {
 func NewConversation() *Conversation {
 	return &Conversation{
 		Prompt: node.NewPrompt(
-			ConversationDesc,
+			ConversationInfo,
 			conversationTemplate,
 		),
 	}

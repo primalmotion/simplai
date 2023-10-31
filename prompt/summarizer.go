@@ -11,7 +11,7 @@ import (
 	readability "github.com/go-shiori/go-readability"
 )
 
-var SummarizerDesc = node.Info{
+var SummarizerInfo = node.Info{
 	Name:        "summarizer",
 	Description: "summarize some text, URL or document.",
 	Parameters:  "either the full text to summarize or a valid URL",
@@ -31,7 +31,7 @@ type Summarizer struct {
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
 		Prompt: node.NewPrompt(
-			SummarizerDesc,
+			SummarizerInfo,
 			summarizerTemplate,
 		),
 	}

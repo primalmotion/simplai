@@ -97,10 +97,10 @@ func main() {
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		updateSpinner(spinner, "classifying"),
 		prompt.NewClassifier(
-			prompt.StoryTellerDesc,
-			prompt.SummarizerDesc,
-			prompt.SearxSearchDesc,
-			prompt.CoderDesc,
+			prompt.StoryTellerInfo,
+			prompt.SummarizerInfo,
+			prompt.SearxSearchInfo,
+			prompt.CoderInfo,
 		),
 		updateSpinner(spinner, "understanding"),
 		mistral.NewLLM(llmmodel),
@@ -108,6 +108,7 @@ func main() {
 		prompt.NewRouter(
 			node.NewChainWithName(
 				"conversation",
+				updateSpinner(spinner, "thinking"),
 				prompt.NewConversation(),
 				mistral.NewLLM(llmmodel),
 			),

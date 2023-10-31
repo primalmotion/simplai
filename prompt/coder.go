@@ -5,7 +5,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-var CoderDesc = node.Info{
+var CoderInfo = node.Info{
 	Name:        "coder",
 	Description: "write some code, in various programming language",
 	Parameters:  "The detailed summary of the code to write",
@@ -39,7 +39,7 @@ type Coder struct {
 func NewCoder() *Coder {
 	return &Coder{
 		Prompt: node.NewPrompt(
-			CoderDesc,
+			CoderInfo,
 			coderTemplate,
 			llm.OptionStop("<|EOF|>", "\nINPUT"),
 		),
