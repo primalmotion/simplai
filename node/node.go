@@ -20,9 +20,6 @@ func LogNode(n Node, color string, format string, kwargs ...any) { // lulz
 	)
 }
 
-type PreHook func(Node, Input) (Input, error)
-type PostHook func(Node, string) (string, error)
-
 type Node interface {
 	Info() Info
 	Chain(Node)
