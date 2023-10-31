@@ -33,7 +33,7 @@ func matchPrefix(input string, prefix string) (bool, string) {
 
 func updateSpinner(spinner *yacspin.Spinner, message string) node.Node {
 	return node.NewFunc(
-		node.Desc{Name: "debug"},
+		node.Info{Name: "debug"},
 		func(ctx context.Context, in node.Input, err node.Node) (string, error) {
 			spinner.Message(message + "...")
 			return in.Input(), nil
@@ -78,7 +78,8 @@ func main() {
 		mistral.NewLLM(llmmodel),
 	)
 
-	searxChain := node.NewChainWithName("chain:search",
+	searxChain := node.NewChainWithName(
+		"chain:search",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSearxSearch("https://search.inframonde.me"),
 		mistral.NewLLM(llmmodel),

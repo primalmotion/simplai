@@ -76,19 +76,19 @@ Pay attention to the action description if it details what the params should be.
 INPUT: {{ .Input }}
 ACTION:`
 
-var ClassifierDesc = node.Desc{
+var ClassifierDesc = node.Info{
 	Name:        "classifier",
 	Description: "used to classify the intent of the user.",
 }
 
 type Classifier struct {
 	*node.Prompt
-	subchainMap map[string]node.Desc
+	subchainMap map[string]node.Info
 }
 
-func NewClassifier(subchains ...node.Desc) *Classifier {
+func NewClassifier(subchains ...node.Info) *Classifier {
 
-	subchainMap := map[string]node.Desc{}
+	subchainMap := map[string]node.Info{}
 	for _, s := range subchains {
 		subchainMap[s.Name] = s
 	}

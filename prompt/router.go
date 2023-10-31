@@ -10,7 +10,7 @@ import (
 
 const routerTemplate = `{{.Input}}`
 
-var RouterDesc = node.Desc{
+var RouterDesc = node.Info{
 	Name:        "router",
 	Description: "route the input to a particular chain.",
 }
@@ -30,7 +30,7 @@ func NewRouter(defaultNode node.Node, subchains ...node.Node) *Router {
 
 	subchainMap := map[string]node.Node{}
 	for _, s := range subchains {
-		subchainMap[s.Desc().Name] = s
+		subchainMap[s.Info().Name] = s
 	}
 
 	return &Router{
@@ -84,7 +84,7 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 	if !n.isValidAction(inst.Action) {
 		return "", fmt.Errorf(
 			"[%s] invalid action name '%s'",
-			n.Desc().Name,
+			n.Info().Name,
 			inst.Action,
 		)
 	}
@@ -102,7 +102,7 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 			"13",
 			"received: %s\nexecuting subchain: %s",
 			in.Input(),
-			subchain.Desc().Name,
+			subchain.Info().Name,
 		)
 	}
 
@@ -110,8 +110,8 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf(
 			"[%s] unable to run subchain '%s': %w",
-			n.Desc().Name,
-			subchain.Desc().Name,
+			n.Info().Name,
+			subchain.Info().Name,
 			err,
 		)
 	}

@@ -7,7 +7,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
-type Desc struct {
+type Info struct {
 	Name        string
 	Description string
 	Parameters  string
@@ -15,7 +15,7 @@ type Desc struct {
 
 func LogNode(n Node, color string, format string, kwargs ...any) { // lulz
 	render.Box(
-		fmt.Sprintf("[%s]\n\n", n.Desc().Name)+fmt.Sprintf(format, kwargs...),
+		fmt.Sprintf("[%s]\n\n", n.Info().Name)+fmt.Sprintf(format, kwargs...),
 		color,
 	)
 }
@@ -24,7 +24,7 @@ type PreHook func(Node, Input) (Input, error)
 type PostHook func(Node, string) (string, error)
 
 type Node interface {
-	Desc() Desc
+	Info() Info
 	Chain(Node)
 	Next() Node
 	WithPreHook(PreHook) Node
@@ -36,22 +36,22 @@ type BaseNode struct {
 	next     Node
 	preHook  PreHook
 	postHook PostHook
-	desc     Desc
+	desc     Info
 }
 
-func New(desc Desc) *BaseNode {
+func New(desc Info) *BaseNode {
 	return &BaseNode{
 		desc: desc,
 	}
 }
 
-func (n *BaseNode) Desc() Desc {
+func (n *BaseNode) Info() Info {
 	return n.desc
 }
 
 func (n *BaseNode) Chain(next Node) {
 	if n.next != nil {
-		panic(fmt.Sprintf("node %s is already chained to %s", n.Desc().Name, n.next.Desc().Name))
+		panic(fmt.Sprintf("node %s is already chained to %s", n.Info().Name, n.next.Info().Name))
 	}
 	n.next = next
 }

@@ -22,7 +22,7 @@ Hello how may I help you?
 {{ .Get "botname" }}
 `
 
-var ConversationDesc = node.Desc{
+var ConversationDesc = node.Info{
 	Name:        "conversation",
 	Description: "Used to have a general conversation with the user",
 	Parameters:  "the user INPUT, as is. You must not modify or summarize it",

@@ -4,7 +4,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
-var StoryTellerDesc = node.Desc{
+var StoryTellerDesc = node.Info{
 	Name:        "storyteller",
 	Description: "write something, invent a story, tell a tale or a lie.",
 	Parameters:  "The subject of the story to write",

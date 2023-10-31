@@ -13,7 +13,7 @@ type LLM struct {
 	options []llm.Option
 }
 
-func NewLLM(desc Desc, llm llm.LLM, options ...llm.Option) *LLM {
+func NewLLM(desc Info, llm llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
 		BaseNode: New(desc),
 		llm:      llm,

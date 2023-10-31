@@ -22,7 +22,7 @@ RESULTS:
 
 SUMMARY:`
 
-var SearxSearchDesc = node.Desc{
+var SearxSearchDesc = node.Info{
 	Name:        "search",
 	Description: "used to summarize some text, URL or document.",
 	Parameters:  "the subject to search for",

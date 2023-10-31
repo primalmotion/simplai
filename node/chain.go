@@ -13,10 +13,10 @@ type Chain struct {
 }
 
 func NewChainWithName(name string, nodes ...Node) *Chain {
-	return NewChain(Desc{Name: name}, nodes...)
+	return NewChain(Info{Name: name}, nodes...)
 }
 
-func NewChain(desc Desc, nodes ...Node) *Chain {
+func NewChain(desc Info, nodes ...Node) *Chain {
 
 	for i, n := range nodes {
 		if len(nodes) > i+1 && nodes[i+1] != nil {
@@ -51,7 +51,7 @@ func (c *Chain) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf(
 			"[%s] unable to execute node '%s': %w",
 			c.desc.Name,
-			c.nodes[0].Desc().Name,
+			c.nodes[0].Info().Name,
 			err,
 		)
 	}

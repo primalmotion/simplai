@@ -10,7 +10,7 @@ type Func struct {
 	*BaseNode
 }
 
-func NewFunc(desc Desc, executor func(context.Context, Input, Node) (string, error)) *Func {
+func NewFunc(desc Info, executor func(context.Context, Input, Node) (string, error)) *Func {
 	return &Func{
 		executor: executor,
 		BaseNode: New(desc),
@@ -20,7 +20,7 @@ func NewFunc(desc Desc, executor func(context.Context, Input, Node) (string, err
 func (n *Func) Execute(ctx context.Context, input Input) (string, error) {
 	out, err := n.executor(ctx, input, n)
 	if err != nil {
-		return "", fmt.Errorf("[%s] unable to call executor func: %w", n.Desc().Name, err)
+		return "", fmt.Errorf("[%s] unable to call executor func: %w", n.Info().Name, err)
 	}
 
 	return n.BaseNode.Execute(ctx, input.Derive(out))

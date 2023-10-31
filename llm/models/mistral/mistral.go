@@ -7,7 +7,7 @@ import (
 
 func NewLLM(llm llm.LLM, options ...llm.Option) *node.LLM {
 	return node.NewLLM(
-		node.Desc{
+		node.Info{
 			Name: "mistral-llm",
 		},
 		llm,
@@ -17,7 +17,7 @@ func NewLLM(llm llm.LLM, options ...llm.Option) *node.LLM {
 
 func NewChatMemory() *node.ChatMemory {
 	return node.NewChatMemory(
-		node.Desc{
+		node.Info{
 			Name: "mistral-memory",
 		},
 		"<|system|>",
