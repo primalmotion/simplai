@@ -96,6 +96,7 @@ func main() {
 			prompt.StoryTellerDesc,
 			prompt.SummarizerDesc,
 			prompt.SearxSearchDesc,
+			prompt.CoderDesc,
 		),
 		updateSpinner(spinner, "understanding"),
 		mistral.NewLLM(llmmodel),
@@ -106,19 +107,27 @@ func main() {
 				"storyteller",
 				updateSpinner(spinner, "writing story"),
 				prompt.NewStoryTeller(),
+				mistral.NewLLM(llmmodel),
 			),
 			node.NewChainWithName(
 				"summarizer",
 				updateSpinner(spinner, "summarizing"),
 				prompt.NewSummarizer(),
+				mistral.NewLLM(llmmodel),
 			),
 			node.NewChainWithName(
 				"search",
 				updateSpinner(spinner, "searching the web"),
 				prompt.NewSearxSearch("https://search.inframonde.me"),
+				mistral.NewLLM(llmmodel),
+			),
+			node.NewChainWithName(
+				"coder",
+				updateSpinner(spinner, "coding"),
+				prompt.NewCoder(),
+				mistral.NewLLM(llmmodel),
 			),
 		),
-		mistral.NewLLM(llmmodel),
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)

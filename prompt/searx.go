@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
@@ -53,7 +52,6 @@ func NewSearxSearch(api string) *SearxSearch {
 		Prompt: node.NewPrompt(
 			SearxSearchDesc,
 			searxTemplate,
-			llm.OptionMaxTokens(2048),
 		),
 	}
 }
