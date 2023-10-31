@@ -41,7 +41,7 @@ func NewCoder() *Coder {
 		Prompt: node.NewPrompt(
 			CoderDesc,
 			coderTemplate,
-			llm.OptionStop("<|EOF|>"),
+			llm.OptionStop("<|EOF|>", "\nINPUT"),
 		),
 	}
 }

@@ -202,7 +202,7 @@ func main() {
 		if lex := lexers.Analyse(output); lex == nil {
 			buf.WriteString(output)
 		} else {
-			quick.Highlight(buf, output, lex.Config().Name, "terminal", "")
+			quick.Highlight(buf, output, lex.Config().Name, "terminal256", "gruvbox")
 		}
 
 		render.Box(buf.String(), "12")
