@@ -117,7 +117,6 @@ func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error
 
 	return n.Prompt.Execute(
 		ctx,
-		node.NewInput(strings.Join(output, "\n\n")).
-			WithKeyValue("userquery", query),
+		in.Derive(strings.Join(output, "\n\n")).WithKeyValue("userquery", query),
 	)
 }

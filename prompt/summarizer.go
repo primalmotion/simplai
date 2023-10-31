@@ -67,5 +67,5 @@ func (s *Summarizer) Execute(ctx context.Context, in node.Input) (string, error)
 		text = text[:2048]
 	}
 
-	return s.Prompt.Execute(ctx, node.NewInput(text))
+	return s.Prompt.Execute(ctx, in.Derive(text))
 }

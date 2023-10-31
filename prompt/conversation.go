@@ -2,7 +2,6 @@ package prompt
 
 import (
 	"context"
-	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -29,17 +28,9 @@ type Conversation struct {
 	conversation *node.ChatMemory
 }
 
-func NewConversation(c *node.ChatMemory) *Conversation {
+func NewConversation() *Conversation {
 	return &Conversation{
-		conversation: c,
-		Prompt: node.NewPrompt(
-			conversationTemplate,
-			llm.OptionStop(
-				fmt.Sprintf("%s", c.System()),
-				fmt.Sprintf("%s", c.BotName()),
-				fmt.Sprintf("%s", c.UserName()),
-			),
-		).
+		Prompt: node.NewPrompt(conversationTemplate).
 			WithName("conversation").
 			WithDescription("Used to have a general conversation with the user.").(*node.Prompt),
 	}
@@ -66,5 +57,11 @@ func (n *Conversation) WithPostHook(h node.PostHook) node.Node {
 }
 
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
-	return n.Prompt.Execute(ctx, in)
+	return n.Prompt.Execute(ctx, in.WithOptions(
+		llm.OptionStop(
+			in.Get("username").(string),
+			in.Get("botname").(string),
+			in.Get("system").(string),
+		),
+	))
 }

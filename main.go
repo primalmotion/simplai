@@ -15,11 +15,11 @@ import (
 
 func matchPrefix(input string, prefix string) (bool, string) {
 
-	if strings.HasPrefix(input, fmt.Sprintf("%s ", prefix)) {
+	if strings.HasPrefix(input, fmt.Sprintf("%s", prefix)) {
 		return true, strings.TrimSpace(
 			strings.TrimPrefix(
 				input,
-				fmt.Sprintf("%s ", prefix),
+				fmt.Sprintf("%s", prefix),
 			),
 		)
 	}
@@ -44,13 +44,11 @@ func main() {
 	}
 
 	// this one needs state
-	memory := node.NewChatMemory(
-		"<|system|>",
-		"<|assistant|>",
-		"<|user|>",
-	)
+	// it's an ugly array for now.
+	memstorage := []string{}
 
 	summarizerChain := node.NewChain(
+		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
 		prompt.NewSummarizer().WithPreHook(printPreHook),
 		node.NewLLM(llmmodel),
 	)
@@ -61,13 +59,13 @@ func main() {
 	)
 
 	searxChain := node.NewChain(
-		memory,
+		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
 		prompt.NewSearxSearch("https://search.inframonde.me").WithPreHook(printPreHook),
 		node.NewLLM(llmmodel),
 	)
 
 	routerChain := node.NewChain(
-		memory,
+		node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
 		node.NewChain(
 			prompt.NewClassifier(
 				prompt.NewStoryTeller(),
@@ -128,11 +126,11 @@ func main() {
 			ch = routerChain
 		}
 
-		if llmInput == nil || ch == nil {
+		if ch == nil {
 			llmInput = node.NewInput(input)
 			ch = node.NewChain(
-				memory,
-				prompt.NewConversation(memory).WithPreHook(printPreHook),
+				node.NewChatMemory("<|system|>", "<|assistant|>", "<|user|>").WithStorage(&memstorage),
+				prompt.NewConversation().WithPreHook(printPreHook),
 				node.NewLLM(llmmodel),
 			)
 		}

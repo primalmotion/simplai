@@ -13,13 +13,13 @@ import (
 type Prompt struct {
 	*BaseNode
 	template string
-	Options  []llm.Option
+	options  []llm.Option
 }
 
 func NewPrompt(template string, options ...llm.Option) *Prompt {
 	return &Prompt{
 		template: template,
-		Options:  options,
+		options:  options,
 		BaseNode: New(),
 	}
 }
@@ -58,7 +58,8 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to execute template: %w", err)
 	}
 
-	return n.BaseNode.Execute(ctx,
-		NewInput(buf.String(), append(n.Options, input.Options()...)...),
+	return n.BaseNode.Execute(
+		ctx,
+		input.Derive(buf.String()).WithOptions(n.options...),
 	)
 }

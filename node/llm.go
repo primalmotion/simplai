@@ -51,5 +51,5 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
-	return n.BaseNode.Execute(ctx, NewInput(output))
+	return n.BaseNode.Execute(ctx, input.Derive(output))
 }

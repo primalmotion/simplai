@@ -2,46 +2,56 @@ package node
 
 import "git.sr.ht/~primalmotion/simplai/llm"
 
-type Input interface {
-	Input() string
-	Get(key string) any
-	Keys() map[string]any
-	Options() []llm.Option
-
-	WithKeyValue(k string, v any) Input
-}
-
-type input struct {
+type Input struct {
 	keys    map[string]any
 	input   string
 	options []llm.Option
 }
 
 func NewInput(in string, options ...llm.Option) Input {
-	return &input{
+	return Input{
 		input:   in,
 		keys:    map[string]any{},
 		options: options,
 	}
 }
 
-func (i *input) WithKeyValue(k string, v any) Input {
+func (i Input) WithKeyValue(k string, v any) Input {
 	i.keys[k] = v
 	return i
 }
 
-func (i *input) Input() string {
+func (i Input) WithOptions(options ...llm.Option) Input {
+	i.options = append(i.options, options...)
+	return i
+}
+
+func (i Input) Input() string {
 	return i.input
 }
 
-func (i *input) Get(key string) any {
+func (i Input) Get(key string) any {
 	return i.keys[key]
 }
 
-func (i *input) Keys() map[string]any {
+func (i Input) Keys() map[string]any {
 	return i.keys
 }
 
-func (i *input) Options() []llm.Option {
+func (i Input) Options() []llm.Option {
 	return i.options
+}
+
+func (i *Input) Derive(in string) Input {
+
+	nkeys := make(map[string]any, len(i.keys))
+	for k, v := range i.keys {
+		nkeys[k] = v
+	}
+
+	return Input{
+		input:   in,
+		keys:    nkeys,
+		options: append([]llm.Option{}, i.options...),
+	}
 }

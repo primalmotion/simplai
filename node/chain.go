@@ -51,5 +51,5 @@ func (c *Chain) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to execute chained node: %w", err)
 	}
 
-	return c.BaseNode.Execute(ctx, NewInput(output))
+	return c.BaseNode.Execute(ctx, input.Derive(output))
 }

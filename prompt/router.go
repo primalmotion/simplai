@@ -80,10 +80,10 @@ func (n *Router) Execute(ctx context.Context, in node.Input) (string, error) {
 	}
 
 	subchain := n.subchainMap[inst.Action]
-	output, err := subchain.Execute(ctx, node.NewInput(inst.Params))
+	output, err := subchain.Execute(ctx, in.Derive(inst.Params))
 	if err != nil {
 		return "", fmt.Errorf("unable to run subchain: %w", err)
 	}
 
-	return n.Prompt.Execute(ctx, node.NewInput(output))
+	return n.Prompt.Execute(ctx, in.Derive(output))
 }
