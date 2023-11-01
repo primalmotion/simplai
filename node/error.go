@@ -19,5 +19,6 @@ func (e Error) Unwrap() error {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("[%s]: %s", e.N.Info().Name, e.Err)
+	return fmt.Sprintf("node error: %s: %s", e.N.Info().Name, e.Err)
 }
+
