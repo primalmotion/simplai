@@ -58,7 +58,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	}
 
 	if config.Debug {
-		render.Box(vllmreq.String(), "8")
+		render.Box(fmt.Sprintf("[openai-engine-request]\n\n%s", vllmreq), "4")
 	}
 
 	if err := encoder.Encode(vllmreq); err != nil {
@@ -93,7 +93,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	}
 
 	if config.Debug {
-		render.Box(vllmresp.String(), "4")
+		render.Box(fmt.Sprintf("[openai-engine-response]\n\n%s", vllmresp), "4")
 	}
 
 	output := vllmresp.Choices[0].Text

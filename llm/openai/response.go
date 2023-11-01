@@ -1,8 +1,8 @@
 package openai
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 )
 
 // VLLMResponse is the structure describing a VLLM response.
@@ -24,19 +24,11 @@ type response struct {
 }
 
 func (r response) String() string {
-
-	var header = `id: %s
-model: %s
-object: %s
-usage: %s`
-
-	usageBytes, _ := json.Marshal(r.Usage)
-
-	return fmt.Sprintf(
-		header,
-		r.ID,
-		r.Model,
-		r.Object,
-		string(usageBytes),
-	)
+	r.Choices = nil
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(r)
+	return buf.String()
 }

@@ -98,7 +98,7 @@ func NewClassifier(tools ...node.Info) *Classifier {
 			ClassifierInfo,
 			classifierTemplate,
 			llm.OptionStop("\n"),
-			llm.OptionMaxTokens(100),
+			llm.OptionMaxTokens(512),
 		),
 	}
 }

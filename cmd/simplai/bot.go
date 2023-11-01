@@ -79,17 +79,18 @@ func run(
 	}
 
 	debugMode := debug
-	cfg := yacspin.Config{
-		Frequency:       100 * time.Millisecond,
-		Suffix:          " ",
-		CharSet:         yacspin.CharSets[11],
-		SuffixAutoColon: true,
-		ColorAll:        true,
-		Colors:          []string{"fgYellow"},
-		StopColors:      []string{"fgGreen"},
-	}
 
-	spinner, err := yacspin.New(cfg)
+	spinner, err := yacspin.New(
+		yacspin.Config{
+			Frequency:       100 * time.Millisecond,
+			Suffix:          " ",
+			CharSet:         yacspin.CharSets[11],
+			SuffixAutoColon: true,
+			ColorAll:        true,
+			Colors:          []string{"fgYellow"},
+			StopColors:      []string{"fgGreen"},
+		},
+	)
 	if err != nil {
 		return err
 	}

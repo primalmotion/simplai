@@ -1,8 +1,8 @@
 package openai
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 )
 
 // request is the data holding the information to make a
@@ -21,30 +21,12 @@ type request struct {
 }
 
 func (r request) String() string {
+	r.Prompt = ""
 
-	var header = `model: %s
-stop: %v
-max_tokens: %d
-temp: %f
-top_p: %f
-frequency_penalty: %f
-presence_penalty: %f
-logprobs: %d
-logit_bias: %v`
-
-	stopsBytes, _ := json.Marshal(r.Stop)
-	logitBiasBytes, _ := json.Marshal(r.LogitBias)
-
-	return fmt.Sprintf(
-		header,
-		r.Model,
-		string(stopsBytes),
-		r.MaxTokens,
-		r.Temperature,
-		r.TopP,
-		r.FrequencyPenalty,
-		r.PresencePenalty,
-		r.LogProbs,
-		string(logitBiasBytes),
-	)
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(r)
+	return buf.String()
 }
