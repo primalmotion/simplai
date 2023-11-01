@@ -27,6 +27,11 @@ func (i Input) WithLLMOptions(options ...llm.Option) Input {
 	return i
 }
 
+func (i Input) ResetLLMOptions() Input {
+	i.llmOptions = nil
+	return i
+}
+
 func (i Input) Input() string {
 	return i.input
 }

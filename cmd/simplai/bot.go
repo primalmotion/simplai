@@ -132,19 +132,17 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 		"chain:router",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		updateSpinner(spinner, "classifying"),
-		node.NewSubchainWithName("classifier",
-			prompt.NewClassifier(
-				prompt.SummarizerInfo,
-				prompt.SearxSearchInfo,
-				prompt.ConversationInfo,
-				prompt.StoryTellerInfo,
-				prompt.CoderInfo,
-			),
-			mistral.NewLLM(llmmodel),
+		prompt.NewClassifier(
+			prompt.SummarizerInfo,
+			prompt.SearxSearchInfo,
+			prompt.ConversationInfo,
+			prompt.StoryTellerInfo,
+			prompt.CoderInfo,
 		),
+		mistral.NewLLM(llmmodel),
 		updateSpinner(spinner, "routing"),
 		node.NewRouter(
-			node.Info{Name: "Router"},
+			node.Info{Name: "router"},
 			node.RouterSimpleDeciderFunc,
 			node.NewSubchainWithName(
 				prompt.ConversationInfo.Name,

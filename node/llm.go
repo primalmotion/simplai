@@ -36,5 +36,5 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		LogNode(n, "4", output)
 	}
 
-	return n.BaseNode.Execute(ctx, input.Derive(output))
+	return n.BaseNode.Execute(ctx, input.Derive(output).ResetLLMOptions())
 }
