@@ -32,5 +32,9 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
 	}
 
+	if input.Debug() {
+		LogNode(n, "4", output)
+	}
+
 	return n.BaseNode.Execute(ctx, input.Derive(output))
 }

@@ -2,7 +2,6 @@ package prompt
 
 import (
 	"context"
-	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -26,7 +25,7 @@ You also need to pay close attention to the PARAMS, if any, in order to complete
 
 You MUST write a valid JSON output, describing the tools to use in the form:
 
-	{"action":"<tool-name>","parameters":"<required-tool-parameters"}
+	{"name":"<tool-name>","input":"<required-tool-parameters"}
 
 For example, given the tools:
 
@@ -41,30 +40,34 @@ For example, given the tools:
 Here is some output example:
 
 	INPUT: write a hello world program in python
-	ACTION: {"action":"code","params":"hello world in python"}
+	ACTION: {"name":"code","input":"hello world in python"}
 
 	INPUT: compose a song about bananas
-	ACTION: {"action":"compose","params":"bananas"}
+	ACTION: {"name":"compose","input":"bananas"}
 
 	INPUT: jump over the bridge
-	ACTION: {"action":"","params":"jump over the bridge"}
+	ACTION: {"name":"default","input":"jump over the bridge"}
 
-If the input not explicitely map to any known actions, you MUST exactly write:
+If the input not explicitely map to any available tools, you MUST exactly write:
 
-	ACTION: {"action":"","params":"{{.Input}}"}
+	ACTION: {"name":"default","input":"{{.Input}}"}
 
 It is VERY IMPORTANT you remember that you MUST follow this protocol no matter
 what, in all circumstances.
 
 ## AVAILABLE TOOLS
-{{ range $k, $v := .Get "subchains" }}
-	- NAME: {{ $k }}
+{{ range $v := .Get "tools" }}
+	- NAME: {{ $v.Name }}
 	  USAGE: {{ $v.Description }}
 	  PARAMS: {{ $v.Parameters }}
 {{ end }}
 
-Remember: ACTION must only be one of: {{ range $k, $v := .Get "subchains" }}{{$k}}, {{end}}
-Pay attention to the action description if it details what the params should be.
+Remember: ACTION's name must only be one of:
+{{- range $k, $v := .Get "tools" }}
+- {{$v.Name}}
+{{- end}}
+
+Pay attention to the tools description if it details what the input should be.
 
 {{ if (.Get "scratchpad") }}
 ## OBSERVATION
@@ -74,7 +77,7 @@ Pay attention to the action description if it details what the params should be.
 ## PROCEED
 
 INPUT: {{ .Input }}
-ACTION:`
+ACTION: `
 
 var ClassifierInfo = node.Info{
 	Name:        "classifier",
@@ -83,18 +86,13 @@ var ClassifierInfo = node.Info{
 
 type Classifier struct {
 	*node.Prompt
-	subchainMap map[string]node.Info
+	tools []node.Info
 }
 
-func NewClassifier(subchains ...node.Info) *Classifier {
-
-	subchainMap := map[string]node.Info{}
-	for _, s := range subchains {
-		subchainMap[s.Name] = s
-	}
+func NewClassifier(tools ...node.Info) *Classifier {
 
 	return &Classifier{
-		subchainMap: subchainMap,
+		tools: tools,
 		Prompt: node.NewPrompt(
 			ClassifierInfo,
 			classifierTemplate,
@@ -104,21 +102,9 @@ func NewClassifier(subchains ...node.Info) *Classifier {
 	}
 }
 
-func (n *Classifier) subchainNames() []string {
-	out := make([]string, len(n.subchainMap))
-	i := 0
-	for _, v := range n.subchainMap {
-		out[i] = fmt.Sprintf(`{"action": "%s"}`, v.Name)
-		i++
-	}
-	return out
-}
-
 func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string, err error) {
-	return n.Prompt.Execute(
-		ctx,
-		in.
-			WithKeyValue("subchains", n.subchainMap).
-			WithKeyValue("original-user-input", in.Input()),
-	)
+	if len(n.tools) == 0 {
+		return `{"name":"default"}`, nil
+	}
+	return n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
 }

@@ -93,8 +93,19 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 
 	summarizerChain := node.NewSubchainWithName(
 		"chain:summarizer",
-		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSummarizer(),
+		mistral.NewLLM(llmmodel),
+	)
+
+	classifierChain := node.NewSubchainWithName(
+		"chain:classifier",
+		mistral.NewChatMemory().WithStorage(&memstorage),
+		prompt.NewClassifier(
+			prompt.SummarizerInfo,
+			prompt.SearxSearchInfo,
+			prompt.ConversationInfo,
+			prompt.StoryTellerInfo,
+		),
 		mistral.NewLLM(llmmodel),
 	)
 
@@ -106,7 +117,6 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 
 	searxChain := node.NewSubchainWithName(
 		"chain:search",
-		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSearxSearch("https://search.inframonde.me"),
 		mistral.NewLLM(llmmodel),
 	)
@@ -119,45 +129,49 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 	)
 
 	routerChain := node.NewSubchainWithName(
-		"chain:root",
+		"chain:router",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		updateSpinner(spinner, "classifying"),
-		prompt.NewClassifier(
-			prompt.StoryTellerInfo,
-			prompt.SummarizerInfo,
-			prompt.SearxSearchInfo,
-			prompt.CoderInfo,
+		node.NewSubchainWithName("classifier",
+			prompt.NewClassifier(
+				prompt.SummarizerInfo,
+				prompt.SearxSearchInfo,
+				prompt.ConversationInfo,
+				prompt.StoryTellerInfo,
+				prompt.CoderInfo,
+			),
+			mistral.NewLLM(llmmodel),
 		),
-		updateSpinner(spinner, "understanding"),
-		mistral.NewLLM(llmmodel),
 		updateSpinner(spinner, "routing"),
-		prompt.NewRouter(
+		node.NewRouter(
+			node.Info{Name: "Router"},
+			node.RouterSimpleDeciderFunc,
 			node.NewSubchainWithName(
-				"conversation",
+				prompt.ConversationInfo.Name,
 				updateSpinner(spinner, "thinking"),
 				prompt.NewConversation(),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
-				"storyteller",
-				updateSpinner(spinner, "writing story"),
+				prompt.StoryTellerInfo.Name,
+				updateSpinner(spinner, "writing"),
 				prompt.NewStoryTeller(),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
-				"summarizer",
+				prompt.SummarizerInfo.Name,
 				updateSpinner(spinner, "summarizing"),
 				prompt.NewSummarizer(),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
-				"search",
-				updateSpinner(spinner, "searching the web"),
+				prompt.SearxSearchInfo.Name,
+				updateSpinner(spinner, "searching"),
 				prompt.NewSearxSearch("https://search.inframonde.me"),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
-				"coder",
+				prompt.CoderInfo.Name,
 				updateSpinner(spinner, "coding"),
 				prompt.NewCoder(),
 				mistral.NewLLM(llmmodel),
@@ -190,6 +204,11 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 		if ok, in := matchPrefix(input, "/s"); ok {
 			llmInput = node.NewInput(in)
 			ch = summarizerChain
+		}
+
+		if ok, in := matchPrefix(input, "/C"); ok {
+			llmInput = node.NewInput(in)
+			ch = classifierChain
 		}
 
 		if ok, in := matchPrefix(input, "/t"); ok {

@@ -1,12 +1,13 @@
 package prompt
 
 import (
+	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
 var StoryTellerInfo = node.Info{
 	Name:        "storyteller",
-	Description: "use to write something, invent a story, tell a tale or a lie.",
+	Description: "use to invent a story, tell a tale or a lie.",
 	Parameters:  "The subject of the story to write",
 }
 
@@ -36,6 +37,7 @@ func NewStoryTeller() *StoryTeller {
 		Prompt: node.NewPrompt(
 			StoryTellerInfo,
 			storyTellerTemplate,
+			llm.OptionStop(),
 		),
 	}
 }

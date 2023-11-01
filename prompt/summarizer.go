@@ -13,8 +13,8 @@ import (
 
 var SummarizerInfo = node.Info{
 	Name:        "summarizer",
-	Description: "use to summarize some text, URL or document.",
-	Parameters:  "either the full text to summarize or a valid URL",
+	Description: "use to summarize (resume, brief, shorten) some text, URL or document.",
+	Parameters:  "either the full texAt to summarize or a valid URL. if the url schema is missing, assume https://",
 }
 
 const summarizerTemplate = `You are extremely good at providing precise 3-4 sentence summary

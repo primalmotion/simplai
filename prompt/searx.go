@@ -24,7 +24,7 @@ SUMMARY:`
 
 var SearxSearchInfo = node.Info{
 	Name:        "search",
-	Description: "use to access internet and find current informations about people, facts and events",
+	Description: "use to access internet and find (search) current data about people, news, etc...",
 	Parameters:  "the subject to search for",
 }
 
