@@ -1,22 +1,29 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"os"
+	"path"
 	"strings"
-	"time"
 
-	"git.sr.ht/~primalmotion/simplai/llm/models/mistral"
-	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
-	"git.sr.ht/~primalmotion/simplai/prompt"
-	"git.sr.ht/~primalmotion/simplai/utils/render"
-	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/quick"
+	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/theckman/yacspin"
+)
+
+var (
+	cfgFile string
+	cfgName string
+)
+
+var (
+	version = "v0.0.0"
+	commit  = "dev"
 )
 
 func matchPrefix(input string, prefix string) (bool, string) {
@@ -42,173 +49,95 @@ func updateSpinner(spinner *yacspin.Spinner, message string) node.Node {
 
 func main() {
 
-	llmmodel := openai.NewOpenAIAPI(
-		"http://cruncher.lan:8000/v1",
-		"HuggingFaceH4/zephyr-7b-beta",
-		0.0,
-	)
+	cobra.OnInitialize(initCobra)
+	mainCtx := context.Background()
 
-	debugMode := false
-	cfg := yacspin.Config{
-		Frequency:       100 * time.Millisecond,
-		Suffix:          " ",
-		CharSet:         yacspin.CharSets[11],
-		SuffixAutoColon: true,
-		ColorAll:        true,
-		Colors:          []string{"fgYellow"},
-		StopColors:      []string{"fgGreen"},
+	rootCmd := &cobra.Command{
+		Use:              "simplai",
+		Short:            "fairely usable AI assistant based on simplai",
+		SilenceUsage:     true,
+		SilenceErrors:    true,
+		TraverseChildren: true,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
+				return err
+			}
+			return viper.BindPFlags(cmd.Flags())
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if viper.GetBool("version") {
+				fmt.Printf("simplai %s (%s)\n", version, commit)
+				os.Exit(0)
+				return nil
+			}
+
+			engine := viper.GetString("engine")
+			model := viper.GetString("model")
+			api := viper.GetString("api")
+			searxURL := viper.GetString("searxurl")
+
+			return run(engine, model, api, searxURL)
+		},
+	}
+	rootCmd.Flags().Bool("version", false, "Show version")
+	rootCmd.Flags().String("engine", "openai", "Select the engine to use (openai or ollama)")
+	rootCmd.Flags().String("api", "", "Set the server API base url")
+	rootCmd.Flags().String("model", "HuggingFaceH4/zephyr-7b-beta", "Select the model to use")
+	rootCmd.Flags().String("searx-url", "", "Set the searx url")
+
+	if err := rootCmd.ExecuteContext(mainCtx); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+}
+
+func initCobra() {
+
+	viper.SetEnvPrefix("simplai")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatalln("unable to find home dir: ", err)
 	}
 
-	spinner, _ := yacspin.New(cfg)
+	if cfgFile == "" {
+		cfgFile = os.Getenv("SIMPLAI_CONFIG")
+	}
 
-	// this one needs state
-	// it's an ugly array for now.
-	memstorage := []string{}
-
-	summarizerChain := node.NewChainWithName(
-		"chain:summarizer",
-		mistral.NewChatMemory().WithStorage(&memstorage),
-		prompt.NewSummarizer(),
-		mistral.NewLLM(llmmodel),
-	)
-
-	storytellerChain := node.NewChainWithName(
-		"chain:storytelling",
-		prompt.NewStoryTeller(),
-		mistral.NewLLM(llmmodel),
-	)
-
-	searxChain := node.NewChainWithName(
-		"chain:search",
-		mistral.NewChatMemory().WithStorage(&memstorage),
-		prompt.NewSearxSearch("https://search.inframonde.me"),
-		mistral.NewLLM(llmmodel),
-	)
-
-	conversationChain := node.NewChainWithName(
-		"chain:conversation",
-		mistral.NewChatMemory().WithStorage(&memstorage),
-		prompt.NewConversation(),
-		mistral.NewLLM(llmmodel),
-	)
-
-	routerChain := node.NewChainWithName(
-		"chain:root",
-		mistral.NewChatMemory().WithStorage(&memstorage),
-		updateSpinner(spinner, "classifying"),
-		prompt.NewClassifier(
-			prompt.StoryTellerInfo,
-			prompt.SummarizerInfo,
-			prompt.SearxSearchInfo,
-			prompt.CoderInfo,
-		),
-		updateSpinner(spinner, "understanding"),
-		mistral.NewLLM(llmmodel),
-		updateSpinner(spinner, "routing"),
-		prompt.NewRouter(
-			node.NewChainWithName(
-				"conversation",
-				updateSpinner(spinner, "thinking"),
-				prompt.NewConversation(),
-				mistral.NewLLM(llmmodel),
-			),
-			node.NewChainWithName(
-				"storyteller",
-				updateSpinner(spinner, "writing story"),
-				prompt.NewStoryTeller(),
-				mistral.NewLLM(llmmodel),
-			),
-			node.NewChainWithName(
-				"summarizer",
-				updateSpinner(spinner, "summarizing"),
-				prompt.NewSummarizer(),
-				mistral.NewLLM(llmmodel),
-			),
-			node.NewChainWithName(
-				"search",
-				updateSpinner(spinner, "searching the web"),
-				prompt.NewSearxSearch("https://search.inframonde.me"),
-				mistral.NewLLM(llmmodel),
-			),
-			node.NewChainWithName(
-				"coder",
-				updateSpinner(spinner, "coding"),
-				prompt.NewCoder(),
-				mistral.NewLLM(llmmodel),
-			),
-		),
-	)
-
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("> ")
-	for scanner.Scan() {
-
-		input := strings.TrimSpace(scanner.Text())
-
-		if input == "" {
-			fmt.Print("> ")
-			continue
+	if cfgFile != "" {
+		if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+			log.Fatalln("config file does not exist", err)
 		}
 
-		var ch node.Node
-		var llmInput node.Input
+		viper.SetConfigType("yaml")
+		viper.SetConfigFile(cfgFile)
 
-		if ok, _ := matchPrefix(input, ":debug"); ok {
-			debugMode = !debugMode
-			render.Box(fmt.Sprintf("debug mode: %t", debugMode), "2")
-			fmt.Print("> ")
-			continue
+		if err = viper.ReadInConfig(); err != nil {
+			log.Fatalln("unable to read config", cfgFile)
 		}
 
-		if ok, in := matchPrefix(input, "/s"); ok {
-			llmInput = node.NewInput(in)
-			ch = summarizerChain
-		}
+		return
+	}
 
-		if ok, in := matchPrefix(input, "/t"); ok {
-			llmInput = node.NewInput(in)
-			ch = storytellerChain
-		}
+	viper.AddConfigPath(path.Join(home, ".config", "simplai"))
+	viper.AddConfigPath("/usr/local/etc/simplai")
+	viper.AddConfigPath("/etc/simplai")
 
-		if ok, in := matchPrefix(input, "/S"); ok {
-			llmInput = node.NewInput(in)
-			ch = searxChain
-		}
+	if cfgName == "" {
+		cfgName = os.Getenv("SIMPLAI_CONFIG_NAME")
+	}
 
-		if ok, in := matchPrefix(input, "/c"); ok {
-			llmInput = node.NewInput(in)
-			ch = conversationChain
-		}
+	if cfgName == "" {
+		cfgName = "config"
+	}
 
-		if ch == nil {
-			llmInput = node.NewInput(input)
-			ch = routerChain
-		}
+	viper.SetConfigName(cfgName)
 
-		if !debugMode {
-			spinner.Start()
+	if err = viper.ReadInConfig(); err != nil {
+		if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
+			log.Fatalln("unable to read config:", err)
 		}
-
-		ctx := context.Background()
-		output, err := ch.Execute(ctx, llmInput.WithDebug(debugMode))
-		if !debugMode {
-			spinner.Stop()
-		}
-		if err != nil {
-			render.Box(err.Error(), "1")
-			fmt.Print("> ")
-			continue
-		}
-
-		buf := &bytes.Buffer{}
-
-		if lex := lexers.Analyse(output); lex == nil {
-			buf.WriteString(output)
-		} else {
-			quick.Highlight(buf, output, lex.Config().Name, "terminal256", "gruvbox")
-		}
-
-		render.Box(buf.String(), "12")
-		fmt.Print("> ")
 	}
 }

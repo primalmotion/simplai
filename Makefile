@@ -4,4 +4,4 @@ build:
 run: build
 	@ ./cmd/simplai/simplai
 
-default: run
+default: build

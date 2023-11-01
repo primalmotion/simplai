@@ -32,10 +32,10 @@ Then run:
     make build
     cd cmd/simplai/
     simplai \
-      --openai
-      --url http://myserver:8000/v1 \
-      --searxurl https://some.searx.instances \
-      --model HuggingFaceH4/zephyr-7b-beta
+      --engine openai \
+      --api http://myserver:8000/v1 \
+      --model HuggingFaceH4/zephyr-7b-beta \
+      --searx-url https://some.searx.instances
 
 More doc will be added over time. This is still really early in the dev, but the
 examples already achieves very good results in our limited testing.
