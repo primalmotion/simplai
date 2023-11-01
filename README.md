@@ -1,5 +1,7 @@
 # Simplai
 
+> THIS IS A WORK IN PROGRESS AND PREVIEW
+
 SimplAI (pronounced Simpl-Hey) is a library to build LLM based applications in
 Go. The goal of SimplAI is to only work with remote inference services like VLLM
 or Ollama and not deal with the complexity of doing inference and such locally
