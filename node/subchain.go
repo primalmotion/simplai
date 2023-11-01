@@ -56,14 +56,10 @@ func (n *Subchain) Execute(ctx context.Context, input Input) (string, error) {
 		render.Box(fmt.Sprintf("[%s]", n.info.Name), "3")
 	}
 
-	output, err := n.nodes[0].Execute(ctx, input)
+	first := n.nodes[0]
+	output, err := first.Execute(ctx, input)
 	if err != nil {
-		return "", fmt.Errorf(
-			"[%s] unable to execute node '%s': %w",
-			n.info.Name,
-			n.nodes[0].Info().Name,
-			err,
-		)
+		return "", NewError(n, "unable to execute node '%s': %w", first.Info().Name, err)
 	}
 
 	return n.BaseNode.Execute(ctx, input.Derive(output))

@@ -53,21 +53,12 @@ func (n *Router) Execute(ctx context.Context, input Input) (string, error) {
 
 	selected, dinput, err := n.decider(ctx, input, n.defaultChain, n.chains)
 	if err != nil {
-		return "", fmt.Errorf(
-			"[%s] unable to run decider func: %w",
-			n.info.Name,
-			err,
-		)
+		return "", NewError(n, "unable to run decider func: %w", err)
 	}
 
 	output, err := selected.Execute(ctx, dinput)
 	if err != nil {
-		return "", fmt.Errorf(
-			"[%s] unable to run chain '%s': %w",
-			n.info.Name,
-			selected.Info().Name,
-			err,
-		)
+		return "", NewError(n, "unable to run chain '%s': %w", selected.Info().Name, err)
 	}
 
 	return n.BaseNode.Execute(ctx, input.Derive(output))
@@ -88,11 +79,7 @@ func RouterSimpleDeciderFunc(
 
 	rinput := RouterSimpleInput{}
 	if err := json.Unmarshal([]byte(input.Input()), &rinput); err != nil {
-		return nil, input, fmt.Errorf(
-			"unable to unmarshal input '%s': %w",
-			input.Input(),
-			err,
-		)
+		return nil, input, fmt.Errorf("unable to unmarshal input '%s': %w", input.Input(), err)
 	}
 
 	if selected := chains[rinput.Name]; selected != nil {

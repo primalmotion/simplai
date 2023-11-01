@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 )
@@ -30,7 +29,7 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
 	output, err := n.llm.Infer(ctx, input.Input(), opts...)
 	if err != nil {
-		return "", fmt.Errorf("unable to run llm inference: %w", err)
+		return "", NewError(n, "unable to run llm inference: %w", err)
 	}
 
 	if input.Debug() {

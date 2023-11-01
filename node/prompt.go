@@ -3,7 +3,6 @@ package node
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"text/template"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
@@ -34,12 +33,12 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 		Funcs(sprig.FuncMap()).
 		Parse(n.template)
 	if err != nil {
-		return "", fmt.Errorf("unable to parse template: %w", err)
+		return "", NewError(n, "unable to parse template: %w", err)
 	}
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, input); err != nil {
-		return "", fmt.Errorf("unable to execute template: %w", err)
+		return "", NewError(n, "unable to execute template: %w", err)
 	}
 
 	if input.Debug() {

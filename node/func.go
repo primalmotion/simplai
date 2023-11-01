@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"fmt"
 )
 
 type Func struct {
@@ -20,7 +19,7 @@ func NewFunc(info Info, executor func(context.Context, Input, Node) (string, err
 func (n *Func) Execute(ctx context.Context, input Input) (string, error) {
 	out, err := n.executor(ctx, input, n)
 	if err != nil {
-		return "", fmt.Errorf("[%s] unable to call executor func: %w", n.Info().Name, err)
+		return "", NewError(n, "unable to call executor: %w", err)
 	}
 
 	return n.BaseNode.Execute(ctx, input.Derive(out))
