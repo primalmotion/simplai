@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -117,19 +116,13 @@ func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string,
 
 	output, err = n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
 	if err == nil {
-		if rand.Intn(2) == 0 {
-			return "foirade", nil
-		}
 		return output, nil
 	}
 
-	fmt.Println("HERE")
 	var promptErr node.PromptError
 	if !errors.As(err, &promptErr) {
-		fmt.Println("eFUCK")
 		return "", err
 	}
-	fmt.Println("THERE")
 
 	retry++
 	if retry > 3 {

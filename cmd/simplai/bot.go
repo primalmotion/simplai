@@ -125,7 +125,7 @@ func run(
 
 	searxChain := node.NewSubchainWithName(
 		"chain:search",
-		prompt.NewSearxSearch("https://search.inframonde.me"),
+		prompt.NewSearxSearch(searxURL),
 		mistral.NewLLM(llmmodel),
 	)
 
@@ -173,7 +173,7 @@ func run(
 			node.NewSubchainWithName(
 				prompt.SearxSearchInfo.Name,
 				updateSpinner(spinner, "searching"),
-				prompt.NewSearxSearch("https://search.inframonde.me"),
+				prompt.NewSearxSearch(searxURL),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(

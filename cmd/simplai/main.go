@@ -51,7 +51,7 @@ func main() {
 			engine := viper.GetString("engine")
 			model := viper.GetString("model")
 			api := viper.GetString("api")
-			searxURL := viper.GetString("searxurl")
+			searxURL := viper.GetString("searx-url")
 			debug := viper.GetBool("debug")
 
 			return run(cmd.Context(), engine, model, api, searxURL, debug)
