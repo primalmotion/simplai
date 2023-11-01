@@ -91,34 +91,34 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 	// it's an ugly array for now.
 	memstorage := []string{}
 
-	summarizerChain := node.NewChainWithName(
+	summarizerChain := node.NewSubchainWithName(
 		"chain:summarizer",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSummarizer(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	storytellerChain := node.NewChainWithName(
+	storytellerChain := node.NewSubchainWithName(
 		"chain:storytelling",
 		prompt.NewStoryTeller(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	searxChain := node.NewChainWithName(
+	searxChain := node.NewSubchainWithName(
 		"chain:search",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewSearxSearch("https://search.inframonde.me"),
 		mistral.NewLLM(llmmodel),
 	)
 
-	conversationChain := node.NewChainWithName(
+	conversationChain := node.NewSubchainWithName(
 		"chain:conversation",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewConversation(),
 		mistral.NewLLM(llmmodel),
 	)
 
-	routerChain := node.NewChainWithName(
+	routerChain := node.NewSubchainWithName(
 		"chain:root",
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		updateSpinner(spinner, "classifying"),
@@ -132,31 +132,31 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 		mistral.NewLLM(llmmodel),
 		updateSpinner(spinner, "routing"),
 		prompt.NewRouter(
-			node.NewChainWithName(
+			node.NewSubchainWithName(
 				"conversation",
 				updateSpinner(spinner, "thinking"),
 				prompt.NewConversation(),
 				mistral.NewLLM(llmmodel),
 			),
-			node.NewChainWithName(
+			node.NewSubchainWithName(
 				"storyteller",
 				updateSpinner(spinner, "writing story"),
 				prompt.NewStoryTeller(),
 				mistral.NewLLM(llmmodel),
 			),
-			node.NewChainWithName(
+			node.NewSubchainWithName(
 				"summarizer",
 				updateSpinner(spinner, "summarizing"),
 				prompt.NewSummarizer(),
 				mistral.NewLLM(llmmodel),
 			),
-			node.NewChainWithName(
+			node.NewSubchainWithName(
 				"search",
 				updateSpinner(spinner, "searching the web"),
 				prompt.NewSearxSearch("https://search.inframonde.me"),
 				mistral.NewLLM(llmmodel),
 			),
-			node.NewChainWithName(
+			node.NewSubchainWithName(
 				"coder",
 				updateSpinner(spinner, "coding"),
 				prompt.NewCoder(),

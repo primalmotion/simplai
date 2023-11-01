@@ -48,7 +48,7 @@ examples already achieves very good results in our limited testing.
 
 ## Components
 
-The main components in the framework are the `node.Node`, `node.Chain` and
+The main components in the framework are the `node.Node`, `node.Subchain` and
 `node.Input`.
 
 ### Node
@@ -58,7 +58,7 @@ The main components in the framework are the `node.Node`, `node.Chain` and
 
     [prompt:genstory] -> [llm:mistral] -> [prompt:summarize] -> [llm:zephyr]
 
-A chain can contains nested chains:
+A chain can contain nested chains:
 
     [prompt:search] -> [ [prompt:summarize] -> [llm] ] -> [func:format] -> [llm]
 
@@ -69,24 +69,23 @@ This output will then be fed to the next `Node` in the chain. This process conti
 until the execution reaches a node with no `Next()` Node. Then the output is
 unstacked and returned by the initial executed Node.
 
-### Chain
+### Subchain
 
-A `Chain` is a Node that holds a separate set of `[]Node`.
+A `Subchain` is a Node that holds a separate chain of `[]Node`.
 
-It can be seen as a nested chain of `Node.` that can be considered as a
-single node.
+It can be considered as a single `Node`.
 
     [node] -> [[node]->[node]->[node]] -> [node]
 
 It can be useful to handle a separate set of `Input`, or `llm.Options` for
-instance. `Chains` can also be used in `Router` nodes, that will decide which
-subchain it should forward the Input to.
+instance. `Subchains` can also be used in `Router` nodes, that will
+execute a certain `Subchain` based on a condition.
 
     [classify] -> [llm] -> [router] ?-> [summarize] ->[llm1]
                                     ?-> [search] -> [llm2]
                                     ?-> [generate] -> [llm3]
 
-`Chain` embeds the `BaseNode` and can be used as any other node.
+`Subhain` embeds the `BaseNode` and can be used as any other node.
 
 ### Input
 

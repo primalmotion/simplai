@@ -16,11 +16,11 @@ type Prompt struct {
 	options  []llm.Option
 }
 
-func NewPrompt(desc Info, template string, options ...llm.Option) *Prompt {
+func NewPrompt(info Info, template string, options ...llm.Option) *Prompt {
 	return &Prompt{
 		template: template,
 		options:  options,
-		BaseNode: New(desc),
+		BaseNode: New(info),
 	}
 }
 

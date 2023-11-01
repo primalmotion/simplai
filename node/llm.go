@@ -13,9 +13,9 @@ type LLM struct {
 	options []llm.Option
 }
 
-func NewLLM(desc Info, llm llm.LLM, options ...llm.Option) *LLM {
+func NewLLM(info Info, llm llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
-		BaseNode: New(desc),
+		BaseNode: New(info),
 		llm:      llm,
 		options:  options,
 	}

@@ -17,9 +17,9 @@ type ChatMemory struct {
 	separator string
 }
 
-func NewChatMemory(desc Info, system string, botname string, username string) *ChatMemory {
+func NewChatMemory(info Info, system string, botname string, username string) *ChatMemory {
 	return &ChatMemory{
-		BaseNode:  New(desc),
+		BaseNode:  New(info),
 		system:    strings.ToLower(system),
 		botname:   strings.ToLower(botname),
 		username:  strings.ToLower(username),

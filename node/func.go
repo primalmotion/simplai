@@ -10,10 +10,10 @@ type Func struct {
 	*BaseNode
 }
 
-func NewFunc(desc Info, executor func(context.Context, Input, Node) (string, error)) *Func {
+func NewFunc(info Info, executor func(context.Context, Input, Node) (string, error)) *Func {
 	return &Func{
 		executor: executor,
-		BaseNode: New(desc),
+		BaseNode: New(info),
 	}
 }
 
