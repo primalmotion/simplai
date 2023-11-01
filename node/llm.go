@@ -23,7 +23,7 @@ func NewLLM(info Info, llm llm.LLM, options ...llm.Option) *LLM {
 
 func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
-	opts := append(n.options, input.Options()...)
+	opts := append(n.options, input.LLMOptions()...)
 	if input.Debug() {
 		opts = append(opts, llm.OptionDebug(true))
 	}

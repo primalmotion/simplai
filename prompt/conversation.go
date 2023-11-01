@@ -43,7 +43,7 @@ func NewConversation() *Conversation {
 }
 
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
-	return n.Prompt.Execute(ctx, in.WithOptions(
+	return n.Prompt.Execute(ctx, in.WithLLMOptions(
 		llm.OptionStop(
 			in.Get("username").(string),
 			in.Get("botname").(string),

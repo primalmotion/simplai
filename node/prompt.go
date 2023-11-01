@@ -50,6 +50,6 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (string, error) {
 		ctx,
 		input.
 			Derive(buf.String()).
-			WithOptions(append(n.options, input.Options()...)...),
+			WithLLMOptions(append(n.options, input.LLMOptions()...)...),
 	)
 }
