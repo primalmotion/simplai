@@ -93,7 +93,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	}
 
 	if config.Debug {
-		render.Box(vllmresp.String(), "8")
+		render.Box(vllmresp.String(), "4")
 	}
 
 	output := vllmresp.Choices[0].Text
