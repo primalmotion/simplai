@@ -7,7 +7,7 @@ in order to provide a sane interface that allows to build powerful LLM
 applications.
 
 This is still a work in progress, and the API will change, but things are
-shaping up and soon unit testing will be added as the API stabbilizes.
+shaping up and soon unit testing will be added as the API stabilizes.
 
 ## Chain
 
@@ -35,7 +35,7 @@ Then run:
       --engine openai \
       --api http://myserver:8000/v1 \
       --model HuggingFaceH4/zephyr-7b-beta \
-      --searx-url https://some.searx.instances
+      --searx-url https://some.searxinstance.org
 
 More doc will be added over time. This is still really early in the dev, but the
 examples already achieves very good results in our limited testing.
@@ -46,7 +46,7 @@ examples already achieves very good results in our limited testing.
 - [x] chain system
 - [ ] better memory
 - [ ] unit tests
-- [ ] args for the main binary
+- [x] flags for the main binary
 - [ ] retry error back propagation
 - [ ] doc strings
 - [ ] move some parts out of the repository (prompts)
