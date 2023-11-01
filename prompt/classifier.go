@@ -2,7 +2,9 @@ package prompt
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math/rand"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -70,11 +72,13 @@ Remember: ACTION's name must only be one of:
 
 Pay attention to the tools description if it details what the input should be.
 
-{{ if (.Get "scratchpad") }}
-## OBSERVATION
+{{ if .Scratchpad }}
+## PREVIOUS OBSERVATION
 
-{{ .Get "scratchpad" }} {{ end }}
+The following is observations about one of your previous failed attempts.
+make sure you take them into account when generating the response.
 
+- {{ .Scratchpad }} {{ end }}
 ## PROCEED
 
 INPUT: {{ .Input }}
@@ -104,8 +108,34 @@ func NewClassifier(tools ...node.Info) *Classifier {
 }
 
 func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string, err error) {
+
 	if len(n.tools) == 0 {
 		return fmt.Sprintf(`{"name":"default","input":"%s"}`, in.Input()), nil
 	}
-	return n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
+
+	var retry int
+
+	output, err = n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
+	if err == nil {
+		if rand.Intn(2) == 0 {
+			return "foirade", nil
+		}
+		return output, nil
+	}
+
+	fmt.Println("HERE")
+	var promptErr node.PromptError
+	if !errors.As(err, &promptErr) {
+		fmt.Println("eFUCK")
+		return "", err
+	}
+	fmt.Println("THERE")
+
+	retry++
+	if retry > 3 {
+		return "", err
+	}
+
+	return n.Execute(ctx, promptErr.Input)
+
 }

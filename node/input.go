@@ -5,6 +5,7 @@ import "git.sr.ht/~primalmotion/simplai/llm"
 type Input struct {
 	keys       map[string]any
 	input      string
+	scratchpad string
 	llmOptions []llm.Option
 	debug      bool
 }
@@ -27,9 +28,22 @@ func (i Input) WithLLMOptions(options ...llm.Option) Input {
 	return i
 }
 
+func (i Input) LLMOptions() []llm.Option {
+	return i.llmOptions
+}
+
 func (i Input) ResetLLMOptions() Input {
 	i.llmOptions = nil
 	return i
+}
+
+func (i Input) WithScratchpad(scratchpad string) Input {
+	i.scratchpad = scratchpad
+	return i
+}
+
+func (i Input) Scratchpad() string {
+	return i.scratchpad
 }
 
 func (i Input) Input() string {
@@ -38,10 +52,6 @@ func (i Input) Input() string {
 
 func (i Input) Get(key string) any {
 	return i.keys[key]
-}
-
-func (i Input) LLMOptions() []llm.Option {
-	return i.llmOptions
 }
 
 func (i Input) WithDebug(debug bool) Input {
