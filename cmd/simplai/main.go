@@ -52,8 +52,9 @@ func main() {
 			model := viper.GetString("model")
 			api := viper.GetString("api")
 			searxURL := viper.GetString("searxurl")
+			debug := viper.GetBool("debug")
 
-			return run(cmd.Context(), engine, model, api, searxURL)
+			return run(cmd.Context(), engine, model, api, searxURL, debug)
 		},
 	}
 	rootCmd.Flags().Bool("version", false, "Show version")
@@ -61,6 +62,7 @@ func main() {
 	rootCmd.Flags().String("api", "", "Set the server API base url")
 	rootCmd.Flags().String("model", "HuggingFaceH4/zephyr-7b-beta", "Select the model to use")
 	rootCmd.Flags().String("searx-url", "", "Set the searx url")
+	rootCmd.Flags().Bool("debug", false, "Set the default debug mode state")
 
 	if err := rootCmd.ExecuteContext(mainCtx); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

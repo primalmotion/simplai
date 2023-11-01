@@ -57,7 +57,14 @@ func codeHighlighter() node.Node {
 		})
 }
 
-func run(ctx context.Context, engine string, model string, api string, searxURL string) error {
+func run(
+	ctx context.Context,
+	engine string,
+	model string,
+	api string,
+	searxURL string,
+	debug bool,
+) error {
 
 	var llmmodel llm.LLM
 
@@ -71,7 +78,7 @@ func run(ctx context.Context, engine string, model string, api string, searxURL 
 		return fmt.Errorf("unknown model type")
 	}
 
-	debugMode := false
+	debugMode := debug
 	cfg := yacspin.Config{
 		Frequency:       100 * time.Millisecond,
 		Suffix:          " ",

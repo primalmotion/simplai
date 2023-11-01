@@ -27,6 +27,7 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 	if input.Debug() {
 		opts = append(opts, llm.OptionDebug(true))
 	}
+
 	output, err := n.llm.Infer(ctx, input.Input(), opts...)
 	if err != nil {
 		return "", fmt.Errorf("unable to run llm inference: %w", err)
@@ -36,5 +37,10 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		LogNode(n, "4", output)
 	}
 
-	return n.BaseNode.Execute(ctx, input.Derive(output).ResetLLMOptions())
+	return n.BaseNode.Execute(
+		ctx,
+		input.
+			Derive(output).
+			ResetLLMOptions(),
+	)
 }
