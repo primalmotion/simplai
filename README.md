@@ -46,6 +46,52 @@ Then run:
 More doc will be added over time. This is still really early in the dev, but the
 examples already achieves very good results in our limited testing.
 
+## Components
+
+The main components in the framework are the `node.Node`, `node.Chain` and
+`node.Input`.
+
+### Node
+
+`Node` is the base object of the framework. A `Node` can be chained to another
+`Node`. Together they form a chain.
+
+    [prompt:genstory] -> [llm:mistral] -> [prompt:summarize] -> [llm:zephyr]
+
+A chain can contains nested chains:
+
+    [prompt:search] -> [ [prompt:summarize] -> [llm] ] -> [func:format] -> [llm]
+
+A `Node` can be executed by calling its `Execute()` method. The execution is given a
+`context.Context` and an `Input`. It returns a string and an eventual error.
+
+This output will then be fed to the next `Node` in the chain. This process continues
+until the execution reaches a node with no `Next()` Node. Then the output is
+unstacked and returned by the initial executed Node.
+
+### Chain
+
+A `Chain` is a Node that holds a separate set of `[]Node`.
+
+It can be seen as a nested chain of `Node.` that can be considered as a
+single node.
+
+    [node] -> [[node]->[node]->[node]] -> [node]
+
+It can be useful to handle a separate set of `Input`, or `llm.Options` for
+instance. `Chains` can also be used in `Router` nodes, that will decide which
+subchain it should forward the Input to.
+
+    [classify] -> [llm] -> [router] ?-> [summarize] ->[llm1]
+                                    ?-> [search] -> [llm2]
+                                    ?-> [generate] -> [llm3]
+
+`Chain` embeds the `BaseNode` and can be used as any other node.
+
+### Input
+
+TODO
+
 ## TODO
 
 - [x] base API
