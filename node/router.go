@@ -3,7 +3,6 @@ package node
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 )
 
 type RouterDeciderFunc func(context.Context, Input, Node, map[string]Node) (Node, Input, error)
@@ -79,7 +78,10 @@ func RouterSimpleDeciderFunc(
 
 	rinput := RouterSimpleInput{}
 	if err := json.Unmarshal([]byte(input.Input()), &rinput); err != nil {
-		return nil, input, fmt.Errorf("unable to unmarshal input '%s': %w", input.Input(), err)
+		return nil, input, NewPromptError(
+			"I MUST write a valid JSON structure",
+			err,
+		)
 	}
 
 	if selected := chains[rinput.Name]; selected != nil {

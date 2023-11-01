@@ -2,7 +2,6 @@ package prompt
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
@@ -52,7 +51,7 @@ Here is some output example:
 
 If the input not explicitely map to any available tools, you MUST exactly write:
 
-	ACTION: {"name":"default","input":"{{.Input}}"}
+	ACTION: {"name":"default","input":"[original-input]"}
 
 It is VERY IMPORTANT you remember that you MUST follow this protocol no matter
 what, in all circumstances.
@@ -71,13 +70,16 @@ Remember: ACTION's name must only be one of:
 
 Pay attention to the tools description if it details what the input should be.
 
-{{ if .Scratchpad }}
+{{- if .Scratchpad }}
+
 ## PREVIOUS OBSERVATION
 
 The following is observations about one of your previous failed attempts.
 make sure you take them into account when generating the response.
 
-- {{ .Scratchpad }} {{ end }}
+- {{ .Scratchpad }}
+{{- end }}
+
 ## PROCEED
 
 INPUT: {{ .Input }}
@@ -101,7 +103,6 @@ func NewClassifier(tools ...node.Info) *Classifier {
 			ClassifierInfo,
 			classifierTemplate,
 			llm.OptionStop("\n"),
-			llm.OptionMaxTokens(512),
 		),
 	}
 }
@@ -112,23 +113,5 @@ func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string,
 		return fmt.Sprintf(`{"name":"default","input":"%s"}`, in.Input()), nil
 	}
 
-	var retry int
-
-	output, err = n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
-	if err == nil {
-		return output, nil
-	}
-
-	var promptErr node.PromptError
-	if !errors.As(err, &promptErr) {
-		return "", err
-	}
-
-	retry++
-	if retry > 3 {
-		return "", err
-	}
-
-	return n.Execute(ctx, promptErr.Input)
-
+	return n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
 }

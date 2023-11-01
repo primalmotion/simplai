@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -54,6 +55,18 @@ func codeHighlighter() node.Node {
 				quick.Highlight(buf, in.Input(), lex.Config().Name, "terminal256", "gruvbox")
 			}
 			return string(buf.Bytes()), nil
+		})
+}
+
+func randomOutputSwitcher(freq int, output string) node.Node {
+	return node.NewFunc(
+		node.Info{Name: "random-scrambler"},
+		func(ctx context.Context, in node.Input, n node.Node) (string, error) {
+			if rand.Intn(freq) == 0 {
+				fmt.Println("SCRAMBLED OUTPUT!!", output)
+				return output, nil
+			}
+			return in.Input(), nil
 		})
 }
 
@@ -148,6 +161,11 @@ func run(
 			prompt.CoderInfo,
 		),
 		mistral.NewLLM(llmmodel),
+
+		// Comment this out to simpulate an error
+		// in json generation.
+		// randomOutputSwitcher(2, "not-json"),
+
 		updateSpinner(spinner, "routing"),
 		node.NewRouter(
 			node.Info{Name: "router"},

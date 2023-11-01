@@ -19,18 +19,23 @@ func (e Error) Unwrap() error {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("node error: %s: %s", e.N.Info().Name, e.Err)
+	return fmt.Sprintf("[%s]: %s", e.N.Info().Name, e.Err)
+}
+
+func (e Error) Is(err error) bool {
+	_, ok := err.(Error)
+	return ok
 }
 
 type PromptError struct {
-	Err   error
-	Input Input
+	Err        error
+	Scratchpad string
 }
 
-func NewPromptError(input Input, err error) PromptError {
+func NewPromptError(scratchpad string, err error) PromptError {
 	return PromptError{
-		Err:   err,
-		Input: input,
+		Err:        err,
+		Scratchpad: scratchpad,
 	}
 }
 
@@ -39,5 +44,10 @@ func (e PromptError) Unwrap() error {
 }
 
 func (e PromptError) Error() string {
-	return fmt.Sprintf("prompt error: %s", e.Err)
+	return fmt.Sprintf("prompt-error: %s", e.Err)
+}
+
+func (e PromptError) Is(err error) bool {
+	_, ok := err.(PromptError)
+	return ok
 }
