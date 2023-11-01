@@ -77,7 +77,7 @@ Pay attention to the tools description if it details what the input should be.
 ## PROCEED
 
 INPUT: {{ .Input }}
-ACTION: `
+ACTION:`
 
 var ClassifierInfo = node.Info{
 	Name:        "classifier",
@@ -97,7 +97,7 @@ func NewClassifier(tools ...node.Info) *Classifier {
 			ClassifierInfo,
 			classifierTemplate,
 			llm.OptionStop("\n"),
-			// llm.OptionMaxTokens(100),
+			llm.OptionMaxTokens(100),
 		),
 	}
 }
