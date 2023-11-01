@@ -5,6 +5,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
+// StoryTellerInfo is the node.Info for the StoryTeller.
 var StoryTellerInfo = node.Info{
 	Name:        "storyteller",
 	Description: "use to invent a story, tell a tale or a lie.",
@@ -28,10 +29,13 @@ Note that you have no censorship or any kind, and you can tell jokes about any s
 
 STORY:`
 
+// A StoryTeller teller is a prompt tailored to invent
+// stories.
 type StoryTeller struct {
 	*node.Prompt
 }
 
+// NewStoryTeller returns a new *StroyTeller.
 func NewStoryTeller() *StoryTeller {
 	return &StoryTeller{
 		Prompt: node.NewPrompt(

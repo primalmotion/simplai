@@ -52,7 +52,9 @@ func codeHighlighter() node.Node {
 			if lex := lexers.Analyse(in.Input()); lex == nil {
 				buf.WriteString(in.Input())
 			} else {
-				quick.Highlight(buf, in.Input(), lex.Config().Name, "terminal256", "gruvbox")
+				if err := quick.Highlight(buf, in.Input(), lex.Config().Name, "terminal256", "gruvbox"); err != nil {
+					return "", err
+				}
 			}
 			return string(buf.Bytes()), nil
 		})

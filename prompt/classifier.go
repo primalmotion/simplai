@@ -8,21 +8,28 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
+// ClassifierInfo is the node.Info for the Classifier.
+var ClassifierInfo = node.Info{
+	Name:        "classifier",
+	Description: "used to classify the intent of the user.",
+}
+
 const classifierTemplate = `classify the user input and map it to a known tool name.
 your output will be used by a machine and it needs to be perfect.
 You must conform to the protocol described below at all times.
 
 ## PROTOCOL
 
-You must identify which of the known tools is the best fullfill the user request.
+You must identify which of the known tools is the best fulfill the user request.
 They are described as:
 
 	NAME: <name>
 	USAGE: <intent>
 	PARAMS: <information about parameters>
 
-The tool NAME is what you must classify. You will use the USAGE to help you choose a tool.
-You also need to pay close attention to the PARAMS, if any, in order to complete the paramaters.
+The tool NAME is what you must classify. You will use the USAGE to help you
+choose a tool. You also need to pay close attention to the PARAMS, if any, in
+order to complete the parameters.
 
 You MUST write a valid JSON output, describing the tools to use in the form:
 
@@ -49,7 +56,7 @@ Here is some output example:
 	INPUT: jump over the bridge
 	ACTION: {"name":"default","input":"jump over the bridge"}
 
-If the input not explicitely map to any available tools, you MUST exactly write:
+If the input not explicitly map to any available tools, you MUST exactly write:
 
 	ACTION: {"name":"default","input":"[original-input]"}
 
@@ -85,18 +92,16 @@ make sure you take them into account when generating the response.
 INPUT: {{ .Input }}
 ACTION:`
 
-var ClassifierInfo = node.Info{
-	Name:        "classifier",
-	Description: "used to classify the intent of the user.",
-}
-
+// A Classifier is a prompt that will try to classify an input
+// into using one of of the tools it knows. The tools are different
+// node.Node that are identified by their node.Info.
 type Classifier struct {
 	*node.Prompt
 	tools []node.Info
 }
 
+// NewClassifier returns a new *Classifier.
 func NewClassifier(tools ...node.Info) *Classifier {
-
 	return &Classifier{
 		tools: tools,
 		Prompt: node.NewPrompt(
@@ -107,11 +112,12 @@ func NewClassifier(tools ...node.Info) *Classifier {
 	}
 }
 
+// Execute implements the Node interface.
 func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string, err error) {
 
 	if len(n.tools) == 0 {
 		return fmt.Sprintf(`{"name":"default","input":"%s"}`, in.Input()), nil
 	}
 
-	return n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
+	return n.Prompt.Execute(ctx, in.Set("tools", n.tools))
 }

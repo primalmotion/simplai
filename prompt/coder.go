@@ -5,6 +5,7 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
+// CoderInfo is the node.Info for the Coder.
 var CoderInfo = node.Info{
 	Name:        "coder",
 	Description: "use to write some code, in various programming language",
@@ -32,10 +33,13 @@ echo "hello world"
 INPUT: {{ .Input }}
 CODE:`
 
+// A Coder is a prompt asking the LLM to
+// perform various coding operations.
 type Coder struct {
 	*node.Prompt
 }
 
+// NewCoder returns a new *Coder.
 func NewCoder() *Coder {
 	return &Coder{
 		Prompt: node.NewPrompt(

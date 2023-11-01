@@ -6,20 +6,24 @@ import (
 	"git.sr.ht/~primalmotion/simplai/llm"
 )
 
+// LLM is a node responsible for running its
+// input into an inference engine.
 type LLM struct {
-	llm llm.LLM
+	engine llm.LLM
 	*BaseNode
 	options []llm.Option
 }
 
-func NewLLM(info Info, llm llm.LLM, options ...llm.Option) *LLM {
+// NewLLM returns a new LLM using the given engine.
+func NewLLM(info Info, engine llm.LLM, options ...llm.Option) *LLM {
 	return &LLM{
 		BaseNode: New(info),
-		llm:      llm,
+		engine:   engine,
 		options:  options,
 	}
 }
 
+// Execute implements the Node interface.
 func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
 	opts := append(n.options, input.LLMOptions()...)
@@ -27,7 +31,7 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 		opts = append(opts, llm.OptionDebug(true))
 	}
 
-	output, err := n.llm.Infer(ctx, input.Input(), opts...)
+	output, err := n.engine.Infer(ctx, input.Input(), opts...)
 	if err != nil {
 		return "", NewError(n, "unable to run llm inference: %w", err)
 	}
@@ -39,7 +43,7 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 	return n.BaseNode.Execute(
 		ctx,
 		input.
-			Derive(output).
+			WithInput(output).
 			ResetLLMOptions(),
 	)
 }

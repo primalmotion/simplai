@@ -7,6 +7,13 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
+// ConversationInfo is the node.Info for Conversation.
+var ConversationInfo = node.Info{
+	Name:        "conversation",
+	Description: "used to have a general conversation with the user",
+	Parameters:  "the user INPUT, as is. You must not modify or summarize it",
+}
+
 const conversationTemplate = `{{ .Get "system" }}
 You are an AI with high conversational skills. You are entertaining and
 curious. You are knowledgeable in programming, physics, artificial
@@ -22,17 +29,13 @@ Hello how may I help you?
 {{ .Get "botname" }}
 `
 
-var ConversationInfo = node.Info{
-	Name:        "conversation",
-	Description: "used to have a general conversation with the user",
-	Parameters:  "the user INPUT, as is. You must not modify or summarize it",
-}
-
+// A Conversation is a prompt that can be used
+// to have a generic conversation with the LLM.
 type Conversation struct {
 	*node.Prompt
-	conversation *node.ChatMemory
 }
 
+// NewConversation returns a new *Conversation.
 func NewConversation() *Conversation {
 	return &Conversation{
 		Prompt: node.NewPrompt(
@@ -43,6 +46,8 @@ func NewConversation() *Conversation {
 	}
 }
 
+// Execute implements the node.Node interface. It will
+// inject into the input the llm.OptionStop needed.
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
 	return n.Prompt.Execute(ctx, in.WithLLMOptions(
 		llm.OptionStop(

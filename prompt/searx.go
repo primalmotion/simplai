@@ -11,6 +11,13 @@ import (
 	"git.sr.ht/~primalmotion/simplai/node"
 )
 
+// SearxSearchInfo is the node.Information for the SearxSearch prompt.
+var SearxSearchInfo = node.Info{
+	Name:        "search",
+	Description: "use to access internet and find (search) current data about people, news, etc...",
+	Parameters:  "the subject to search for",
+}
+
 const searxTemplate = `You must extract the information from the following
 data. Write a short summary of about 2-3 sentences.
 
@@ -22,12 +29,6 @@ RESULTS:
 
 SUMMARY:`
 
-var SearxSearchInfo = node.Info{
-	Name:        "search",
-	Description: "use to access internet and find (search) current data about people, news, etc...",
-	Parameters:  "the subject to search for",
-}
-
 type searxTrimmedResponse struct {
 	Results []struct {
 		Content  string  `json:"content"`
@@ -38,12 +39,16 @@ type searxTrimmedResponse struct {
 	} `json:"results"`
 }
 
+// A SearxSearch is a prompt fetch data from intermet using Searx
+// then summarizes the search results.
 type SearxSearch struct {
 	*node.Prompt
 	client http.Client
 	api    string
 }
 
+// NewSearxSearch returns a new *SearxSearch using
+// the provided URL.
 func NewSearxSearch(api string) *SearxSearch {
 	client := http.Client{}
 	return &SearxSearch{
@@ -56,6 +61,9 @@ func NewSearxSearch(api string) *SearxSearch {
 	}
 }
 
+// Execute implements the node.Node interface.
+// It will make a search using the provided input, then massage the data
+// and summarize them.
 func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	query := in.Input()
@@ -101,6 +109,6 @@ func (n *SearxSearch) Execute(ctx context.Context, in node.Input) (string, error
 
 	return n.Prompt.Execute(
 		ctx,
-		in.Derive(strings.Join(output, "\n\n")).WithKeyValue("userquery", query),
+		in.WithInput(strings.Join(output, "\n\n")).Set("userquery", query),
 	)
 }

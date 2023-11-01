@@ -62,5 +62,5 @@ func (n *Subchain) Execute(ctx context.Context, input Input) (string, error) {
 		return "", NewError(n, "unable to execute node '%s': %w", first.Info().Name, err)
 	}
 
-	return n.BaseNode.Execute(ctx, input.Derive(output))
+	return n.BaseNode.Execute(ctx, input.WithInput(output))
 }

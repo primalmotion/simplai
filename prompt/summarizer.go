@@ -11,6 +11,7 @@ import (
 	readability "github.com/go-shiori/go-readability"
 )
 
+// SummarizerInfo is the node.Info for the Summarizer.
 var SummarizerInfo = node.Info{
 	Name:        "summarizer",
 	Description: "use to summarize (resume, brief, shorten) some text, URL or document.",
@@ -24,10 +25,14 @@ of any text. You will now summarize the following input:
 
 SUMMARY:`
 
+// A Summarizer is a prompt that will try to summuarize the given
+// input. If the input is a valid URL, the content of that URL will
+// first be retrieved using readability, then will be summarized.
 type Summarizer struct {
 	*node.Prompt
 }
 
+// NewSummarizer returns a new *Summarizer.
 func NewSummarizer() *Summarizer {
 	return &Summarizer{
 		Prompt: node.NewPrompt(
@@ -37,6 +42,7 @@ func NewSummarizer() *Summarizer {
 	}
 }
 
+// Execute implements the node.Node interface.
 func (s *Summarizer) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	text := in.Input()
@@ -50,9 +56,9 @@ func (s *Summarizer) Execute(ctx context.Context, in node.Input) (string, error)
 	}
 
 	text = trim.Output(text)
-	if len(text) > 2048 {
-		text = text[:2048]
+	if len(text) > 4096 {
+		text = text[:4096]
 	}
 
-	return s.Prompt.Execute(ctx, in.Derive(text))
+	return s.Prompt.Execute(ctx, in.WithInput(text))
 }

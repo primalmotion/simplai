@@ -11,6 +11,9 @@ import (
 	"github.com/Masterminds/sprig"
 )
 
+// A Prompt is a Node that is responsible
+// for generating a prompt from a template using
+// the informations contained in the given input.
 type Prompt struct {
 	*BaseNode
 	template   string
@@ -18,6 +21,9 @@ type Prompt struct {
 	maxRetries int
 }
 
+// NewPrompt returns a new *Prompt with the given template and ll.Options.
+// The llm.Options will always be appended to the input, before the input's
+// own LLMOptions. So input's options will take precedence.
 func NewPrompt(info Info, template string, options ...llm.Option) *Prompt {
 	return &Prompt{
 		template:   template,
@@ -27,15 +33,19 @@ func NewPrompt(info Info, template string, options ...llm.Option) *Prompt {
 	}
 }
 
+// Options returns the current llm.Options.
 func (n *Prompt) Options() []llm.Option {
 	return append([]llm.Option{}, n.options...)
 }
 
+// WithMaxRetries sets the maximum number of retries the prompt
+// is willing to make when the execution returns a PromptError.
 func (n *Prompt) WithMaxRetries(maxRetries int) *Prompt {
 	n.maxRetries = maxRetries
 	return n
 }
 
+// Execute implements the Node interface.
 func (n *Prompt) Execute(ctx context.Context, input Input) (output string, err error) {
 
 	tmpl, err := template.New("base").
@@ -58,7 +68,7 @@ func (n *Prompt) Execute(ctx context.Context, input Input) (output string, err e
 
 		output, err = n.BaseNode.Execute(
 			ctx,
-			input.Derive(buf.String()).WithLLMOptions(
+			input.WithInput(buf.String()).WithLLMOptions(
 				append(
 					n.options,
 					input.LLMOptions()...,
