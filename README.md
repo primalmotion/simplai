@@ -3,9 +3,13 @@
 > THIS IS A WORK IN PROGRESS AND PREVIEW
 
 SimplAI (pronounced Simpl-Hey) is a library to build LLM based applications in
-Go. The goal of SimplAI is to only work with remote inference services like VLLM
-or Ollama and not deal with the complexity of doing inference and such locally
-in order to provide a sane interface that allows to build powerful LLM
+Go. The goal of SimplAI is to only work with remote inference services like:
+
+- [VLLM](https://vllm.readthedocs.io/en/latest/)
+- [Ollama](https://ollama.ai/)
+
+This avoids having to deal with the complexity of doing inference and such
+locally in order to provide a sane interface that allows to build powerful LLM
 applications.
 
 This is still a work in progress, and the API will change, but things are
