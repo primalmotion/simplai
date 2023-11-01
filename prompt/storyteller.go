@@ -37,7 +37,7 @@ func NewStoryTeller() *StoryTeller {
 		Prompt: node.NewPrompt(
 			StoryTellerInfo,
 			storyTellerTemplate,
-			llm.OptionStop(),
+			llm.OptionTemperature(0.8),
 		),
 	}
 }

@@ -38,6 +38,7 @@ func NewConversation() *Conversation {
 		Prompt: node.NewPrompt(
 			ConversationInfo,
 			conversationTemplate,
+			llm.OptionTemperature(0.8),
 		),
 	}
 }
