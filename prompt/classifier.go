@@ -2,6 +2,7 @@ package prompt
 
 import (
 	"context"
+	"fmt"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/node"
@@ -104,7 +105,7 @@ func NewClassifier(tools ...node.Info) *Classifier {
 
 func (n *Classifier) Execute(ctx context.Context, in node.Input) (output string, err error) {
 	if len(n.tools) == 0 {
-		return `{"name":"default"}`, nil
+		return fmt.Sprintf(`{"name":"default","input":"%s"}`, in.Input()), nil
 	}
 	return n.Prompt.Execute(ctx, in.WithKeyValue("tools", n.tools))
 }
