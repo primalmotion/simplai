@@ -20,7 +20,44 @@ import (
 	"github.com/theckman/yacspin"
 )
 
-func run(engine string, model string, api string, searxURL string) error {
+func matchPrefix(input string, prefix string) (bool, string) {
+	if strings.HasPrefix(input, fmt.Sprintf("%s", prefix)) {
+		return true, strings.TrimSpace(
+			strings.TrimPrefix(
+				input,
+				fmt.Sprintf("%s", prefix),
+			),
+		)
+	}
+	return false, ""
+}
+
+func updateSpinner(spinner *yacspin.Spinner, message string) node.Node {
+	return node.NewFunc(
+		node.Info{Name: "spinner"},
+		func(ctx context.Context, in node.Input, err node.Node) (string, error) {
+			spinner.Message(message + "...")
+			return in.Input(), nil
+		})
+}
+
+func codeHighlighter() node.Node {
+	return node.NewFunc(
+		node.Info{Name: "syntax-colorizer"},
+		func(ctx context.Context, in node.Input, err node.Node) (string, error) {
+
+			buf := &bytes.Buffer{}
+
+			if lex := lexers.Analyse(in.Input()); lex == nil {
+				buf.WriteString(in.Input())
+			} else {
+				quick.Highlight(buf, in.Input(), lex.Config().Name, "terminal256", "gruvbox")
+			}
+			return string(buf.Bytes()), nil
+		})
+}
+
+func run(ctx context.Context, engine string, model string, api string, searxURL string) error {
 
 	var llmmodel llm.LLM
 
@@ -124,6 +161,7 @@ func run(engine string, model string, api string, searxURL string) error {
 				updateSpinner(spinner, "coding"),
 				prompt.NewCoder(),
 				mistral.NewLLM(llmmodel),
+				codeHighlighter(),
 			),
 		),
 	)
@@ -178,7 +216,6 @@ func run(engine string, model string, api string, searxURL string) error {
 			spinner.Start()
 		}
 
-		ctx := context.Background()
 		output, err := ch.Execute(ctx, llmInput.WithDebug(debugMode))
 		if !debugMode {
 			spinner.Stop()
@@ -189,15 +226,7 @@ func run(engine string, model string, api string, searxURL string) error {
 			continue
 		}
 
-		buf := &bytes.Buffer{}
-
-		if lex := lexers.Analyse(output); lex == nil {
-			buf.WriteString(output)
-		} else {
-			quick.Highlight(buf, output, lex.Config().Name, "terminal256", "gruvbox")
-		}
-
-		render.Box(buf.String(), "12")
+		render.Box(output, "12")
 		fmt.Print("> ")
 	}
 

@@ -9,11 +9,9 @@ import (
 	"path"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/node"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/theckman/yacspin"
 )
 
 var (
@@ -25,27 +23,6 @@ var (
 	version = "v0.0.0"
 	commit  = "dev"
 )
-
-func matchPrefix(input string, prefix string) (bool, string) {
-	if strings.HasPrefix(input, fmt.Sprintf("%s", prefix)) {
-		return true, strings.TrimSpace(
-			strings.TrimPrefix(
-				input,
-				fmt.Sprintf("%s", prefix),
-			),
-		)
-	}
-	return false, ""
-}
-
-func updateSpinner(spinner *yacspin.Spinner, message string) node.Node {
-	return node.NewFunc(
-		node.Info{Name: "debug"},
-		func(ctx context.Context, in node.Input, err node.Node) (string, error) {
-			spinner.Message(message + "...")
-			return in.Input(), nil
-		})
-}
 
 func main() {
 
@@ -76,7 +53,7 @@ func main() {
 			api := viper.GetString("api")
 			searxURL := viper.GetString("searxurl")
 
-			return run(engine, model, api, searxURL)
+			return run(cmd.Context(), engine, model, api, searxURL)
 		},
 	}
 	rootCmd.Flags().Bool("version", false, "Show version")
