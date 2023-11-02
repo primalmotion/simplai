@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/quick"
 	"github.com/primalmotion/simplai/llm"
 	"github.com/primalmotion/simplai/llm/models/mistral"
 	"github.com/primalmotion/simplai/llm/ollama"
@@ -17,8 +19,6 @@ import (
 	"github.com/primalmotion/simplai/node"
 	"github.com/primalmotion/simplai/prompt"
 	"github.com/primalmotion/simplai/utils/render"
-	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/quick"
 	"github.com/theckman/yacspin"
 )
 

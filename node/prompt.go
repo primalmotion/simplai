@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/primalmotion/simplai/llm"
 	"github.com/Masterminds/sprig"
+	"github.com/primalmotion/simplai/llm"
 )
 
 // A Prompt is a Node that is responsible

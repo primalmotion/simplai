@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"time"
 
+	readability "github.com/go-shiori/go-readability"
 	"github.com/primalmotion/simplai/node"
 	"github.com/primalmotion/simplai/utils/trim"
-	readability "github.com/go-shiori/go-readability"
 )
 
 // SummarizerInfo is the node.Info for the Summarizer.
