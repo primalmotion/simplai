@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
@@ -14,29 +15,38 @@ import (
 )
 
 type openAIAPI struct {
-	client      *http.Client
-	url         string
-	model       string
-	temperature float64
+	client  *http.Client
+	url     *url.URL
+	options options
+	model   string
 }
 
-// NewOpenAIAPI returns a new openai compatible LLM connector.
-func NewOpenAIAPI(url string, model string, temperature float64) llm.LLM {
+func New(api string, model string, opts ...Option) (*openAIAPI, error) {
+
+	url, err := url.Parse(api)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse url '%s': %w", api, err)
+	}
+
+	o := defaultOptions()
+	for _, opt := range opts {
+		opt(&o)
+	}
+
 	client := &http.Client{}
 	return &openAIAPI{
-		url:         url,
-		model:       model,
-		temperature: temperature,
-		client:      client,
-	}
+		url:     url,
+		model:   model,
+		client:  client,
+		options: o,
+	}, nil
 }
 
 // Infer implements the node.Node interface
 func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
-	config := llm.NewInferenceConfig()
+	config := v.options.defaultInferenceConfig
 	config.Model = v.model
-	config.Temperature = v.temperature
 	config.MaxTokens = llm.CountTokens(v.model, prompt)
 
 	for _, opt := range options {
@@ -47,16 +57,18 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	encoder := json.NewEncoder(buffer)
 
 	vllmreq := request{
-		LogitBias:        config.LogitBias,
-		Model:            config.Model,
-		Prompt:           prompt,
-		Stop:             config.Stop,
-		MaxTokens:        config.MaxTokens,
-		Temperature:      config.Temperature,
-		TopP:             config.TopP,
-		FrequencyPenalty: config.FrequencyPenalty,
-		PresencePenalty:  config.PresencePenalty,
-		LogProbs:         config.LogProbs,
+		LogitBias:         config.LogitBias,
+		Model:             config.Model,
+		Prompt:            prompt,
+		Stop:              config.Stop,
+		MaxTokens:         config.MaxTokens,
+		Temperature:       config.Temperature,
+		TopP:              config.TopP,
+		TopK:              config.TopK,
+		FrequencyPenalty:  config.FrequencyPenalty,
+		RepetitionPenalty: config.RepetitionPenalty,
+		PresencePenalty:   config.PresencePenalty,
+		LogProbs:          config.LogProbs,
 	}
 
 	if config.Debug {

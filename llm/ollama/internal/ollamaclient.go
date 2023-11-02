@@ -30,7 +30,7 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
-func NewClient(ourl *url.URL) (*Client, error) {
+func NewClient(ourl *url.URL) *Client {
 
 	client := Client{
 		base: ourl,
@@ -42,7 +42,7 @@ func NewClient(ourl *url.URL) (*Client, error) {
 		},
 	}
 
-	return &client, nil
+	return &client
 }
 
 func (c *Client) do(ctx context.Context, method, path string, reqData, respData any) error {

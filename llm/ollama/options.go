@@ -1,26 +1,31 @@
 package ollama
 
 import (
-	"log"
-	"net/url"
-
+	"git.sr.ht/~primalmotion/simplai/llm"
 	ollamaclient "git.sr.ht/~primalmotion/simplai/llm/ollama/internal"
 )
 
 type options struct {
-	ollamaServerURL     *url.URL
-	model               string
-	customModelTemplate string
-	system              string
-	ollamaOptions       ollamaclient.Options
+	customModelTemplate    string
+	system                 string
+	defaultInferenceConfig llm.InferenceConfig
+	ollamaOptions          ollamaclient.Options
+	raw                    bool
 }
 
 type Option func(*options)
 
-// OptionModel Set the model to use.
-func OptionModel(model string) Option {
+func defaultOptions() options {
+	return options{
+		ollamaOptions: ollamaclient.DefaultOptions(),
+		raw:           true,
+	}
+}
+
+// OptionDefaultInferenceConfig To set the default InferenceConfig parameters.
+func OptionDefaultInferenceConfig(c llm.InferenceConfig) Option {
 	return func(opts *options) {
-		opts.model = model
+		opts.defaultInferenceConfig = c
 	}
 }
 
@@ -34,21 +39,18 @@ func OptionSystemPrompt(p string) Option {
 	}
 }
 
+// OptionUseModelTemplating To enable the prompt templating done
+// on the ollama side if set in the modelfile (default is false).
+func OptionUseModelTemplating(b bool) Option {
+	return func(opts *options) {
+		opts.raw = !b
+	}
+}
+
 // OptionCustomTemplate To override the templating done on Ollama model side.
 func OptionCustomTemplate(template string) Option {
 	return func(opts *options) {
 		opts.customModelTemplate = template
-	}
-}
-
-// OptionServerURL Set the URL of the ollama instance to use.
-func OptionServerURL(rawURL string) Option {
-	return func(opts *options) {
-		var err error
-		opts.ollamaServerURL, err = url.Parse(rawURL)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 }
 
@@ -57,21 +59,6 @@ func OptionServerURL(rawURL string) Option {
 func OptionRunnerNumKeep(num int) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.NumKeep = num
-	}
-}
-
-// OptionRunnerNumThread Set the number of threads to use during computation (default: auto).
-func OptionRunnerNumThread(num int) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.NumThread = num
-	}
-}
-
-// OptionRunnerNumGPU The number of layers to send to the GPU(s).
-// On macOS it defaults to 1 to enable metal support, 0 to disable.
-func OptionRunnerNumGPU(num int) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.NumGPU = num
 	}
 }
 
