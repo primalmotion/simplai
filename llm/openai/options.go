@@ -6,6 +6,7 @@ type options struct {
 	defaultInferenceConfig llm.InferenceConfig
 }
 
+// Option represent the func option.
 type Option func(*options)
 
 func defaultOptions() options {

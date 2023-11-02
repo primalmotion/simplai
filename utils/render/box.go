@@ -7,6 +7,7 @@ import (
 	"golang.org/x/term"
 )
 
+// Box draw a box with content and color.
 func Box(content string, color string) {
 
 	width, _, _ := term.GetSize(0)

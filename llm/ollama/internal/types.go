@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+// StatusError describe various errors.
 type StatusError struct {
 	Status       string `json:"status,omitempty"`
 	ErrorMessage string `json:"error"`
 	StatusCode   int    `json:"code,omitempty"`
 }
 
+// Error return a proper error.
 func (e StatusError) Error() string {
 	switch {
 	case e.Status != "" && e.ErrorMessage != "":
@@ -27,6 +29,7 @@ func (e StatusError) Error() string {
 	}
 }
 
+// GenerateRequest represents an ollama request.
 type GenerateRequest struct {
 	Model    string `json:"model"`
 	Prompt   string `json:"prompt"`
@@ -38,6 +41,7 @@ type GenerateRequest struct {
 	Raw      bool `json:"raw"`
 }
 
+// String representation of an ollama request.
 func (req GenerateRequest) String() string {
 	req.Prompt = ""
 	var buf bytes.Buffer
@@ -48,6 +52,7 @@ func (req GenerateRequest) String() string {
 	return buf.String()
 }
 
+// GenerateResponse represents an ollama response.
 type GenerateResponse struct {
 	CreatedAt          time.Time     `json:"created_at"`
 	Model              string        `json:"model"`
@@ -62,6 +67,7 @@ type GenerateResponse struct {
 	Done               bool          `json:"done"`
 }
 
+// String representation of an ollama response.
 func (resp GenerateResponse) String() string {
 	resp.Context = []int{}
 	resp.Response = ""
@@ -73,6 +79,7 @@ func (resp GenerateResponse) String() string {
 	return buf.String()
 }
 
+// Options represents the ollama options for inference.
 type Options struct {
 	Stop             []string `json:"stop,omitempty"`
 	RepeatLastN      int      `json:"repeat_last_n,omitempty"`
@@ -93,6 +100,7 @@ type Options struct {
 	PenalizeNewline  bool     `json:"penalize_newline,omitempty"`
 }
 
+// DefaultOptions return the default ollama options.
 func DefaultOptions() Options {
 	return Options{
 		NumPredict:       -1,

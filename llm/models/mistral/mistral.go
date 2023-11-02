@@ -16,7 +16,7 @@ func NewLLM(llm llm.LLM, options ...llm.Option) *node.LLM {
 	)
 }
 
-// NewLLM returns a new node.ChatMemory named mistral-memory
+// NewChatMemory a new node.ChatMemory named mistral-memory
 // correctly configured to optmized the chats based on
 // mistral training.
 func NewChatMemory() *node.ChatMemory {
