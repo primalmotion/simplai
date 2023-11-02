@@ -13,16 +13,17 @@ import (
 	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
-type OpenAIAPI struct {
+type openAIAPI struct {
 	client      *http.Client
 	url         string
 	model       string
 	temperature float64
 }
 
-func NewOpenAIAPI(url string, model string, temperature float64) *OpenAIAPI {
+// NewOpenAIAPI returns a new openai compatible LLM connector.
+func NewOpenAIAPI(url string, model string, temperature float64) llm.LLM {
 	client := &http.Client{}
-	return &OpenAIAPI{
+	return &openAIAPI{
 		url:         url,
 		model:       model,
 		temperature: temperature,
@@ -30,7 +31,8 @@ func NewOpenAIAPI(url string, model string, temperature float64) *OpenAIAPI {
 	}
 }
 
-func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
+// Infer implements the node.Node interface
+func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
 	config := llm.NewInferenceConfig()
 	config.Model = v.model
@@ -77,7 +79,7 @@ func (v *OpenAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 
 	defer func() {
 		if resp.Body != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 

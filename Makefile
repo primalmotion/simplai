@@ -1,3 +1,8 @@
+default: build
+
+build:
+	go build -o ./cmd/simplai/simplai ./cmd/simplai/...
+
 lint:
 	golangci-lint run \
 		--timeout=5m \
@@ -30,11 +35,3 @@ sec:
 
 vuln:
 	govulncheck ./...
-
-build:
-	go build -o ./cmd/simplai/simplai ./cmd/simplai/...
-
-run: build
-	@ ./cmd/simplai/simplai
-
-default: build
