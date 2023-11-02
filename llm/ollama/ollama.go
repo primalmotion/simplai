@@ -3,9 +3,12 @@ package ollama
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	ollamaclient "git.sr.ht/~primalmotion/simplai/llm/ollama/internal"
+	"git.sr.ht/~primalmotion/simplai/utils/render"
 )
 
 var (
@@ -14,35 +17,43 @@ var (
 )
 
 // LLM is a ollama LLM implementation.
-type LLM struct {
+type ollamaAPI struct {
 	client  *ollamaclient.Client
+	model   string
 	options options
 }
 
 // New creates a new ollama LLM implementation.
-func New(opts ...Option) (*LLM, error) {
-	o := options{}
+func New(api string, model string, opts ...Option) (*ollamaAPI, error) {
+
+	url, err := url.Parse(api)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse url '%s': %w", api, err)
+	}
+
+	o := defaultOptions()
 	for _, opt := range opts {
 		opt(&o)
 	}
 
-	client, err := ollamaclient.NewClient(o.ollamaServerURL)
-	if err != nil {
-		return nil, err
-	}
-
-	return &LLM{client: client, options: o}, nil
+	return &ollamaAPI{
+		client:  ollamaclient.NewClient(url),
+		model:   model,
+		options: o,
+	}, nil
 }
 
 // Generate implemente the generate interface for LLM.
-func (o *LLM) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
+func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
-	opts := llm.InferenceConfig{}
+	opts := o.options.defaultInferenceConfig
+	opts.Model = o.model
+	opts.MaxTokens = llm.CountTokens(o.model, prompt)
+
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	// Load back CallOptions as ollamaOptions
 	ollamaOptions := o.options.ollamaOptions
 	ollamaOptions.NumPredict = opts.MaxTokens
 	ollamaOptions.Temperature = float32(opts.Temperature)
@@ -54,23 +65,26 @@ func (o *LLM) Infer(ctx context.Context, prompt string, options ...llm.Option) (
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
-	// Override LLM model if set as llm.InferenceOption
-	model := o.options.model
-	if opts.Model != "" {
-		model = opts.Model
-	}
-
 	req := &ollamaclient.GenerateRequest{
-		Model:    model,
+		Model:    opts.Model,
 		System:   o.options.system,
 		Prompt:   prompt,
 		Template: o.options.customModelTemplate,
 		Options:  ollamaOptions,
+		Raw:      o.options.raw,
+	}
+
+	if opts.Debug {
+		render.Box(fmt.Sprintf("[ollama-engine-request]\n\n%s", req), "4")
 	}
 
 	resp, err := o.client.Infer(ctx, req)
 	if err != nil {
 		return "", err
+	}
+
+	if opts.Debug {
+		render.Box(fmt.Sprintf("[ollama-engine-response]\n\n%s", resp), "4")
 	}
 
 	return resp.Response, nil

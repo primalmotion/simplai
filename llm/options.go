@@ -16,14 +16,6 @@ type InferenceConfig struct {
 	Debug             bool
 }
 
-func NewInferenceConfig() InferenceConfig {
-	return InferenceConfig{
-		MaxTokens:   512,
-		Temperature: 0.0,
-		TopP:        1,
-	}
-}
-
 type Option func(*InferenceConfig)
 
 func OptionDebug(debug bool) Option {

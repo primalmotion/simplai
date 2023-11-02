@@ -12,6 +12,7 @@ import (
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	"git.sr.ht/~primalmotion/simplai/llm/models/mistral"
+	"git.sr.ht/~primalmotion/simplai/llm/ollama"
 	"git.sr.ht/~primalmotion/simplai/llm/openai"
 	"git.sr.ht/~primalmotion/simplai/node"
 	"git.sr.ht/~primalmotion/simplai/prompt"
@@ -86,12 +87,27 @@ func run(
 
 	var llmmodel llm.LLM
 
+	// define our default Inference settings
+	defaultInferenceConfig := llm.InferenceConfig{
+		Temperature:       0,
+		RepetitionPenalty: 1.0,
+		TopP:              1,
+		TopK:              -1,
+	}
+
 	switch engine {
 	case "openai":
-		llmmodel = openai.NewOpenAIAPI(api, model, 0.0)
+		var err error
+		llmmodel, err = openai.New(api, model, openai.OptionDefaultInferenceConfig(defaultInferenceConfig))
+		if err != nil {
+			return err
+		}
 	case "ollama":
-		// llmmodel = ollama.New()
-		return fmt.Errorf("TODO")
+		var err error
+		llmmodel, err = ollama.New(api, model, ollama.OptionDefaultInferenceConfig(defaultInferenceConfig))
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unknown model type")
 	}
