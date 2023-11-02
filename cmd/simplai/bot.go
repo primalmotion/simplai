@@ -22,11 +22,11 @@ import (
 )
 
 func matchPrefix(input string, prefix string) (bool, string) {
-	if strings.HasPrefix(input, fmt.Sprintf("%s", prefix)) {
+	if strings.HasPrefix(input, prefix) {
 		return true, strings.TrimSpace(
 			strings.TrimPrefix(
 				input,
-				fmt.Sprintf("%s", prefix),
+				prefix,
 			),
 		)
 	}
@@ -56,7 +56,7 @@ func codeHighlighter() node.Node {
 					return "", err
 				}
 			}
-			return string(buf.Bytes()), nil
+			return buf.String(), nil
 		})
 }
 
@@ -71,6 +71,9 @@ func randomOutputSwitcher(freq int, output string) node.Node {
 			return in.Input(), nil
 		})
 }
+
+// calm the linter
+var _ = randomOutputSwitcher
 
 func run(
 	ctx context.Context,
@@ -258,12 +261,12 @@ func run(
 		}
 
 		if !debugMode {
-			spinner.Start()
+			_ = spinner.Start()
 		}
 
 		output, err := ch.Execute(ctx, llmInput.WithDebug(debugMode))
 		if !debugMode {
-			spinner.Stop()
+			_ = spinner.Stop()
 		}
 		if err != nil {
 			render.Box(err.Error(), "1")
