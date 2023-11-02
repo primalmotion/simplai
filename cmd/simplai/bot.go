@@ -145,9 +145,6 @@ func run(
 		mistral.NewChatMemory().WithStorage(&memstorage),
 		prompt.NewClassifier(
 			prompt.SummarizerInfo,
-			prompt.SearxSearchInfo,
-			prompt.ConversationInfo,
-			prompt.StoryTellerInfo,
 		),
 		mistral.NewLLM(llmmodel),
 	)
@@ -178,7 +175,7 @@ func run(
 		updateSpinner(spinner, "classifying"),
 		prompt.NewClassifier(
 			prompt.SummarizerInfo,
-			prompt.SearxSearchInfo,
+			tool.SearxInfo,
 			prompt.ConversationInfo,
 			prompt.StoryTellerInfo,
 			prompt.CoderInfo,
@@ -212,9 +209,10 @@ func run(
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
-				prompt.SearxSearchInfo.Name,
+				tool.SearxInfo.Name,
 				updateSpinner(spinner, "searching"),
-				prompt.NewSearxSearch(searxURL),
+				tool.NewSearx(searxURL),
+				prompt.NewSummarizer(),
 				mistral.NewLLM(llmmodel),
 			),
 			node.NewSubchainWithName(
