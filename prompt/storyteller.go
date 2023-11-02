@@ -1,8 +1,8 @@
 package prompt
 
 import (
-	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/node"
 )
 
 // StoryTellerInfo is the node.Info for the StoryTeller.

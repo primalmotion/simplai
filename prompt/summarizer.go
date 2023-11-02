@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"time"
 
-	"git.sr.ht/~primalmotion/simplai/node"
-	"git.sr.ht/~primalmotion/simplai/utils/trim"
+	"github.com/primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/utils/trim"
 	readability "github.com/go-shiori/go-readability"
 )
 

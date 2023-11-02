@@ -1,6 +1,6 @@
 package openai
 
-import "git.sr.ht/~primalmotion/simplai/llm"
+import "github.com/primalmotion/simplai/llm"
 
 type options struct {
 	defaultInferenceConfig llm.InferenceConfig

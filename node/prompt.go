@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/llm"
 	"github.com/Masterminds/sprig"
 )
 

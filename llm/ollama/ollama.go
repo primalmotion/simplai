@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
-	ollamaclient "git.sr.ht/~primalmotion/simplai/llm/ollama/internal"
-	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/primalmotion/simplai/llm"
+	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
+	"github.com/primalmotion/simplai/utils/render"
 )
 
 // LLM is a ollama LLM implementation.

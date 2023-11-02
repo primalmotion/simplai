@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/node"
 )
 
 // ClassifierInfo is the node.Info for the Classifier.

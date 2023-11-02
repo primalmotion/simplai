@@ -3,7 +3,7 @@ package node
 import (
 	"context"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/llm"
 )
 
 // LLM is a node responsible for running its

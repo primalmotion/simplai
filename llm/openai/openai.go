@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/utils/render"
 )
 
 type openAIAPI struct {

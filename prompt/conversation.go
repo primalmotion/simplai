@@ -3,8 +3,8 @@ package prompt
 import (
 	"context"
 
-	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/node"
 )
 
 // ConversationInfo is the node.Info for Conversation.

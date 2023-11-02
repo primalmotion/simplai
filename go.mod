@@ -1,4 +1,4 @@
-module git.sr.ht/~primalmotion/simplai
+module github.com/primalmotion/simplai
 
 go 1.21
 

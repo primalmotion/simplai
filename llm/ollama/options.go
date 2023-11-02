@@ -1,8 +1,8 @@
 package ollama
 
 import (
-	"git.sr.ht/~primalmotion/simplai/llm"
-	ollamaclient "git.sr.ht/~primalmotion/simplai/llm/ollama/internal"
+	"github.com/primalmotion/simplai/llm"
+	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
 )
 
 type options struct {

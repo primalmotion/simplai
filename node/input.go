@@ -1,6 +1,6 @@
 package node
 
-import "git.sr.ht/~primalmotion/simplai/llm"
+import "github.com/primalmotion/simplai/llm"
 
 // Input represents the data passed to
 // a Node.

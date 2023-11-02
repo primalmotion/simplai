@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/primalmotion/simplai/utils/render"
 )
 
 // Info holds the basic information about a Node. Every Node info can be

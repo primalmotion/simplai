@@ -1,8 +1,8 @@
 package mistral
 
 import (
-	"git.sr.ht/~primalmotion/simplai/llm"
-	"git.sr.ht/~primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/node"
 )
 
 // NewLLM returns a new node.LLM named mistral-llm

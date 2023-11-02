@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/utils/trim"
+	"github.com/primalmotion/simplai/utils/trim"
 )
 
 // ChatMemory holds information

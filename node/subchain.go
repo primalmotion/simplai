@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"git.sr.ht/~primalmotion/simplai/utils/render"
+	"github.com/primalmotion/simplai/utils/render"
 )
 
 // A Subchain is a Node that holds a separate set of Nodes.
