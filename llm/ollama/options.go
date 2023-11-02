@@ -13,6 +13,7 @@ type options struct {
 	raw                    bool
 }
 
+// Option is the function to handle options.
 type Option func(*options)
 
 func defaultOptions() options {
@@ -29,7 +30,7 @@ func OptionDefaultInferenceConfig(c llm.InferenceConfig) Option {
 	}
 }
 
-// OptionSystem Set the system prompt. This is only valid if
+// OptionSystemPrompt Set the system prompt. This is only valid if
 // OptionCustomTemplate is not set and the ollama model use
 // .System in its model template OR if OptionCustomTemplate
 // is set using {{.System}}.

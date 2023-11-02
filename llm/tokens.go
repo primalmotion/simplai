@@ -4,7 +4,7 @@ import (
 	tiktoken "github.com/pkoukk/tiktoken-go"
 )
 
-// CountToken is computing the max_tokens
+// CountTokens is computing the max_tokens
 // based on the model and the input.
 func CountTokens(model, text string) int {
 	e, err := tiktoken.EncodingForModel(model)

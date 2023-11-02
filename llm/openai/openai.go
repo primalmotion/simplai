@@ -17,11 +17,12 @@ import (
 type openAIAPI struct {
 	client  *http.Client
 	url     *url.URL
-	options options
 	model   string
+	options options
 }
 
-func New(api string, model string, opts ...Option) (*openAIAPI, error) {
+// New Return a new openAIAPI client.
+func New(api string, model string, opts ...Option) (*openAIAPI, error) { //nolint:revive
 
 	url, err := url.Parse(api)
 	if err != nil {

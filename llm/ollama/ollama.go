@@ -2,18 +2,12 @@ package ollama
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 
 	"git.sr.ht/~primalmotion/simplai/llm"
 	ollamaclient "git.sr.ht/~primalmotion/simplai/llm/ollama/internal"
 	"git.sr.ht/~primalmotion/simplai/utils/render"
-)
-
-var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
 )
 
 // LLM is a ollama LLM implementation.
@@ -24,7 +18,7 @@ type ollamaAPI struct {
 }
 
 // New creates a new ollama LLM implementation.
-func New(api string, model string, opts ...Option) (*ollamaAPI, error) {
+func New(api string, model string, opts ...Option) (*ollamaAPI, error) { //nolint:revive
 
 	url, err := url.Parse(api)
 	if err != nil {

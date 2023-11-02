@@ -9,6 +9,7 @@ import (
 	"net/url"
 )
 
+// Client represents a basic client.
 type Client struct {
 	base *url.URL
 	http http.Client
@@ -30,6 +31,7 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
+// NewClient returns a basic client.
 func NewClient(ourl *url.URL) *Client {
 
 	client := Client{
@@ -70,7 +72,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	if err != nil {
 		return err
 	}
-	defer respObj.Body.Close()
+	defer respObj.Body.Close() //nolint
 
 	respBody, err := io.ReadAll(respObj.Body)
 	if err != nil {
@@ -89,6 +91,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	return nil
 }
 
+// Infer is calling the inference ollama endpoint.
 func (c *Client) Infer(ctx context.Context, req *GenerateRequest) (*GenerateResponse, error) {
 	resp := &GenerateResponse{}
 	if err := c.do(ctx, http.MethodPost, "/api/generate", req, &resp); err != nil {
