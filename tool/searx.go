@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"git.sr.ht/~primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/node"
 )
 
 // SearxInfo is the node.Information for the SearxSearch prompt.

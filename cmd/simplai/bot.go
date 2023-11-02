@@ -18,6 +18,7 @@ import (
 	"github.com/primalmotion/simplai/llm/openai"
 	"github.com/primalmotion/simplai/node"
 	"github.com/primalmotion/simplai/prompt"
+	"github.com/primalmotion/simplai/tool"
 	"github.com/primalmotion/simplai/utils/render"
 	"github.com/theckman/yacspin"
 )
