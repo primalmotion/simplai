@@ -92,9 +92,9 @@ make sure you take them into account when generating the response.
 INPUT: {{ .Input }}
 ACTION:`
 
-// A Classifier is a prompt that will try to classify an input
-// into using one of of the tools it knows. The tools are different
-// node.Node that are identified by their node.Info.
+// A Classifier is a prompt that will try to classify an input into using one
+// of of the tools it knows. The tools are different node.Node that are
+// identified by their node.Info.
 type Classifier struct {
 	*node.Prompt
 	tools []node.Info

@@ -159,7 +159,8 @@ func run(
 
 	searxChain := node.NewSubchainWithName(
 		"chain:search",
-		prompt.NewSearxSearch(searxURL),
+		tool.NewSearx(searxURL),
+		prompt.NewSummarizer(),
 		mistral.NewLLM(llmmodel),
 	)
 
