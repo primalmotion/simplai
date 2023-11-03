@@ -2,7 +2,6 @@ package ollama
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 
@@ -11,15 +10,15 @@ import (
 	"github.com/primalmotion/simplai/utils/render"
 )
 
-// Client is a ollama LLM implementation.
-type Client struct {
+// ollamaAPI is a ollama LLM implementation.
+type ollamaAPI struct {
 	client  *ollamaclient.Client
 	model   string
 	options options
 }
 
 // New creates a new ollama LLM implementation.
-func New(api string, model string, opts ...Option) (*Client, error) {
+func New(api string, model string, opts ...Option) (*ollamaAPI, error) { //nolint:revive
 
 	url, err := url.Parse(api)
 	if err != nil {
@@ -31,7 +30,7 @@ func New(api string, model string, opts ...Option) (*Client, error) {
 		opt(&o)
 	}
 
-	return &Client{
+	return &ollamaAPI{
 		client:  ollamaclient.NewClient(url),
 		model:   model,
 		options: o,
@@ -39,7 +38,7 @@ func New(api string, model string, opts ...Option) (*Client, error) {
 }
 
 // Infer implemente the generate interface for LLM.
-func (o *Client) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
+func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
 	opts := o.options.defaultInferenceConfig
 	opts.Model = o.model
@@ -83,39 +82,4 @@ func (o *Client) Infer(ctx context.Context, prompt string, options ...llm.Option
 	}
 
 	return resp.Response, nil
-}
-
-// Embed call the internal Embed api call.
-func (o *Client) Embed(ctx context.Context, inputs []string, options ...llm.Option) ([][]float64, error) {
-
-	opts := o.options.defaultInferenceConfig
-	opts.Model = o.model
-
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	embeddings := [][]float64{}
-
-	for _, input := range inputs {
-		embedding, err := o.client.Embed(ctx, &ollamaclient.EmbeddingRequest{
-			Prompt: input,
-			Model:  opts.Model,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		if len(embedding.Embedding) == 0 {
-			return nil, errors.New("no response")
-		}
-
-		embeddings = append(embeddings, embedding.Embedding)
-	}
-
-	if len(inputs) != len(embeddings) {
-		return embeddings, errors.New("no all input got emmbedded")
-	}
-
-	return embeddings, nil
 }

@@ -1,6 +1,7 @@
 package ollama
 
 import (
+	"github.com/primalmotion/simplai/embeddings"
 	"github.com/primalmotion/simplai/llm"
 	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
 )
@@ -20,6 +21,12 @@ func defaultOptions() options {
 	return options{
 		ollamaOptions: ollamaclient.DefaultOptions(),
 		raw:           true,
+	}
+}
+
+func defaultEmbeddingConfig() embeddings.EmbeddingConfig {
+	return embeddings.EmbeddingConfig{
+		BatchSize: 512,
 	}
 }
 
