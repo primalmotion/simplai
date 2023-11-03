@@ -88,6 +88,9 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 		return "", fmt.Errorf("unable to prepare request: %w", err)
 	}
 
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
 	resp, err := v.client.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("unable to send request: %w", err)
@@ -160,6 +163,9 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		if err != nil {
 			return nil, fmt.Errorf("unable to prepare request: %w", err)
 		}
+
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("Accept", "application/json")
 
 		resp, err := v.client.Do(request)
 		if err != nil {
