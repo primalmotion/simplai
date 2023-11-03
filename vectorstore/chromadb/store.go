@@ -9,11 +9,15 @@ import (
 
 var _ vectorstore.VectorStore = &ChromaStore{}
 
+// A ChromaStore implement the the
+// vectorstore.VectorStore interface for a
+// a store backend by ChromaDB.
 type ChromaStore struct {
 	client       *Client
 	collectionID string
 }
 
+// NewChromaStore returns a new *ChromaStore.
 func NewChromaStore(client *Client, collectionID string) *ChromaStore {
 	return &ChromaStore{
 		client:       client,
@@ -21,6 +25,8 @@ func NewChromaStore(client *Client, collectionID string) *ChromaStore {
 	}
 }
 
+// AddDocument implements the vectorstore.VectorStore interface.
+// if perform a chromadb upsert.
 func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.Document) error {
 
 	l := len(documents)
@@ -36,7 +42,7 @@ func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.
 		metadatas[i] = d.Metadata
 	}
 
-	c.client.Upsert(
+	err := c.client.Upsert(
 		ctx,
 		c.collectionID,
 		EmbeddingUpdate{
@@ -46,10 +52,15 @@ func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.
 			IDs:        ids,
 		},
 	)
+	if err != nil {
+		return fmt.Errorf("unable to execute upsert: %w", err)
+	}
 
 	return nil
 }
 
+// SimilaritySearch implements the vectorstore.VectorStore interface.
+// if perform a chromadb query.
 func (c *ChromaStore) SimilaritySearch(ctx context.Context, input vectorstore.Embedding, max int) ([]vectorstore.Document, error) {
 
 	res, err := c.client.Query(

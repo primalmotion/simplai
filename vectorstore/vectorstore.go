@@ -12,6 +12,7 @@ type Embedding []float64
 // Metadata holds chromadb metadata.
 type Metadata map[string]any
 
+// A Document represents an embedded document.
 type Document struct {
 	Metadata  Metadata
 	ID        string
@@ -24,6 +25,8 @@ func (d Document) String() string {
 	return fmt.Sprintf("<document id:%s distance:%f>", d.ID, d.Distance)
 }
 
+// A VectorStore is the interface that must implement
+// all vector databases.
 type VectorStore interface {
 	AddDocument(context.Context, ...Document) error
 	SimilaritySearch(context.Context, Embedding, int) ([]Document, error)
