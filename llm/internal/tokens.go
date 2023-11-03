@@ -1,4 +1,4 @@
-package llm
+package tools
 
 import (
 	tiktoken "github.com/pkoukk/tiktoken-go"

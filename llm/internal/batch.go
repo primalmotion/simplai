@@ -1,4 +1,4 @@
-package embeddings
+package tools
 
 import (
 	"errors"
