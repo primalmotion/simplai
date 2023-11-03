@@ -128,6 +128,11 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		opt(&config)
 	}
 
+	model := config.Model
+	if model == "" {
+		model = v.model
+	}
+
 	emb := make([][]float64, 0, len(chunks))
 
 	batches := tools.Batch(chunks, config.BatchSize)
@@ -139,7 +144,7 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		encoder := json.NewEncoder(buffer)
 
 		req := &embeddingRequest{
-			Model: config.Model,
+			Model: model,
 			Input: batch,
 		}
 
@@ -218,8 +223,8 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 }
 
 // EmbedQuery implement the embeddings interface for query.
-func (v *openAIAPI) EmbedQuery(ctx context.Context, query string) ([]float64, error) {
-	c, err := v.EmbedChunks(ctx, []string{query})
+func (v *openAIAPI) EmbedQuery(ctx context.Context, query string, options ...llm.EmbeddingOption) ([]float64, error) {
+	c, err := v.EmbedChunks(ctx, []string{query}, options...)
 	if err != nil {
 		return nil, err
 	}

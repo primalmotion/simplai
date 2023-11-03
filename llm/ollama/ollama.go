@@ -94,6 +94,11 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		opt(&opts)
 	}
 
+	model := opts.Model
+	if model == "" {
+		model = o.model
+	}
+
 	emb := make([][]float64, 0, len(chunks))
 
 	batches := tools.Batch(chunks, opts.BatchSize)
@@ -104,7 +109,7 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		for _, chunk := range chunks {
 			req := &ollamaclient.EmbeddingRequest{
 				Prompt: chunk,
-				Model:  opts.Model,
+				Model:  model,
 			}
 
 			if opts.Debug {
@@ -155,8 +160,8 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 }
 
 // EmbedQuery implement the embeddings interface for query.
-func (o *ollamaAPI) EmbedQuery(ctx context.Context, query string) ([]float64, error) {
-	c, err := o.EmbedChunks(ctx, []string{query})
+func (o *ollamaAPI) EmbedQuery(ctx context.Context, query string, options ...llm.EmbeddingOption) ([]float64, error) {
+	c, err := o.EmbedChunks(ctx, []string{query}, options...)
 	if err != nil {
 		return nil, err
 	}
