@@ -1,6 +1,8 @@
 package openai
 
-import "github.com/primalmotion/simplai/llm"
+import (
+	"github.com/primalmotion/simplai/llm"
+)
 
 type options struct {
 	defaultInferenceConfig llm.InferenceConfig
@@ -21,6 +23,12 @@ func defaultOptions() options {
 			TopK:              0,
 			Seed:              -1,
 		},
+	}
+}
+
+func defaultEmbeddingConfig() llm.EmbeddingConfig {
+	return llm.EmbeddingConfig{
+		BatchSize: 512,
 	}
 }
 

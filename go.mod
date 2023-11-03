@@ -13,6 +13,7 @@ require (
 	github.com/spf13/viper v1.17.0
 	github.com/theckman/yacspin v0.13.12
 	golang.org/x/term v0.13.0
+	gonum.org/v1/gonum v0.14.0
 )
 
 require (

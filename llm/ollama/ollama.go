@@ -2,15 +2,17 @@ package ollama
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/primalmotion/simplai/llm"
+	tools "github.com/primalmotion/simplai/llm/internal"
 	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
 	"github.com/primalmotion/simplai/utils/render"
 )
 
-// LLM is a ollama LLM implementation.
+// ollamaAPI is a ollama LLM implementation.
 type ollamaAPI struct {
 	client  *ollamaclient.Client
 	model   string
@@ -37,12 +39,12 @@ func New(api string, model string, opts ...Option) (*ollamaAPI, error) { //nolin
 	}, nil
 }
 
-// Generate implemente the generate interface for LLM.
+// Infer implemente the generate interface for LLM.
 func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
 	opts := o.options.defaultInferenceConfig
 	opts.Model = o.model
-	opts.MaxTokens = llm.CountTokens(o.model, prompt)
+	opts.MaxTokens = tools.CountTokens(o.model, prompt)
 
 	for _, opt := range options {
 		opt(&opts)
@@ -82,4 +84,86 @@ func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	}
 
 	return resp.Response, nil
+}
+
+// EmbedChunks implement the embeddings interface for chunks.
+func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ...llm.EmbeddingOption) ([][]float64, error) {
+
+	opts := defaultEmbeddingConfig()
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	model := opts.Model
+	if model == "" {
+		model = o.model
+	}
+
+	emb := make([][]float64, 0, len(chunks))
+
+	batches := tools.Batch(chunks, opts.BatchSize)
+	for _, batch := range batches {
+
+		currentEmbeddings := [][]float64{}
+
+		for _, chunk := range chunks {
+			req := &ollamaclient.EmbeddingRequest{
+				Prompt: chunk,
+				Model:  model,
+			}
+
+			if opts.Debug {
+				render.Box(fmt.Sprintf("[ollama-embedding-request]\n\n%s", req), "4")
+			}
+
+			embedding, err := o.client.Embed(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(embedding.Embedding) == 0 {
+				return nil, errors.New("no response")
+			}
+
+			if opts.Debug {
+				render.Box(fmt.Sprintf("[ollama-embedding-response]\n\n%s", embedding), "4")
+			}
+
+			currentEmbeddings = append(currentEmbeddings, embedding.Embedding)
+		}
+
+		if len(chunks) != len(currentEmbeddings) {
+			return currentEmbeddings, errors.New("no all input got emmbedded")
+		}
+
+		// get num of token in that batch
+		// we should use the encoder of the model to get the tokens
+		// but its not available. So we fall back on tiktoken
+		numTokens := make([]float64, 0, len(batch))
+		for _, text := range batch {
+			numTokens = append(numTokens, float64(tools.CountTokens(opts.Model, text)))
+		}
+
+		if len(currentEmbeddings) > 1 {
+			combinedVectors, err := tools.CombineBatchedEmbedding(currentEmbeddings, numTokens)
+			if err != nil {
+				return [][]float64{}, err
+			}
+			emb = append(emb, combinedVectors)
+			continue
+		}
+
+		emb = append(emb, currentEmbeddings...)
+	}
+
+	return emb, nil
+}
+
+// EmbedQuery implement the embeddings interface for query.
+func (o *ollamaAPI) EmbedQuery(ctx context.Context, query string, options ...llm.EmbeddingOption) ([]float64, error) {
+	c, err := o.EmbedChunks(ctx, []string{query}, options...)
+	if err != nil {
+		return nil, err
+	}
+	return c[0], nil
 }

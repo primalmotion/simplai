@@ -121,3 +121,37 @@ func DefaultOptions() Options {
 		Seed:             -1,
 	}
 }
+
+// EmbeddingRequest is and EmbeddingRequest.
+type EmbeddingRequest struct {
+	Options map[string]interface{} `json:"options"`
+	Model   string                 `json:"model"`
+	Prompt  string                 `json:"prompt"`
+}
+
+// String representation of an ollama embedding request.
+func (req EmbeddingRequest) String() string {
+	req.Prompt = ""
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(req)
+	return buf.String()
+}
+
+// EmbeddingResponse is the embedding response.
+type EmbeddingResponse struct {
+	Embedding []float64 `json:"embedding"`
+}
+
+// String representation of an ollama embedding response.
+func (resp EmbeddingResponse) String() string {
+	resp.Embedding = nil
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(resp)
+	return buf.String()
+}

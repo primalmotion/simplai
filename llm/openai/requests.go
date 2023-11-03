@@ -22,8 +22,28 @@ type request struct {
 	LogProbs          int            `json:"logprobs,omitempty"`
 }
 
+// String representation of request
 func (r request) String() string {
 	r.Prompt = ""
+
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(r)
+	return buf.String()
+}
+
+// embeddingRequest is the openai structure to make
+// an embedding request.
+type embeddingRequest struct {
+	Model string   `json:"model"`
+	Input []string `json:"input"`
+}
+
+// String representation of embeddingRequest
+func (r embeddingRequest) String() string {
+	r.Input = []string{}
 
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)

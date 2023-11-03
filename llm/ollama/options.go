@@ -23,6 +23,12 @@ func defaultOptions() options {
 	}
 }
 
+func defaultEmbeddingConfig() llm.EmbeddingConfig {
+	return llm.EmbeddingConfig{
+		BatchSize: 512,
+	}
+}
+
 // OptionDefaultInferenceConfig To set the default InferenceConfig parameters.
 func OptionDefaultInferenceConfig(c llm.InferenceConfig) Option {
 	return func(opts *options) {

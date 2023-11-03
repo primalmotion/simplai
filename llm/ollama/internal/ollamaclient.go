@@ -99,3 +99,12 @@ func (c *Client) Infer(ctx context.Context, req *GenerateRequest) (*GenerateResp
 	}
 	return resp, nil
 }
+
+// Embed is calling the embeddings ollama endpoint.
+func (c *Client) Embed(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
+	resp := &EmbeddingResponse{}
+	if err := c.do(ctx, http.MethodPost, "/api/embeddings", req, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
