@@ -54,12 +54,17 @@ func (e *ollamaEmbedder) EmbedChunks(ctx context.Context, chunks []string) ([][]
 			numTokens = append(numTokens, float64(llm.CountTokens(e.config.Model, text)))
 		}
 
-		combinedVectors, err := embeddings.CombineBatchedEmbedding(cemb, numTokens)
-		if err != nil {
-			return [][]float64{}, err
+		if len(cemb) > 1 {
+			combinedVectors, err := embeddings.CombineBatchedEmbedding(cemb, numTokens)
+			if err != nil {
+				return [][]float64{}, err
+			}
+			emb = append(emb, combinedVectors)
+			continue
 		}
 
-		emb = append(emb, combinedVectors)
+		emb = append(emb, cemb...)
+
 	}
 
 	return emb, nil
