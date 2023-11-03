@@ -121,3 +121,15 @@ func DefaultOptions() Options {
 		Seed:             -1,
 	}
 }
+
+// EmbeddingRequest is and EmbeddingRequest.
+type EmbeddingRequest struct {
+	Options map[string]interface{} `json:"options"`
+	Model   string                 `json:"model"`
+	Prompt  string                 `json:"prompt"`
+}
+
+// EmbeddingResponse is the embedding response.
+type EmbeddingResponse struct {
+	Embedding []float64 `json:"embedding"`
+}
