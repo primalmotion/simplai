@@ -10,10 +10,11 @@ type Where map[string]string
 // This only supports float64 for now.
 type Embedding []float64
 
-// Include represents the availaible include
+// Include represents the available include
 // for Get and Query.
 type Include string
 
+// Various values for Include.
 const (
 	IncludeMetadatas = "metadata"
 	IncludeDocuments = "documents"
@@ -63,7 +64,7 @@ type EmbeddingDelete struct {
 	IDs           []string `json:"ids,omitempty"`
 }
 
-// EmbeddingCreate represents a collection create request.
+// CollectionCreate represents a collection create request.
 type CollectionCreate struct {
 	Metadata    Metadata `json:"metadata,omitempty"`
 	Name        string   `json:"name"`
@@ -84,7 +85,7 @@ type GetResult struct {
 	Documents  []string    `json:"documents,omitempty"`
 }
 
-// GetResult holds the data returned by an EmbeddingQuery request.
+// QueryResult holds the data returned by an EmbeddingQuery request.
 type QueryResult struct {
 	IDs        [][]string  `json:"ids,omitempty"`
 	Embeddings []Embedding `json:"embeddings,omitempty"`

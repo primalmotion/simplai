@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// A Client is a simple chromadb client.
 type Client struct {
 	client *http.Client
 	url    string
@@ -89,6 +90,7 @@ func (v *Client) Delete(ctx context.Context, collectionID string, req EmbeddingD
 	)
 }
 
+// Get gets existing embeddings.
 func (v *Client) Get(ctx context.Context, collectionID string, req EmbeddingGet) (GetResult, error) {
 
 	if len(req.Include) == 0 {
@@ -131,7 +133,7 @@ func (v *Client) Query(ctx context.Context, collectionID string, req EmbeddingQu
 	return res, err
 }
 
-func (v *Client) send(ctx context.Context, path string, method string, obj any, out any) error {
+func (v *Client) send(ctx context.Context, path string, method string, obj any, out any) error { //nolint: unparam
 
 	buffer := bytes.NewBuffer(nil)
 
@@ -142,7 +144,7 @@ func (v *Client) send(ctx context.Context, path string, method string, obj any, 
 
 	request, err := http.NewRequestWithContext(
 		ctx,
-		http.MethodPost,
+		method,
 		fmt.Sprintf(
 			"%s/%s",
 			strings.TrimSuffix(v.url, "/"),
