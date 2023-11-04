@@ -3,7 +3,7 @@ package prompt
 import (
 	"context"
 
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/node"
 )
 
@@ -41,7 +41,7 @@ func NewConversation() *Conversation {
 		Prompt: node.NewPrompt(
 			ConversationInfo,
 			conversationTemplate,
-			llm.OptionTemperature(0.8),
+			engine.OptionTemperature(0.8),
 		),
 	}
 }
@@ -50,7 +50,7 @@ func NewConversation() *Conversation {
 // inject into the input the llm.OptionStop needed.
 func (n *Conversation) Execute(ctx context.Context, in node.Input) (string, error) {
 	return n.Prompt.Execute(ctx, in.WithLLMOptions(
-		llm.OptionStop(
+		engine.OptionStop(
 			in.Get("username").(string),
 			in.Get("botname").(string),
 			in.Get("system").(string),

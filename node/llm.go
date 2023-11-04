@@ -3,19 +3,19 @@ package node
 import (
 	"context"
 
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 )
 
 // LLM is a node responsible for running its
 // input into an inference engine.
 type LLM struct {
-	engine llm.LLM
+	engine engine.LLM
 	*BaseNode
-	options []llm.Option
+	options []engine.LLMOption
 }
 
 // NewLLM returns a new LLM using the given engine.
-func NewLLM(info Info, engine llm.LLM, options ...llm.Option) *LLM {
+func NewLLM(info Info, engine engine.LLM, options ...engine.LLMOption) *LLM {
 	return &LLM{
 		BaseNode: New(info),
 		engine:   engine,
@@ -28,7 +28,7 @@ func (n *LLM) Execute(ctx context.Context, input Input) (string, error) {
 
 	opts := append(n.options, input.LLMOptions()...)
 	if input.Debug() {
-		opts = append(opts, llm.OptionDebug(true))
+		opts = append(opts, engine.OptionDebug(true))
 	}
 
 	output, err := n.engine.Infer(ctx, input.Input(), opts...)

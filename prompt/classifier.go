@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/node"
 )
 
@@ -107,8 +107,8 @@ func NewClassifier(tools ...node.Info) *Classifier {
 		Prompt: node.NewPrompt(
 			ClassifierInfo,
 			classifierTemplate,
-			llm.OptionStop("\n"),
-			llm.OptionMaxTokens(1024),
+			engine.OptionStop("\n"),
+			engine.OptionMaxTokens(1024),
 		),
 	}
 }

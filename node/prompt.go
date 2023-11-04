@@ -8,7 +8,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 )
 
 // A Prompt is a Node that is responsible
@@ -17,14 +17,14 @@ import (
 type Prompt struct {
 	*BaseNode
 	template   string
-	options    []llm.Option
+	options    []engine.LLMOption
 	maxRetries int
 }
 
 // NewPrompt returns a new *Prompt with the given template and ll.Options.
 // The llm.Options will always be appended to the input, before the input's
 // own LLMOptions. So input's options will take precedence.
-func NewPrompt(info Info, template string, options ...llm.Option) *Prompt {
+func NewPrompt(info Info, template string, options ...engine.LLMOption) *Prompt {
 	return &Prompt{
 		template:   template,
 		options:    options,
@@ -34,8 +34,8 @@ func NewPrompt(info Info, template string, options ...llm.Option) *Prompt {
 }
 
 // Options returns the current llm.Options.
-func (n *Prompt) Options() []llm.Option {
-	return append([]llm.Option{}, n.options...)
+func (n *Prompt) Options() []engine.LLMOption {
+	return append([]engine.LLMOption{}, n.options...)
 }
 
 // WithMaxRetries sets the maximum number of retries the prompt

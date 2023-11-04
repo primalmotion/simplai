@@ -1,7 +1,7 @@
 package prompt
 
 import (
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/node"
 )
 
@@ -45,7 +45,7 @@ func NewCoder() *Coder {
 		Prompt: node.NewPrompt(
 			CoderInfo,
 			coderTemplate,
-			llm.OptionStop("<|EOF|>", "\nINPUT"),
+			engine.OptionStop("<|EOF|>", "\nINPUT"),
 		),
 	}
 }

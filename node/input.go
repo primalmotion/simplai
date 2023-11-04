@@ -1,6 +1,6 @@
 package node
 
-import "github.com/primalmotion/simplai/llm"
+import "github.com/primalmotion/simplai/engine"
 
 // Input represents the data passed to
 // a Node.
@@ -8,7 +8,7 @@ type Input struct {
 	keys       map[string]any
 	input      string
 	scratchpad string
-	llmOptions []llm.Option
+	llmOptions []engine.LLMOption
 	debug      bool
 }
 
@@ -16,7 +16,7 @@ type Input struct {
 // and llm.Options. Note that the llm.Option will be
 // carried out until it reaches a LLM Node. After
 // that they will be discarded.
-func NewInput(in string, options ...llm.Option) Input {
+func NewInput(in string, options ...engine.LLMOption) Input {
 	return Input{
 		input:      in,
 		keys:       map[string]any{},
@@ -50,13 +50,13 @@ func (i Input) Get(key string) any {
 
 // WithLLMOptions returns a copy of the receiver with the given llm.Options
 // added to it.
-func (i Input) WithLLMOptions(options ...llm.Option) Input {
-	i.llmOptions = append([]llm.Option{}, options...)
+func (i Input) WithLLMOptions(options ...engine.LLMOption) Input {
+	i.llmOptions = append([]engine.LLMOption{}, options...)
 	return i
 }
 
 // LLMOptions returns the current llm.Options.
-func (i Input) LLMOptions() []llm.Option {
+func (i Input) LLMOptions() []engine.LLMOption {
 	return i.llmOptions
 }
 

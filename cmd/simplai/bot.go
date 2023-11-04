@@ -12,10 +12,10 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/quick"
-	"github.com/primalmotion/simplai/llm"
-	"github.com/primalmotion/simplai/llm/models/mistral"
-	"github.com/primalmotion/simplai/llm/ollama"
-	"github.com/primalmotion/simplai/llm/openai"
+	"github.com/primalmotion/simplai/engine"
+	"github.com/primalmotion/simplai/engine/models/mistral"
+	"github.com/primalmotion/simplai/engine/ollama"
+	"github.com/primalmotion/simplai/engine/openai"
 	"github.com/primalmotion/simplai/node"
 	"github.com/primalmotion/simplai/prompt"
 	"github.com/primalmotion/simplai/tool"
@@ -79,24 +79,60 @@ var _ = randomOutputSwitcher
 
 func run(
 	ctx context.Context,
-	engine string,
+	engineName string,
 	model string,
 	api string,
 	searxURL string,
 	debug bool,
 ) error {
 
-	var llmmodel llm.LLM
+	// cdb := chromadb.New("http://127.0.0.1:8000")
+	// col, _ := cdb.CreateCollection(ctx, chromadb.CollectionCreate{
+	// 	Name:        "test",
+	// 	GetOrCreate: true,
+	// })
+	// store := chromadb.NewChromaStore(cdb, col.ID)
+	//
+	// err := store.AddDocument(
+	// 	ctx,
+	// 	vectorstore.Document{
+	// 		ID:        "doc10",
+	// 		Content:   "Cats sucks ass",
+	// 		Embedding: vectorstore.Embedding{0.1, 0.2, 0.3},
+	// 		Metadata:  vectorstore.Metadata{"coucou": "cucul"},
+	// 	},
+	// 	vectorstore.Document{
+	// 		ID:        "doc20",
+	// 		Content:   "Dogs are great",
+	// 		Embedding: vectorstore.Embedding{0.847734, 0.23784640, 0.389175},
+	// 		Metadata:  vectorstore.Metadata{"gougou": "gaga"},
+	// 	},
+	// )
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// doc, err := store.SimilaritySearch(
+	// 	ctx,
+	// 	vectorstore.Embedding{0.1, 0.2, 0.3},
+	// 	10,
+	// )
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(doc)
+
+	var llmmodel engine.LLM
 
 	// define our default Inference settings
-	defaultInferenceConfig := llm.InferenceConfig{
+	defaultInferenceConfig := engine.InferenceConfig{
 		Temperature:       0,
 		RepetitionPenalty: 1.0,
 		TopP:              1,
 		TopK:              -1,
 	}
 
-	switch engine {
+	switch engineName {
 	case "openai":
 		var err error
 		llmmodel, err = openai.New(api, model, openai.OptionDefaultInferenceConfig(defaultInferenceConfig))

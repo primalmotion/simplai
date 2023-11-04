@@ -1,7 +1,7 @@
 package prompt
 
 import (
-	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/node"
 )
 
@@ -41,7 +41,7 @@ func NewStoryTeller() *StoryTeller {
 		Prompt: node.NewPrompt(
 			StoryTellerInfo,
 			storyTellerTemplate,
-			llm.OptionTemperature(0.8),
+			engine.OptionTemperature(0.8),
 		),
 	}
 }
