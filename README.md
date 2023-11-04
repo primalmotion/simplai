@@ -96,8 +96,10 @@ TODO
 - [x] base API
 - [x] chain system
 - [ ] better memory
+- [x] embedder
+- [x] store
 - [ ] unit tests
 - [x] flags for the main binary
-- [ ] retry error back propagation
-- [ ] doc strings
+- [x] retry error back propagation
+- [x] doc strings
 - [ ] move some parts out of the repository (prompts)
