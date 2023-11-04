@@ -15,18 +15,18 @@ applications.
 This is still a work in progress, and the API will change, but things are
 shaping up and soon unit testing will be added as the API stabilizes.
 
-## Chain
+## Concepts
 
-The root concept of Simplai is to use stacks of nodes. Each node deals with an
-input and returns an output and an eventual error.
-This was inspired by Langchain (especially the part about the need to have a
-sane a simple interface).
+The root concept of Simplai is to use chains of nodes. Each node deals with an
+input and returns an output and an eventual error. This was inspired by
+Langchain (especially the part about the need to have a sane a simple
+interface).
 
-Right now the repositoty contains several prompts, but those are bound to be
+Right now the repository contains several prompts, but those are bound to be
 moved out of this repository, as it should only contain the basis to build
 everything else.
 
-## Get Started
+## Try the example bot
 
 To get started you must have a running instance of VLLM or Ollama, preferably
 running Mistral or Zephyr. While the connector for VLLM is using OpenAI style
@@ -103,3 +103,4 @@ TODO
 - [x] retry error back propagation
 - [x] doc strings
 - [ ] move some parts out of the repository (prompts)
+- [ ] declarative chain builder (from a yaml file or something like that)
