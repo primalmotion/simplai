@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/vectorstore"
 )
 
@@ -13,21 +14,23 @@ var _ vectorstore.VectorStore = &ChromaStore{}
 // vectorstore.VectorStore interface for a
 // a store backend by ChromaDB.
 type ChromaStore struct {
+	embedder     engine.Embedder
 	client       *Client
 	collectionID string
 }
 
 // NewChromaStore returns a new *ChromaStore.
-func NewChromaStore(client *Client, collectionID string) *ChromaStore {
+func NewChromaStore(client *Client, collectionID string, embedder engine.Embedder) *ChromaStore {
 	return &ChromaStore{
 		client:       client,
+		embedder:     embedder,
 		collectionID: collectionID,
 	}
 }
 
 // AddDocument implements the vectorstore.VectorStore interface.
 // if perform a chromadb upsert.
-func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.Document) error {
+func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.Document) (err error) {
 
 	l := len(documents)
 	embeddings := make([]vectorstore.Embedding, l)
@@ -37,12 +40,18 @@ func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.
 
 	for i, d := range documents {
 		embeddings[i] = d.Embedding
+		if len(d.Embedding) == 0 {
+			embeddings[i], err = c.embedder.EmbedQuery(ctx, d.Content)
+			if err != nil {
+				return fmt.Errorf("unable to embedd document: %w", err)
+			}
+		}
 		contents[i] = d.Content
 		ids[i] = d.ID
 		metadatas[i] = d.Metadata
 	}
 
-	err := c.client.Upsert(
+	err = c.client.Upsert(
 		ctx,
 		c.collectionID,
 		EmbeddingUpdate{

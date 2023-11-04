@@ -86,42 +86,6 @@ func run(
 	debug bool,
 ) error {
 
-	// cdb := chromadb.New("http://127.0.0.1:8000")
-	// col, _ := cdb.CreateCollection(ctx, chromadb.CollectionCreate{
-	// 	Name:        "test",
-	// 	GetOrCreate: true,
-	// })
-	// store := chromadb.NewChromaStore(cdb, col.ID)
-	//
-	// err := store.AddDocument(
-	// 	ctx,
-	// 	vectorstore.Document{
-	// 		ID:        "doc10",
-	// 		Content:   "Cats sucks ass",
-	// 		Embedding: vectorstore.Embedding{0.1, 0.2, 0.3},
-	// 		Metadata:  vectorstore.Metadata{"coucou": "cucul"},
-	// 	},
-	// 	vectorstore.Document{
-	// 		ID:        "doc20",
-	// 		Content:   "Dogs are great",
-	// 		Embedding: vectorstore.Embedding{0.847734, 0.23784640, 0.389175},
-	// 		Metadata:  vectorstore.Metadata{"gougou": "gaga"},
-	// 	},
-	// )
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// doc, err := store.SimilaritySearch(
-	// 	ctx,
-	// 	vectorstore.Embedding{0.1, 0.2, 0.3},
-	// 	10,
-	// )
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(doc)
-
 	var llmmodel engine.LLM
 
 	// define our default Inference settings
@@ -148,6 +112,41 @@ func run(
 	default:
 		return fmt.Errorf("unknown model type")
 	}
+
+	// cdb := chromadb.New("http://127.0.0.1:8000")
+	// col, _ := cdb.CreateCollection(ctx, chromadb.CollectionCreate{
+	// 	Name:        "test",
+	// 	GetOrCreate: true,
+	// })
+	// store := chromadb.NewChromaStore(cdb, col.ID, llmmodel.(engine.Embedder))
+	//
+	// err := store.AddDocument(
+	// 	ctx,
+	// 	vectorstore.Document{
+	// 		ID:       "doc10",
+	// 		Content:  "Cats sucks ass",
+	// 		Metadata: vectorstore.Metadata{"coucou": "cucul"},
+	// 	},
+	// 	vectorstore.Document{
+	// 		ID:        "doc20",
+	// 		Content:   "Dogs are great",
+	// 		Embedding: vectorstore.Embedding{0.847734, 0.23784640, 0.389175},
+	// 		Metadata:  vectorstore.Metadata{"gougou": "gaga"},
+	// 	},
+	// )
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// doc, err := store.SimilaritySearch(
+	// 	ctx,
+	// 	vectorstore.Embedding{0.1, 0.2, 0.3},
+	// 	10,
+	// )
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(doc)
 
 	debugMode := debug
 
