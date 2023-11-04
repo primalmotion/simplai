@@ -1,7 +1,8 @@
 default: build
 
 build:
-	go build -o ./cmd/simplai/simplai ./cmd/simplai/...
+	go build ./...
+	cd ./cmd/simplai && go build
 
 lint:
 	golangci-lint run \
