@@ -7,14 +7,14 @@ import (
 	"net/url"
 
 	"github.com/primalmotion/simplai/llm"
-	tools "github.com/primalmotion/simplai/llm/internal"
-	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
+	"github.com/primalmotion/simplai/llm/internal/utils"
+	"github.com/primalmotion/simplai/llm/ollama/internal/client"
 	"github.com/primalmotion/simplai/utils/render"
 )
 
 // ollamaAPI is a ollama LLM implementation.
 type ollamaAPI struct {
-	client  *ollamaclient.Client
+	client  *client.Client
 	model   string
 	options options
 }
@@ -33,18 +33,18 @@ func New(api string, model string, opts ...Option) (*ollamaAPI, error) { //nolin
 	}
 
 	return &ollamaAPI{
-		client:  ollamaclient.NewClient(url),
+		client:  client.NewClient(url),
 		model:   model,
 		options: o,
 	}, nil
 }
 
-// Infer implemente the generate interface for LLM.
+// Infer implemente the geneollamaclientrate interface for LLM.
 func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Option) (string, error) {
 
 	opts := o.options.defaultInferenceConfig
 	opts.Model = o.model
-	opts.MaxTokens = tools.CountTokens(o.model, prompt)
+	opts.MaxTokens = utils.CountTokens(o.model, prompt)
 
 	for _, opt := range options {
 		opt(&opts)
@@ -61,7 +61,7 @@ func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
-	req := &ollamaclient.GenerateRequest{
+	req := &client.GenerateRequest{
 		Model:    opts.Model,
 		System:   o.options.system,
 		Prompt:   prompt,
@@ -101,13 +101,13 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 
 	emb := make([][]float64, 0, len(chunks))
 
-	batches := tools.Batch(chunks, opts.BatchSize)
+	batches := utils.Batch(chunks, opts.BatchSize)
 	for _, batch := range batches {
 
 		currentEmbeddings := [][]float64{}
 
 		for _, chunk := range chunks {
-			req := &ollamaclient.EmbeddingRequest{
+			req := &client.EmbeddingRequest{
 				Prompt: chunk,
 				Model:  model,
 			}
@@ -141,11 +141,11 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		// but its not available. So we fall back on tiktoken
 		numTokens := make([]float64, 0, len(batch))
 		for _, text := range batch {
-			numTokens = append(numTokens, float64(tools.CountTokens(opts.Model, text)))
+			numTokens = append(numTokens, float64(utils.CountTokens(opts.Model, text)))
 		}
 
 		if len(currentEmbeddings) > 1 {
-			combinedVectors, err := tools.CombineBatchedEmbedding(currentEmbeddings, numTokens)
+			combinedVectors, err := utils.CombineBatchedEmbedding(currentEmbeddings, numTokens)
 			if err != nil {
 				return [][]float64{}, err
 			}

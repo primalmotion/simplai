@@ -1,4 +1,4 @@
-package ollamaclient
+package client
 
 import (
 	"bytes"

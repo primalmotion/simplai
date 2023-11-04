@@ -11,9 +11,8 @@ import (
 	"net/url"
 	"strings"
 
-	tools "github.com/primalmotion/simplai/llm/internal"
-
 	"github.com/primalmotion/simplai/llm"
+	"github.com/primalmotion/simplai/llm/internal/utils"
 	"github.com/primalmotion/simplai/utils/render"
 )
 
@@ -51,7 +50,7 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...llm.Opt
 
 	config := v.options.defaultInferenceConfig
 	config.Model = v.model
-	config.MaxTokens = tools.CountTokens(v.model, prompt)
+	config.MaxTokens = utils.CountTokens(v.model, prompt)
 
 	for _, opt := range options {
 		opt(&config)
@@ -138,7 +137,7 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 
 	emb := make([][]float64, 0, len(chunks))
 
-	batches := tools.Batch(chunks, config.BatchSize)
+	batches := utils.Batch(chunks, config.BatchSize)
 	for _, batch := range batches {
 
 		currentEmbeddings := [][]float64{}
@@ -210,11 +209,11 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		// but its not available. So we fall back on tiktoken
 		numTokens := make([]float64, 0, len(batch))
 		for _, text := range batch {
-			numTokens = append(numTokens, float64(tools.CountTokens(config.Model, text)))
+			numTokens = append(numTokens, float64(utils.CountTokens(config.Model, text)))
 		}
 
 		if len(currentEmbeddings) > 1 {
-			combinedVectors, err := tools.CombineBatchedEmbedding(currentEmbeddings, numTokens)
+			combinedVectors, err := utils.CombineBatchedEmbedding(currentEmbeddings, numTokens)
 			if err != nil {
 				return [][]float64{}, err
 			}

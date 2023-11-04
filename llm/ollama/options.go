@@ -2,14 +2,14 @@ package ollama
 
 import (
 	"github.com/primalmotion/simplai/llm"
-	ollamaclient "github.com/primalmotion/simplai/llm/ollama/internal"
+	"github.com/primalmotion/simplai/llm/ollama/internal/client"
 )
 
 type options struct {
 	customModelTemplate    string
 	system                 string
 	defaultInferenceConfig llm.InferenceConfig
-	ollamaOptions          ollamaclient.Options
+	ollamaOptions          client.Options
 	raw                    bool
 }
 
@@ -18,7 +18,7 @@ type Option func(*options)
 
 func defaultOptions() options {
 	return options{
-		ollamaOptions: ollamaclient.DefaultOptions(),
+		ollamaOptions: client.DefaultOptions(),
 		raw:           true,
 	}
 }

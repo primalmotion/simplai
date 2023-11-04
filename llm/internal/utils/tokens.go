@@ -1,8 +1,6 @@
-package tools
+package utils
 
-import (
-	tiktoken "github.com/pkoukk/tiktoken-go"
-)
+import tiktoken "github.com/pkoukk/tiktoken-go"
 
 // CountTokens is computing the max_tokens
 // based on the model and the input.
