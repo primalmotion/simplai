@@ -6,6 +6,7 @@ replace github.com/primalmotion/simplai => ../../
 
 require (
 	github.com/alecthomas/chroma v0.10.0
+	github.com/c-bata/go-prompt v0.2.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/primalmotion/simplai v0.0.0-00010101000000-000000000000
 	github.com/spf13/cobra v1.7.0
@@ -36,12 +37,14 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/mattn/go-tty v0.0.3 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
@@ -63,3 +66,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/c-bata/go-prompt => github.com/joeycumines/go-prompt v0.0.0-20230810222144-645e1d124d01

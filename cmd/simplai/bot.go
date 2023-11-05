@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/quick"
+	tprompt "github.com/c-bata/go-prompt"
 	"github.com/primalmotion/simplai/engine"
 	"github.com/primalmotion/simplai/engine/models/mistral"
 	"github.com/primalmotion/simplai/engine/ollama"
@@ -22,6 +22,28 @@ import (
 	"github.com/primalmotion/simplai/utils/render"
 	"github.com/theckman/yacspin"
 )
+
+// huh?
+type exitPanic int
+
+func completer(d tprompt.Document) []tprompt.Suggest {
+
+	if w := d.GetWordBeforeCursor(); w != ":" && w != "/" {
+		return nil
+	}
+
+	s := []tprompt.Suggest{
+		{Text: ":flush", Description: "flush the memory of the bot"},
+		{Text: ":debug", Description: "turn on and off debug traces"},
+		{Text: ":quit", Description: "quit"},
+		{Text: "/c", Description: "force conversation tool"},
+		{Text: "/C", Description: "force classification tool"},
+		{Text: "/s", Description: "force search tool"},
+		{Text: "/S", Description: "force summarizer tool"},
+		{Text: "/t", Description: "force story teller tool"},
+	}
+	return tprompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+}
 
 func matchPrefix(input string, prefix string) (bool, string) {
 	if strings.HasPrefix(input, prefix) {
@@ -260,15 +282,11 @@ func run(
 		),
 	)
 
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("> ")
-	for scanner.Scan() {
-
-		input := strings.TrimSpace(scanner.Text())
+	promptExecutor := func(input string) {
+		input = strings.TrimSpace(input)
 
 		if input == "" {
-			fmt.Print("> ")
-			continue
+			return
 		}
 
 		var ch node.Node
@@ -277,8 +295,13 @@ func run(
 		if ok, _ := matchPrefix(input, ":debug"); ok {
 			debugMode = !debugMode
 			render.Box(fmt.Sprintf("debug mode: %t", debugMode), "2")
-			fmt.Print("> ")
-			continue
+			return
+		}
+
+		if ok, _ := matchPrefix(input, ":quit"); ok {
+			// yeah.. there is a story here, obviously.
+			// see at the bottom of the function.
+			panic(exitPanic(0))
 		}
 
 		if ok, in := matchPrefix(input, "/s"); ok {
@@ -321,13 +344,45 @@ func run(
 		}
 		if err != nil {
 			render.Box(err.Error(), "1")
-			fmt.Print("> ")
-			continue
+			return
 		}
 
 		render.Box(output, "12")
-		fmt.Print("> ")
 	}
+
+	defer func() {
+		// See a bit below on why
+		// this insanity came to existence.
+		v, ok := recover().(exitPanic)
+		if ok {
+			os.Exit(0)
+		}
+		panic(v)
+	}()
+
+	promptHistory := []string{}
+	tprompt.New(
+		promptExecutor,
+		completer,
+		tprompt.OptionPrefix("> "),
+		tprompt.OptionHistory(promptHistory),
+		tprompt.OptionSuggestionBGColor(9),
+		tprompt.OptionDescriptionBGColor(9),
+		tprompt.OptionDescriptionTextColor(tprompt.DefaultColor),
+		tprompt.OptionSelectedSuggestionTextColor(8),
+		tprompt.OptionSelectedSuggestionBGColor(tprompt.DefaultColor),
+		tprompt.OptionSelectedDescriptionBGColor(tprompt.DefaultColor),
+		tprompt.OptionSelectedDescriptionTextColor(tprompt.DefaultColor),
+		// this is an insane way to quit the prompt. but it seems
+		// there is no other way. I don't even understand why there
+		// is no way to cleanly exit..
+		// Without this trick, ctrl-c is dead, as the term is no restored.
+		// see: https://github.com/c-bata/go-prompt/issues/59
+		tprompt.OptionAddKeyBind(tprompt.KeyBind{
+			Key: tprompt.ControlC,
+			Fn:  func(*tprompt.Buffer) { panic(exitPanic(0)) },
+		}),
+	).Run()
 
 	return nil
 }
