@@ -106,7 +106,7 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 
 		currentEmbeddings := [][]float64{}
 
-		for _, chunk := range chunks {
+		for _, chunk := range batch {
 			req := &client.EmbeddingRequest{
 				Prompt: chunk,
 				Model:  model,
@@ -132,7 +132,7 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 			currentEmbeddings = append(currentEmbeddings, embedding.Embedding)
 		}
 
-		if len(chunks) != len(currentEmbeddings) {
+		if len(batch) != len(currentEmbeddings) {
 			return currentEmbeddings, errors.New("no all input got emmbedded")
 		}
 
