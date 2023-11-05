@@ -200,7 +200,7 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 			currentEmbeddings = append(currentEmbeddings, embResp.Data[i].Embedding)
 		}
 
-		if len(chunks) != len(currentEmbeddings) {
+		if len(batch) != len(currentEmbeddings) {
 			return currentEmbeddings, errors.New("no all input got emmbedded")
 		}
 
