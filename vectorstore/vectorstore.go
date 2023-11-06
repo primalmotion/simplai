@@ -29,5 +29,5 @@ func (d Document) String() string {
 // all vector databases.
 type VectorStore interface {
 	AddDocument(context.Context, ...Document) error
-	SimilaritySearch(context.Context, Embedding, int) ([]Document, error)
+	SimilaritySearch(context.Context, string, int) ([]Document, error)
 }
