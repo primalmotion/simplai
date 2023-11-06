@@ -10,7 +10,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// A memory store is an in memory simple vector db.
+// A MemoryStore is an in memory simple vector db.
 type MemoryStore struct {
 	embedder engine.Embedder
 	db       map[string]vectorstore.Document
