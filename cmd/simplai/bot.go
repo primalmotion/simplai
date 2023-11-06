@@ -20,6 +20,8 @@ import (
 	"github.com/primalmotion/simplai/prompt"
 	"github.com/primalmotion/simplai/tool"
 	"github.com/primalmotion/simplai/utils/render"
+	"github.com/primalmotion/simplai/vectorstore"
+	"github.com/primalmotion/simplai/vectorstore/memdb"
 	"github.com/theckman/yacspin"
 )
 
@@ -38,8 +40,9 @@ func completer(d tprompt.Document) []tprompt.Suggest {
 		{Text: ":quit", Description: "quit"},
 		{Text: "/c", Description: "force conversation tool"},
 		{Text: "/C", Description: "force classification tool"},
-		{Text: "/s", Description: "force search tool"},
-		{Text: "/S", Description: "force summarizer tool"},
+		{Text: "/r", Description: "force rag tool"},
+		{Text: "/s", Description: "force summarizer tool"},
+		{Text: "/S", Description: "force search tool"},
 		{Text: "/t", Description: "force story teller tool"},
 	}
 	return tprompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
@@ -135,40 +138,34 @@ func run(
 		return fmt.Errorf("unknown model type")
 	}
 
-	// cdb := chromadb.New("http://127.0.0.1:8000")
-	// col, _ := cdb.CreateCollection(ctx, chromadb.CollectionCreate{
-	// 	Name:        "test",
-	// 	GetOrCreate: true,
-	// })
-	// store := chromadb.NewChromaStore(cdb, col.ID, llmmodel.(engine.Embedder))
-	//
-	// err := store.AddDocument(
-	// 	ctx,
-	// 	vectorstore.Document{
-	// 		ID:       "doc10",
-	// 		Content:  "Cats sucks ass",
-	// 		Metadata: vectorstore.Metadata{"coucou": "cucul"},
-	// 	},
-	// 	vectorstore.Document{
-	// 		ID:        "doc20",
-	// 		Content:   "Dogs are great",
-	// 		Embedding: vectorstore.Embedding{0.847734, 0.23784640, 0.389175},
-	// 		Metadata:  vectorstore.Metadata{"gougou": "gaga"},
-	// 	},
-	// )
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//
-	// doc, err := store.SimilaritySearch(
-	// 	ctx,
-	// 	vectorstore.Embedding{0.1, 0.2, 0.3},
-	// 	10,
-	// )
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(doc)
+	var em engine.Embedder
+	em, _ = openai.New("http://localhost:5000", "all-MiniLM-L12-v2")
+	store := memdb.New(em)
+
+	err := store.AddDocument(
+		ctx,
+		vectorstore.Document{
+			ID: "",
+			Content: `The cat (Felis catus), commonly referred to as the domestic cat or house cat, is the only domesticated species in the family Felidae. Recent advances in archaeology and genetics have shown that the domestication of the cat occurred in the Near East around 7500 BC. It is commonly kept as a house pet and farm cat, but also ranges freely as a feral cat avoiding human contact. It is valued by humans for companionship and its ability to kill vermin. Because of its retractable claws it is adapted to killing small prey like mice and rats. It has a strong flexible body, quick reflexes, sharp teeth, and its night vision and sense of smell are well developed. It is a social species, but a solitary hunter and a crepuscular predator. Cat communication includes vocalizations like meowing, purring, trilling, hissing, growling, and grunting as well as cat body language. It can hear sounds too faint or too high in frequency for human ears, such as those made by small mammals. It also secretes and perceives pheromones.
+
+Female domestic cats can have kittens from spring to late autumn in temperate zones and throughout the year in equatorial regions, with litter sizes often ranging from two to five kittens. Domestic cats are bred and shown at events as registered pedigreed cats, a hobby known as cat fancy. Animal population control of cats may be achieved by spaying and neutering, but their proliferation and the abandonment of pets has resulted in large numbers of feral cats worldwide, contributing to the extinction of bird, mammal and reptile species.
+
+As of 2017, the domestic cat was the second most popular pet in the United States, with 95.6 million cats owned and around 42 million households owning at least one cat. In the United Kingdom, 26% of adults have a cat, with an estimated population of 10.9 million pet cats as of 2020. As of 2021, there were an estimated 220 million owned and 480 million stray cats in the world
+			`,
+			Metadata: vectorstore.Metadata{"coucou": "cucul"},
+		},
+		vectorstore.Document{
+			ID: "doc20",
+			Content: `The dog (Canis familiaris[4][5] or Canis lupus familiaris[5]) is a domesticated descendant of the wolf. Also called the domestic dog, it is derived from extinct Pleistocene wolves,[6][7] and the modern wolf is the dog's nearest living relative.[8] The dog was the first species to be domesticated[9][8] by humans. Hunter-gatherers did this, over 15,000 years ago,[7] which was before the development of agriculture.[1] Due to their long association with humans, dogs have expanded to a large number of domestic individuals[10] and gained the ability to thrive on a starch-rich diet that would be inadequate for other canids.[11]
+
+The dog has been selectively bred over millennia for various behaviors, sensory capabilities, and physical attributes.[12] Dog breeds vary widely in shape, size, and color. They perform many roles for humans, such as hunting, herding, pulling loads, protection, assisting police and the military, companionship, therapy, and aiding disabled people. Over the millennia, dogs became uniquely adapted to human behavior, and the human–canine bond has been a topic of frequent study.[13] This influence on human society has given them the sobriquet of "man's best friend".[14]
+			`,
+			Metadata: vectorstore.Metadata{"gougou": "gaga"},
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
 
 	debugMode := debug
 
@@ -216,6 +213,13 @@ func run(
 		"chain:search",
 		tool.NewSearx(searxURL),
 		prompt.NewSummarizer(),
+		mistral.NewLLM(llmmodel),
+	)
+
+	ragChain := node.NewSubchainWithName(
+		"chain:rag",
+		tool.NewRetriever(store, 5),
+		prompt.NewRag(),
 		mistral.NewLLM(llmmodel),
 	)
 
@@ -307,6 +311,11 @@ func run(
 		if ok, in := matchPrefix(input, "/s"); ok {
 			llmInput = node.NewInput(in)
 			ch = summarizerChain
+		}
+
+		if ok, in := matchPrefix(input, "/r"); ok {
+			llmInput = node.NewInput(in)
+			ch = ragChain
 		}
 
 		if ok, in := matchPrefix(input, "/C"); ok {
