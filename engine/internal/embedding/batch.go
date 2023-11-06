@@ -6,6 +6,7 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
+// Various errors that can heppen during embedding.
 var (
 	ErrEmptyVecor            = errors.New("vectors must not be empty")
 	ErrWeightLenghtsMismatch = errors.New("length of weights must match the number of vectors")

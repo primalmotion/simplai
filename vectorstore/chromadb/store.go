@@ -41,10 +41,11 @@ func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.
 	for i, d := range documents {
 		embeddings[i] = d.Embedding
 		if len(d.Embedding) == 0 {
-			embeddings[i], err = c.embedder.EmbedQuery(ctx, d.Content)
+			embds, err := c.embedder.Embed(ctx, []string{d.Content})
 			if err != nil {
 				return fmt.Errorf("unable to embedd document: %w", err)
 			}
+			embeddings[i] = embds[0]
 		}
 		contents[i] = d.Content
 		ids[i] = d.ID

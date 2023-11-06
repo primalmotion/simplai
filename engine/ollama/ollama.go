@@ -13,6 +13,12 @@ import (
 	"github.com/primalmotion/simplai/utils/render"
 )
 
+// check interface compliance.
+var (
+	_ engine.Embedder = &ollamaAPI{}
+	_ engine.LLM      = &ollamaAPI{}
+)
+
 // ollamaAPI is a ollama LLM implementation.
 type ollamaAPI struct {
 	client  *client.Client
@@ -87,8 +93,8 @@ func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...engine.
 	return resp.Response, nil
 }
 
-// EmbedChunks implement the embeddings interface for chunks.
-func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ...engine.EmbeddingOption) ([][]float64, error) {
+// Embed implements the Embedder interface.
+func (o *ollamaAPI) Embed(ctx context.Context, chunks []string, options ...engine.EmbeddingOption) ([][]float64, error) {
 
 	opts := defaultEmbeddingConfig()
 	for _, opt := range options {
@@ -158,13 +164,4 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 	}
 
 	return emb, nil
-}
-
-// EmbedQuery implement the embeddings interface for query.
-func (o *ollamaAPI) EmbedQuery(ctx context.Context, query string, options ...engine.EmbeddingOption) ([]float64, error) {
-	c, err := o.EmbedChunks(ctx, []string{query}, options...)
-	if err != nil {
-		return nil, err
-	}
-	return c[0], nil
 }

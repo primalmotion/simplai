@@ -17,6 +17,12 @@ import (
 	"github.com/primalmotion/simplai/utils/render"
 )
 
+// check interface compliance.
+var (
+	_ engine.Embedder = &openAIAPI{}
+	_ engine.LLM      = &openAIAPI{}
+)
+
 type openAIAPI struct {
 	client  *http.Client
 	url     *url.URL
@@ -123,8 +129,8 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...engine.
 	return output, nil
 }
 
-// EmbedChunks implements the embedding interface.
-func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ...engine.EmbeddingOption) ([][]float64, error) {
+// Embed implements the Embedder interface.
+func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engine.EmbeddingOption) ([][]float64, error) {
 
 	config := defaultEmbeddingConfig()
 	for _, opt := range options {
@@ -227,13 +233,4 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 	}
 
 	return emb, nil
-}
-
-// EmbedQuery implement the embeddings interface for query.
-func (v *openAIAPI) EmbedQuery(ctx context.Context, query string, options ...engine.EmbeddingOption) ([]float64, error) {
-	c, err := v.EmbedChunks(ctx, []string{query}, options...)
-	if err != nil {
-		return nil, err
-	}
-	return c[0], nil
 }
