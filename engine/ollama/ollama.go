@@ -7,7 +7,8 @@ import (
 	"net/url"
 
 	"github.com/primalmotion/simplai/engine"
-	"github.com/primalmotion/simplai/engine/internal/utils"
+	"github.com/primalmotion/simplai/engine/internal/embedding"
+	"github.com/primalmotion/simplai/engine/internal/token"
 	"github.com/primalmotion/simplai/engine/ollama/internal/client"
 	"github.com/primalmotion/simplai/utils/render"
 )
@@ -44,7 +45,7 @@ func (o *ollamaAPI) Infer(ctx context.Context, prompt string, options ...engine.
 
 	opts := o.options.defaultInferenceConfig
 	opts.Model = o.model
-	opts.MaxTokens = utils.CountTokens(o.model, prompt)
+	opts.MaxTokens = token.Count(o.model, prompt)
 
 	for _, opt := range options {
 		opt(&opts)
@@ -101,7 +102,7 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 
 	emb := make([][]float64, 0, len(chunks))
 
-	batches := utils.Batch(chunks, opts.BatchSize)
+	batches := embedding.Batch(chunks, opts.BatchSize)
 	for _, batch := range batches {
 
 		currentEmbeddings := [][]float64{}
@@ -141,11 +142,11 @@ func (o *ollamaAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		// but its not available. So we fall back on tiktoken
 		numTokens := make([]float64, 0, len(batch))
 		for _, text := range batch {
-			numTokens = append(numTokens, float64(utils.CountTokens(opts.Model, text)))
+			numTokens = append(numTokens, float64(token.Count(opts.Model, text)))
 		}
 
 		if len(currentEmbeddings) > 1 {
-			combinedVectors, err := utils.CombineBatchedEmbedding(currentEmbeddings, numTokens)
+			combinedVectors, err := embedding.CombineBatchedEmbedding(currentEmbeddings, numTokens)
 			if err != nil {
 				return [][]float64{}, err
 			}

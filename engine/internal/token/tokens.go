@@ -1,10 +1,10 @@
-package utils
+package token
 
 import tiktoken "github.com/pkoukk/tiktoken-go"
 
-// CountTokens is computing the max_tokens
+// Count is computing the max_tokens
 // based on the model and the input.
-func CountTokens(model, text string) int {
+func Count(model, text string) int {
 	e, err := tiktoken.EncodingForModel(model)
 	if err != nil {
 		e, err = tiktoken.GetEncoding("gpt2")

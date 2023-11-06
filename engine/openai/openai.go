@@ -12,7 +12,8 @@ import (
 	"strings"
 
 	"github.com/primalmotion/simplai/engine"
-	"github.com/primalmotion/simplai/engine/internal/utils"
+	"github.com/primalmotion/simplai/engine/internal/embedding"
+	"github.com/primalmotion/simplai/engine/internal/token"
 	"github.com/primalmotion/simplai/utils/render"
 )
 
@@ -50,7 +51,7 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...engine.
 
 	config := v.options.defaultInferenceConfig
 	config.Model = v.model
-	config.MaxTokens = utils.CountTokens(v.model, prompt)
+	config.MaxTokens = token.Count(v.model, prompt)
 
 	for _, opt := range options {
 		opt(&config)
@@ -137,7 +138,7 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 
 	emb := make([][]float64, 0, len(chunks))
 
-	batches := utils.Batch(chunks, config.BatchSize)
+	batches := embedding.Batch(chunks, config.BatchSize)
 	for _, batch := range batches {
 
 		currentEmbeddings := [][]float64{}
@@ -155,7 +156,8 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		}
 
 		if err := encoder.Encode(req); err != nil {
-			return nil, fmt.Errorf("unable to encode request: %w", err)
+			return nil, fmt.Errorf(
+				"unable to encode request: %w", err)
 		}
 
 		request, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/embeddings", v.url), buffer)
@@ -209,11 +211,11 @@ func (v *openAIAPI) EmbedChunks(ctx context.Context, chunks []string, options ..
 		// but its not available. So we fall back on tiktoken
 		numTokens := make([]float64, 0, len(batch))
 		for _, text := range batch {
-			numTokens = append(numTokens, float64(utils.CountTokens(config.Model, text)))
+			numTokens = append(numTokens, float64(token.Count(config.Model, text)))
 		}
 
 		if len(currentEmbeddings) > 1 {
-			combinedVectors, err := utils.CombineBatchedEmbedding(currentEmbeddings, numTokens)
+			combinedVectors, err := embedding.CombineBatchedEmbedding(currentEmbeddings, numTokens)
 			if err != nil {
 				return [][]float64{}, err
 			}

@@ -1,9 +1,15 @@
-package utils
+package embedding
 
 import (
 	"errors"
 
 	"gonum.org/v1/gonum/floats"
+)
+
+var (
+	ErrEmptyVecor            = errors.New("vectors must not be empty")
+	ErrWeightLenghtsMismatch = errors.New("length of weights must match the number of vectors")
+	ErrDimensionMismatch     = errors.New("vectors must have the same dimension")
 )
 
 // Batch will split inputs by the batch size.
@@ -30,15 +36,15 @@ func Batch(inputs []string, batch int) [][]string {
 func CombineBatchedEmbedding(vectors [][]float64, weights []float64) ([]float64, error) {
 
 	if len(vectors) == 0 || len(vectors[0]) == 0 {
-		return nil, errors.New("vectors must not be empty")
+		return nil, ErrEmptyVecor
 	}
 
 	if len(vectors) != len(weights) {
-		return nil, errors.New("length of weights must match the number of vectors")
+		return nil, ErrWeightLenghtsMismatch
 	}
 
 	if len(vectors[0]) != len(vectors[1]) {
-		return nil, errors.New("vectors must have the same dimension")
+		return nil, ErrDimensionMismatch
 	}
 
 	// Compute the weighted average
