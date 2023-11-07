@@ -38,8 +38,7 @@ func NewRag() *Rag {
 		Prompt: node.NewPrompt(
 			RagInfo,
 			ragTemplate,
-			engine.OptionStop("Question:"),
-			engine.OptionStop("Context:"),
+			engine.OptionStop("Question:", "Context:"),
 		),
 	}
 }

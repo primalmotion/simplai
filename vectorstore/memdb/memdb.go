@@ -45,7 +45,7 @@ func (m *MemoryStore) SimilaritySearch(ctx context.Context, query string, max in
 
 	queryEmbedding, err := m.embedder.Embed(ctx, []string{query})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to embedd document: %w", err)
 	}
 
 	scores := make(map[float64]string, len(m.db))

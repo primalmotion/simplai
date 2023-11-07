@@ -75,7 +75,7 @@ func (c *ChromaStore) SimilaritySearch(ctx context.Context, query string, max in
 
 	queryEmbedding, err := c.embedder.Embed(ctx, []string{query})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to embedd document: %w", err)
 	}
 
 	res, err := c.client.Query(
