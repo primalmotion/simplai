@@ -18,7 +18,7 @@ type request struct {
 	TopK              int            `json:"top_k"`
 	FrequencyPenalty  float64        `json:"frequency_penalty"`
 	PresencePenalty   float64        `json:"presence_penalty"`
-	RepetitionPenalty float64        `json:"repetition_penalty"`
+	RepetitionPenalty float64        `json:"repeat_penalty"`
 	LogProbs          int            `json:"logprobs,omitempty"`
 }
 
