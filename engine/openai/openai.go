@@ -52,6 +52,46 @@ func New(api string, model string, opts ...Option) (*openAIAPI, error) { //nolin
 	}, nil
 }
 
+func (v *openAIAPI) do(ctx context.Context, method, path string, reqData, respData any) error {
+
+	buffer := bytes.NewBuffer(nil)
+	encoder := json.NewEncoder(buffer)
+
+	if err := encoder.Encode(reqData); err != nil {
+		return fmt.Errorf("unable to encode request: %w", err)
+	}
+
+	request, err := http.NewRequestWithContext(ctx, method, v.url.JoinPath(path).String(), buffer)
+	if err != nil {
+		return fmt.Errorf("unable to prepare request: %w", err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	resp, err := v.client.Do(request)
+	if err != nil {
+		return fmt.Errorf("unable to send request: %w", err)
+	}
+
+	defer func() {
+		if resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		content, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("server was unable to process the request: %s\n\n%s", resp.Status, content)
+	}
+
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(respData); err != nil {
+		return fmt.Errorf("unable to decode the response: %w", err)
+	}
+	return nil
+}
+
 // Infer implements the node.Node interface
 func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...engine.LLMOption) (string, error) {
 
@@ -62,9 +102,6 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...engine.
 	for _, opt := range options {
 		opt(&config)
 	}
-
-	buffer := bytes.NewBuffer(nil)
-	encoder := json.NewEncoder(buffer)
 
 	vllmreq := request{
 		LogitBias:         config.LogitBias,
@@ -85,38 +122,9 @@ func (v *openAIAPI) Infer(ctx context.Context, prompt string, options ...engine.
 		render.Box(fmt.Sprintf("[openai-engine-request]\n\n%s", vllmreq), "4")
 	}
 
-	if err := encoder.Encode(vllmreq); err != nil {
-		return "", fmt.Errorf("unable to encode request: %w", err)
-	}
-
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/completions", v.url), buffer)
-	if err != nil {
-		return "", fmt.Errorf("unable to prepare request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "application/json")
-
-	resp, err := v.client.Do(request)
-	if err != nil {
-		return "", fmt.Errorf("unable to send request: %w", err)
-	}
-
-	defer func() {
-		if resp.Body != nil {
-			_ = resp.Body.Close()
-		}
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		content, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("server was unable to process the request: %s\n\n%s", resp.Status, content)
-	}
-
 	vllmresp := &response{}
-	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(vllmresp); err != nil {
-		return "", fmt.Errorf("unable to decode the response: %w", err)
+	if err := v.do(ctx, http.MethodPost, "/completions", vllmreq, vllmresp); err != nil {
+		return "", fmt.Errorf("unable to complete completion request: %w", err)
 	}
 
 	if config.Debug {
@@ -149,10 +157,7 @@ func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engin
 
 		currentEmbeddings := [][]float64{}
 
-		buffer := bytes.NewBuffer(nil)
-		encoder := json.NewEncoder(buffer)
-
-		req := &embeddingRequest{
+		req := embeddingRequest{
 			Model: model,
 			Input: batch,
 		}
@@ -161,51 +166,21 @@ func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engin
 			render.Box(fmt.Sprintf("[openai-embedding-request]\n\n%s", req), "4")
 		}
 
-		if err := encoder.Encode(req); err != nil {
-			return nil, fmt.Errorf(
-				"unable to encode request: %w", err)
-		}
-
-		request, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/embeddings", v.url), buffer)
-		if err != nil {
-			return nil, fmt.Errorf("unable to prepare request: %w", err)
-		}
-
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("Accept", "application/json")
-
-		resp, err := v.client.Do(request)
-		if err != nil {
-			return nil, fmt.Errorf("unable to send request: %w", err)
-		}
-
-		defer func() {
-			if resp.Body != nil {
-				_ = resp.Body.Close()
-			}
-		}()
-
-		if resp.StatusCode != http.StatusOK {
-			content, _ := io.ReadAll(resp.Body)
-			return nil, fmt.Errorf("server was unable to process the request: %s\n\n%s", resp.Status, content)
-		}
-
-		embResp := &embeddingResponse{}
-		dec := json.NewDecoder(resp.Body)
-		if err := dec.Decode(embResp); err != nil {
-			return nil, fmt.Errorf("unable to decode the response: %w", err)
+		resp := &embeddingResponse{}
+		if err := v.do(ctx, http.MethodPost, "/embeddings", req, resp); err != nil {
+			return nil, fmt.Errorf("unable to complete embeddings request: %w", err)
 		}
 
 		if config.Debug {
-			render.Box(fmt.Sprintf("[openai-embedding-response]\n\n%s", embResp), "4")
+			render.Box(fmt.Sprintf("[openai-embedding-response]\n\n%s", resp), "4")
 		}
 
-		if len(embResp.Data) == 0 {
+		if len(resp.Data) == 0 {
 			return nil, errors.New("empty response")
 		}
 
-		for i := 0; i < len(embResp.Data); i++ {
-			currentEmbeddings = append(currentEmbeddings, embResp.Data[i].Embedding)
+		for i := 0; i < len(resp.Data); i++ {
+			currentEmbeddings = append(currentEmbeddings, resp.Data[i].Embedding)
 		}
 
 		if len(batch) != len(currentEmbeddings) {
@@ -233,4 +208,31 @@ func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engin
 	}
 
 	return emb, nil
+}
+
+func (v *openAIAPI) Rerank(ctx context.Context, query string, passages []string) ([]float64, error) {
+
+	req := rerankingRequest{
+		Model:     v.model,
+		Query:     query,
+		Documents: passages,
+	}
+
+	type response []float64
+
+	resp := &response{}
+
+	// if config.Debug {
+	// 	render.Box(fmt.Sprintf("[openai-reranking-request]\n\n%s", req), "4")
+	// }
+
+	if err := v.do(ctx, http.MethodPost, "/reranking", req, resp); err != nil {
+		return nil, fmt.Errorf("unable to complete reranking: %w", err)
+	}
+
+	// if config.Debug {
+	// 	render.Box(fmt.Sprintf("[openai-reranking-response]\n\n%s", resp), "4")
+	// }
+
+	return *resp, nil
 }

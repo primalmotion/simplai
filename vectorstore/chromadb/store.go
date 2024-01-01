@@ -71,13 +71,18 @@ func (c *ChromaStore) AddDocument(ctx context.Context, documents ...vectorstore.
 
 // SimilaritySearch implements the vectorstore.VectorStore interface.
 // if perform a chromadb query.
-func (c *ChromaStore) SimilaritySearch(ctx context.Context, input vectorstore.Embedding, max int) ([]vectorstore.Document, error) {
+func (c *ChromaStore) SimilaritySearch(ctx context.Context, query string, max int) ([]vectorstore.Document, error) {
+
+	queryEmbedding, err := c.embedder.Embed(ctx, []string{query})
+	if err != nil {
+		return nil, fmt.Errorf("unable to embedd document: %w", err)
+	}
 
 	res, err := c.client.Query(
 		ctx,
 		c.collectionID,
 		EmbeddingQuery{
-			QueryEmbeddings: []vectorstore.Embedding{input},
+			QueryEmbeddings: []vectorstore.Embedding{queryEmbedding[0]},
 			NResults:        max,
 		},
 	)
