@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/utils/reorder"
 	"github.com/primalmotion/simplai/vectorstore"
 )
 
@@ -34,8 +35,8 @@ func NewRetriever(store vectorstore.VectorStore, topk int) *Retriever {
 
 // Execute implements the node.Node interface.
 // It will make a search using the provided input, then
-// massage the output and set the the topk as input.Set("results") as an array
-// if we need to post process them with a reranker for instance.
+// massage the output and set the the topk as input.Set("documents") as list of
+// vectorstore.Document if we need to process them with a Reranker for instance.
 func (n *Retriever) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	query := in.Input()
@@ -48,15 +49,15 @@ func (n *Retriever) Execute(ctx context.Context, in node.Input) (string, error) 
 	output := []string{}
 	for _, entry := range docs {
 		output = append(output, fmt.Sprintf(
-			"- %s (score: %.2f)\n%s",
-			entry.ID,
+			"- similarity score: %.2f\n%s\n%s",
 			entry.Distance,
+			entry.ID,
 			entry.Content,
 		))
 	}
 
 	return n.BaseNode.Execute(
 		ctx,
-		in.WithInput(strings.Join(output, "\n\n")).Set("userquery", query).Set("results", docs),
+		in.WithInput(strings.Join(reorder.Distribute(output), "\n\n")).Set("userquery", query).Set("documents", docs),
 	)
 }

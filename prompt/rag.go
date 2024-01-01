@@ -22,7 +22,8 @@ Context:
 
 Question: {{ .Get "userquery" }}
 
-Keep the answer concise.
+Keep the answer concise. 
+Only use the information provided above.
 
 Answer:`
 

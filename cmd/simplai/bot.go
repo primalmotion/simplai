@@ -19,8 +19,8 @@ import (
 	"github.com/primalmotion/simplai/node"
 	"github.com/primalmotion/simplai/prompt"
 	"github.com/primalmotion/simplai/tool"
+	"github.com/primalmotion/simplai/utils/chunker"
 	"github.com/primalmotion/simplai/utils/render"
-	"github.com/primalmotion/simplai/vectorstore"
 	"github.com/primalmotion/simplai/vectorstore/memdb"
 	"github.com/theckman/yacspin"
 )
@@ -41,6 +41,7 @@ func completer(d tprompt.Document) []tprompt.Suggest {
 		{Text: "/c", Description: "force conversation tool"},
 		{Text: "/C", Description: "force classification tool"},
 		{Text: "/r", Description: "force rag tool"},
+		{Text: "/R", Description: "force rag with rerank tool"},
 		{Text: "/s", Description: "force summarizer tool"},
 		{Text: "/S", Description: "force search tool"},
 		{Text: "/t", Description: "force story teller tool"},
@@ -118,7 +119,6 @@ func run(
 		Temperature:       0,
 		RepetitionPenalty: 1.0,
 		TopP:              1,
-		TopK:              -1,
 	}
 
 	switch engineName {
@@ -139,33 +139,72 @@ func run(
 	}
 
 	var em engine.Embedder
-	em, _ = openai.New("http://localhost:5000", "all-MiniLM-L12-v2")
+	em, _ = openai.New(api, "sentence-transformers/all-MiniLM-L6-v2")
+
+	var rr engine.Reranker
+	rr, _ = openai.New(api, "cross-encoder/ms-marco-MiniLM-L-6-v2")
+
 	store := memdb.New(em)
 
-	err := store.AddDocument(
-		ctx,
-		vectorstore.Document{
-			ID: "",
-			Content: `The cat (Felis catus), commonly referred to as the domestic cat or house cat, is the only domesticated species in the family Felidae. Recent advances in archaeology and genetics have shown that the domestication of the cat occurred in the Near East around 7500 BC. It is commonly kept as a house pet and farm cat, but also ranges freely as a feral cat avoiding human contact. It is valued by humans for companionship and its ability to kill vermin. Because of its retractable claws it is adapted to killing small prey like mice and rats. It has a strong flexible body, quick reflexes, sharp teeth, and its night vision and sense of smell are well developed. It is a social species, but a solitary hunter and a crepuscular predator. Cat communication includes vocalizations like meowing, purring, trilling, hissing, growling, and grunting as well as cat body language. It can hear sounds too faint or too high in frequency for human ears, such as those made by small mammals. It also secretes and perceives pheromones.
-
+	text := `
+The cat (Felis catus), commonly referred to as the domestic cat or house cat, is the only domesticated species in the family Felidae. Recent advances in archaeology and genetics have shown that the domestication of the cat occurred in the Near East around 7500 BC. It is commonly kept as a house pet and farm cat, but also ranges freely as a feral cat avoiding human contact. It is valued by humans for companionship and its ability to kill vermin. Because of its retractable claws it is adapted to killing small prey like mice and rats. It has a strong flexible body, quick reflexes, sharp teeth, and its night vision and sense of smell are well developed. It is a social species, but a solitary hunter and a crepuscular predator. Cat communication includes vocalizations like meowing, purring, trilling, hissing, growling, and grunting as well as cat body language. It can hear sounds too faint or too high in frequency for human ears, such as those made by small mammals. It also secretes and perceives pheromones.
 Female domestic cats can have kittens from spring to late autumn in temperate zones and throughout the year in equatorial regions, with litter sizes often ranging from two to five kittens. Domestic cats are bred and shown at events as registered pedigreed cats, a hobby known as cat fancy. Animal population control of cats may be achieved by spaying and neutering, but their proliferation and the abandonment of pets has resulted in large numbers of feral cats worldwide, contributing to the extinction of bird, mammal and reptile species.
+As of 2017, the domestic cat was the second most popular pet in the United States, with 95.6 million cats owned and around 42 million households owning at least one cat. In the United Kingdom, 26% of adults have a cat, with an estimated population of 10.9 million pet cats as of 2020. As of 2021, there were an estimated 220 million owned and 480 million stray cats in the world.
 
-As of 2017, the domestic cat was the second most popular pet in the United States, with 95.6 million cats owned and around 42 million households owning at least one cat. In the United Kingdom, 26% of adults have a cat, with an estimated population of 10.9 million pet cats as of 2020. As of 2021, there were an estimated 220 million owned and 480 million stray cats in the world
-			`,
-			Metadata: vectorstore.Metadata{"coucou": "cucul"},
-		},
-		vectorstore.Document{
-			ID: "doc20",
-			Content: `The dog (Canis familiaris[4][5] or Canis lupus familiaris[5]) is a domesticated descendant of the wolf. Also called the domestic dog, it is derived from extinct Pleistocene wolves,[6][7] and the modern wolf is the dog's nearest living relative.[8] The dog was the first species to be domesticated[9][8] by humans. Hunter-gatherers did this, over 15,000 years ago,[7] which was before the development of agriculture.[1] Due to their long association with humans, dogs have expanded to a large number of domestic individuals[10] and gained the ability to thrive on a starch-rich diet that would be inadequate for other canids.[11]
 
-The dog has been selectively bred over millennia for various behaviors, sensory capabilities, and physical attributes.[12] Dog breeds vary widely in shape, size, and color. They perform many roles for humans, such as hunting, herding, pulling loads, protection, assisting police and the military, companionship, therapy, and aiding disabled people. Over the millennia, dogs became uniquely adapted to human behavior, and the human–canine bond has been a topic of frequent study.[13] This influence on human society has given them the sobriquet of "man's best friend".[14]
-			`,
-			Metadata: vectorstore.Metadata{"gougou": "gaga"},
-		},
-	)
-	if err != nil {
-		panic(err)
+Etymology and naming
+The origin of the English word cat, Old English catt, is thought to be the Late Latin word cattus, which was first used at the beginning of the 6th century.[4] The Late Latin word may be derived from an unidentified African language.[5] The Nubian word kaddîska 'wildcat' and Nobiin kadīs are possible sources or cognates.[6] The Nubian word may be a loan from Arabic قَطّ qaṭṭ ~ قِطّ qiṭṭ.[citation needed]
+However, it is "equally likely that the forms might derive from an ancient Germanic word, imported into Latin and thence to Greek and to Syriac and Arabic".[7] The word may be derived from Germanic and Northern European languages, and ultimately be borrowed from Uralic, cf. Northern Sámi gáđfi, 'female stoat', and Hungarian hölgy, 'lady, female stoat'; from Proto-Uralic *käďwä, 'female (of a furred animal)'.[8]
+The English puss, extended as pussy and pussycat, is attested from the 16th century and may have been introduced from Dutch poes or from Low German puuskatte, related to Swedish kattepus, or Norwegian pus, pusekatt. Similar forms exist in Lithuanian puižė and Irish puisín or puiscín. The etymology of this word is unknown, but it may have arisen from a sound used to attract a cat.[9][10]
+A male cat is called a tom or tomcat[11] (or a gib,[12] if neutered). A female is called a queen[13] (or a molly,[14][user-generated source?] if spayed), especially in a cat-breeding context. A juvenile cat is referred to as a kitten. In Early Modern English, the word kitten was interchangeable with the now-obsolete word catling.[15] A group of cats can be referred to as a clowder or a glaring.[16]`
+
+	text2 := `sentence number one is pretty long. sentence number two is the same.
+
+this is a new paragraph. it has sentence number 3.
+`
+	sp := chunker.NewSimpleTextSplitter(chunker.OptionsChunkSize(150))
+	chunks, _ := sp.Chunk(text)
+	for _, c := range chunks {
+		fmt.Println("---------")
+		fmt.Println(c)
+		fmt.Println("---------")
 	}
+
+	chunks, _ = sp.Chunk(text2)
+	for _, c := range chunks {
+		fmt.Println("---------")
+		fmt.Println(c)
+		fmt.Println("---------")
+	}
+
+	os.Exit(0)
+
+	// article, err := readability.FromURL("https://en.wikipedia.org/wiki/Cat", 30*time.Second)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// // We split this article into paragraphs and then every paragraph into sentences
+	// count := 0
+	// for i, p := range strings.Split(article.TextContent, "\n\n") {
+	//
+	// 	trimmed := trim.Output(p)
+	// 	if len(trimmed) > 0 {
+	//
+	// 		count++
+	// 		err := store.AddDocument(
+	// 			ctx,
+	// 			vectorstore.Document{
+	// 				ID:      fmt.Sprintf("doc%d", i),
+	// 				Content: trimmed,
+	// 			},
+	// 		)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 	}
+	// }
+	//
+	// fmt.Println("Documents: ", count)
 
 	debugMode := debug
 
@@ -218,7 +257,15 @@ The dog has been selectively bred over millennia for various behaviors, sensory 
 
 	ragChain := node.NewSubchainWithName(
 		"chain:rag",
-		tool.NewRetriever(store, 5),
+		tool.NewRetriever(store, 2),
+		prompt.NewRag(),
+		mistral.NewLLM(llmmodel),
+	)
+
+	rerankChain := node.NewSubchainWithName(
+		"chain:rerank",
+		tool.NewRetriever(store, 10),
+		tool.NewReranker(rr, 2),
 		prompt.NewRag(),
 		mistral.NewLLM(llmmodel),
 	)
@@ -316,6 +363,11 @@ The dog has been selectively bred over millennia for various behaviors, sensory 
 		if ok, in := matchPrefix(input, "/r"); ok {
 			llmInput = node.NewInput(in)
 			ch = ragChain
+		}
+
+		if ok, in := matchPrefix(input, "/R"); ok {
+			llmInput = node.NewInput(in)
+			ch = rerankChain
 		}
 
 		if ok, in := matchPrefix(input, "/C"); ok {

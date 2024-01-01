@@ -157,7 +157,7 @@ func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engin
 
 		currentEmbeddings := [][]float64{}
 
-		req := &embeddingRequest{
+		req := embeddingRequest{
 			Model: model,
 			Input: batch,
 		}
@@ -208,4 +208,31 @@ func (v *openAIAPI) Embed(ctx context.Context, chunks []string, options ...engin
 	}
 
 	return emb, nil
+}
+
+func (v *openAIAPI) Rerank(ctx context.Context, query string, passages []string) ([]float64, error) {
+
+	req := rerankingRequest{
+		Model:     v.model,
+		Query:     query,
+		Documents: passages,
+	}
+
+	type response []float64
+
+	resp := &response{}
+
+	// if config.Debug {
+	// 	render.Box(fmt.Sprintf("[openai-reranking-request]\n\n%s", req), "4")
+	// }
+
+	if err := v.do(ctx, http.MethodPost, "/reranking", req, resp); err != nil {
+		return nil, fmt.Errorf("unable to complete reranking: %w", err)
+	}
+
+	// if config.Debug {
+	// 	render.Box(fmt.Sprintf("[openai-reranking-response]\n\n%s", resp), "4")
+	// }
+
+	return *resp, nil
 }

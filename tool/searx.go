@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/primalmotion/simplai/node"
+	"github.com/primalmotion/simplai/vectorstore"
 )
 
 // SearxInfo is the node.Information for the SearxSearch prompt.
@@ -52,6 +53,8 @@ func NewSearx(api string) *Searx {
 // Execute implements the node.Node interface.
 // It will make a search using the provided input, then
 // massage the output and set the input.Set("userquery")
+// output is also converted as []vectorstore.Document and set
+// as the input.Set("documents") for tool chaining.
 func (n *Searx) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	query := in.Input()
@@ -86,7 +89,17 @@ func (n *Searx) Execute(ctx context.Context, in node.Input) (string, error) {
 	}
 
 	output := []string{}
+	docs := []vectorstore.Document{}
 	for _, entry := range out.Results {
+		docs = append(docs, vectorstore.Document{
+			Metadata: map[string]any{
+				"URL":      entry.URL,
+				"Category": entry.Category,
+				"Score":    entry.Score,
+			},
+			ID:      entry.Title,
+			Content: entry.Content,
+		})
 		output = append(output, fmt.Sprintf(
 			"- %s (score: %2f)\n%s",
 			entry.Title,
@@ -97,6 +110,6 @@ func (n *Searx) Execute(ctx context.Context, in node.Input) (string, error) {
 
 	return n.BaseNode.Execute(
 		ctx,
-		in.WithInput(strings.Join(output, "\n\n")).Set("userquery", query),
+		in.WithInput(strings.Join(output, "\n\n")).Set("userquery", query).Set("documents", docs),
 	)
 }

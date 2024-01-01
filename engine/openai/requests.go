@@ -52,3 +52,21 @@ func (r embeddingRequest) String() string {
 	_ = encoder.Encode(r)
 	return buf.String()
 }
+
+// rerankingRequest is the custom rerankingRequest
+type rerankingRequest struct {
+	Model     string   `json:"model"`
+	Query     string   `json:"query"`
+	Documents []string `json:"documents"`
+}
+
+// String representation of reranking request.
+func (r rerankingRequest) String() string {
+
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", " ")
+	_ = encoder.Encode(r)
+	return buf.String()
+}
